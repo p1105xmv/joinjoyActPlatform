@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>首頁</title>
+  <link th:href="@{/favicon.ico}" rel="icon" type="image/x-icon" />
+
+  <link th:href="@{/css/cards.css }" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+  <style>
+    .btn:hover,
+    .btn:focus,
+    .btn:active,
+    .btn:visited {
+      outline: none;
+      box-shadow: none !important;
+    }
+  </style>
+
+</head>
+
+<body class="bg-light">
+  <div th:replace="~{layout/navbar}"></div>
+
+  <div class="box" id="index">
+    <div class="container jjmainbody" @mouseover.once="putNxtBtn">
+      <template>
+        <div v-show="false" sec:authorize="isAuthenticated()">
+          Welcome, [[${session.userinfo.uName}]]
+        </div>
+      </template>
+
+
+      <!--輪播-->
+      <template v-if="isShowAll">
+
+        <div id="carouselExampleIndicators" class="carousel slide carousel-fade showcase " data-bs-ride="carousel">
+          <div class="carousel-indicators">
+            <!--輪播btn-->
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+              aria-current="true" aria-label="Slide 1"></button>
+            <button v-for="i in randomIndexList.length-1" type="button" data-bs-target="#carouselExampleIndicators"
+              :data-bs-slide-to="i" :aria-label="`Slide${i+1}`"></button>
+
+            <!--輪播btn end-->
+          </div>
+          <div class="carousel-inner">
+
+            <div class="carousel-item active" data-bs-interval="2000">
+              <a :href="`${WEBROOT}/showActivity/activityPage/${allAc[randomIndexList[0]].acid}`">
+
+                <img :src="allAc[randomIndexList[0]].acImg" class="d-block w-100 showcase_img" alt="..." />
+              </a>
+            </div>
+            <div class="carousel-item" data-bs-interval="2000" v-for="i in randomIndexList.length-1">
+              <a :href="`${WEBROOT}/showActivity/activityPage/${allAc[randomIndexList[i]].acid}`">
+
+                <img :src="allAc[randomIndexList[i]].acImg" class="d-block w-100 showcase_img" alt="..." />
+              </a>
+            </div>
+          </div>
+
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button id="nextBtn" class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+
+
+        </div>
+        <!--輪播end-->
+      </template>
+
+      <!--人氣最高-->
+      <!--人氣最高end-->
+
+
+      <template v-if="isShowAll">
+        <!--即將截止-->
+        <div class="h-25 w-100 overflow-x-scroll hintbox">
+          <div class="text-center text-warning m-4">
+            <h4>即將截止</h4>
+          </div>
+          <template>
+            <div id="soonAc" v-show="soonAc.length>4"><i style="color:rgb(254, 254, 254); font-size: 3em"
+                class="bi bi-play-fill"></i>
+            </div>
+          </template>
+          <ul class="jcards" @mouseenter="hideHint('soonAc')" @mouseleave="showHint('soonAc')">
+            <li v-for="ac in soonAc">
+              <!--one card start-->
+              <a style="margin-bottom: 20px;" :href="`${WEBROOT}/showActivity/activityPage/${ac.acid}`"
+                class="jcard shadow">
+                <img v-if="ac.acImg" :src="ac.acImg" class="jcard__image" alt="" />
+
+                <div class="jcard__overlay">
+                  <div class="jcard__header">
+                    <svg class="jcard__arc" xmlns="http://www.w3.org/2000/svg">
+                      <path />
+                    </svg>
+                    <div class="jcard__header-text">
+
+                      <h3 class="jcard__title mb-2">{{limitedTitle(ac.acName)}}</h3>
+
+                      <span class="jcard__status"></span><span class="jcard__status"><i
+                          class="bi bi-pin-map-fill mr-sm-2"> </i>{{ac.acCity}}</span>
+                    </div>
+
+                    <div class="jcard__thumbnum">
+                      <button style="text-decoration: none;" id="likeBtn" class="btn btn-link text-warning"
+                        @click="likeAc(ac.acid)">
+                        <span>
+                          <i class="bi bi-heart mr-sm-2" v-if="!activitiesLiked.includes(ac.acid)"></i>
+                          <i class="bi bi-heart-fill mr-sm-2" v-if="activitiesLiked.includes(ac.acid)"></i>
+                          {{ac.favCount}}
+                        </span>
+                      </button>
+                    </div>
+
+
+                  </div>
+                  <p class="jcard__description">
+                  <div class="jcard__description_timeinfo">
+
+                    <span class="jcard__status">日期：{{ac.date}}</span><br><span
+                      class="jcard__status">時間：{{ac.time}}</span>
+                  </div>
+                  <span v-if="ac.typeNames.length>0" class="jcard__description_type">#{{ac.typeNames.join("、")}}</span>
+                  <div class="jcard__description_info">
+                    <template v-if="ac.priceLowest<ac.priceHighest && ac.priceLowest>0"><span
+                        class="text-warning">{{ac.priceLowest}} ~
+                        {{ac.priceHighest}} </span><span class="text-secondary mb-md-2"> 元</span></template>
+                    <template v-if="ac.priceLowest==ac.priceHighest && ac.priceLowest>0"><span
+                        class="text-warning">{{ac.priceLowest}}</span><span class="text-secondary mb-md-2">
+                        元</span></template>
+                    <template v-if="ac.priceLowest==0"><span class="text-warning mb-md-2">免費</span></template>
+                    <br>
+                    <button style="text-decoration: none;" id="signBtn" class="btn btn-link text-secondary"
+                      @click="signAc(ac.acid)">
+                      <span class="text-secondary text-end"><i class="bi bi-bookmark-check mr-sm-2 "></i>
+                        {{ac.signedCount}}
+                      </span>
+                    </button>
+                  </div>
+                  </p>
+                </div>
+              </a>
+            </li>
+            <!--one jcard end-->
+
+          </ul>
+        </div>
+        <!--即將截止end-->
+
+        <!--免費活動-->
+        <div class="h-25 w-100 overflow-x-scroll hintbox">
+          <div class="text-center text-warning m-4">
+            <h4>免費活動</h4>
+          </div>
+          <template>
+            <div id="freeAc" v-show="freeAc.length>4  && isShowAll"><i style="color:rgb(254, 254, 254); font-size: 3em"
+                class="bi bi-play-fill"></i>
+            </div>
+          </template>
+
+          <ul class="jcards" @mouseenter="hideHint('freeAc')" @mouseleave="showHint('freeAc')">
+            <li v-for="ac in freeAc">
+              <!--one card start-->
+              <a style="margin-bottom: 20px;" :href="`${WEBROOT}/showActivity/activityPage/${ac.acid}`"
+                class="jcard shadow">
+                <img v-if="ac.acImg" :src="ac.acImg" class="jcard__image" alt="" />
+
+                <div class="jcard__overlay">
+                  <div class="jcard__header">
+                    <svg class="jcard__arc" xmlns="http://www.w3.org/2000/svg">
+                      <path />
+                    </svg>
+                    <div class="jcard__header-text">
+
+                      <h3 class="jcard__title mb-2">{{limitedTitle(ac.acName)}}</h3>
+
+                      <span class="jcard__status"></span><span class="jcard__status"><i
+                          class="bi bi-pin-map-fill mr-sm-2"> </i>{{ac.acCity}}</span>
+                    </div>
+
+                    <div class="jcard__thumbnum">
+                      <button style="text-decoration: none;" id="likeBtn" class="btn btn-link text-warning"
+                        @click="likeAc(ac.acid)">
+                        <span>
+                          <i class="bi bi-heart mr-sm-2" v-if="!activitiesLiked.includes(ac.acid)"></i>
+                          <i class="bi bi-heart-fill mr-sm-2" v-if="activitiesLiked.includes(ac.acid)"></i>
+                          {{ac.favCount}}
+                        </span>
+                      </button>
+                    </div>
+
+
+                  </div>
+                  <p class="jcard__description">
+                  <div class="jcard__description_timeinfo">
+
+                    <span class="jcard__status">日期：{{ac.date}}</span><br><span
+                      class="jcard__status">時間：{{ac.time}}</span>
+                  </div>
+                  <span v-if="ac.typeNames.length>0" class="jcard__description_type">#{{ac.typeNames.join("、")}}</span>
+                  <div class="jcard__description_info">
+                    <template v-if="ac.priceLowest<ac.priceHighest && ac.priceLowest>0"><span
+                        class="text-warning">{{ac.priceLowest}} ~
+                        {{ac.priceHighest}} </span><span class="text-secondary mb-md-2"> 元</span></template>
+                    <template v-if="ac.priceLowest==ac.priceHighest && ac.priceLowest>0"><span
+                        class="text-warning">{{ac.priceLowest}}</span><span class="text-secondary mb-md-2">
+                        元</span></template>
+                    <template v-if="ac.priceLowest==0"><span class="text-warning mb-md-2">免費</span></template>
+                    <br>
+                    <button style="text-decoration: none;" id="signBtn" class="btn btn-link text-secondary"
+                      @click="signAc(ac.acid)">
+                      <span class="text-secondary text-end"><i class="bi bi-bookmark-check mr-sm-2"></i>
+                        {{ac.signedCount}}
+                      </span>
+                    </button>
+                  </div>
+                  </p>
+                </div>
+              </a>
+            </li>
+            <!--one jcard end-->
+
+          </ul>
+        </div>
+        <!--免費活動end-->
+
+        <!--熱門活動-->
+        <div class="h-25 w-100">
+          <div class="text-center text-warning m-4">
+            <h4>熱門活動</h4>
+          </div>
+          <ul class="cards">
+            <li v-for="ac in allAc">
+              <!--one card start-->
+              <a style="width: 330px;" :href="`${WEBROOT}/showActivity/activityPage/${ac.acid}`" class="jcard shadow">
+                <img v-if="ac.acImg" style="height:250px ;padding-bottom:40px" :src="ac.acImg" class="jcard__image"
+                  alt="" />
+
+                <div class="jcard__overlay">
+                  <div class="jcard__header">
+                    <svg class="jcard__arc" xmlns="http://www.w3.org/2000/svg">
+                      <path />
+                    </svg>
+                    <div class="jcard__header-text">
+
+                      <h3 class="jcard__title mb-2"> {{limitedTitle(ac.acName)}}</h3>
+
+                      <span class="jcard__status"></span><span class="jcard__status"><i
+                          class="bi bi-pin-map-fill mr-sm-2"> </i>{{ac.acCity}}</span>
+                    </div>
+
+                    <div class="jcard__thumbnum">
+                      <button style="text-decoration: none;" id="likeBtn" class="btn btn-link text-warning"
+                        @click="likeAc(ac.acid)">
+                        <span>
+                          <i class="bi bi-heart mr-sm-2" v-if="!activitiesLiked.includes(ac.acid)"></i>
+                          <i class="bi bi-heart-fill mr-sm-2" v-if="activitiesLiked.includes(ac.acid)"></i>
+                          {{ac.favCount}}
+                        </span>
+                      </button>
+                    </div>
+
+
+                  </div>
+                  <p class="jcard__description">
+                  <div class="jcard__description_timeinfo">
+
+                    <span class="jcard__status">日期：{{ac.date}}</span><br><span
+                      class="jcard__status">時間：{{ac.time}}</span>
+                  </div>
+                  <span v-if="ac.typeNames.length>0" class="jcard__description_type">#{{ac.typeNames.join("、")}}</span>
+                  <div class="jcard__description_info">
+                    <template v-if="ac.priceLowest<ac.priceHighest && ac.priceLowest>0"><span
+                        class="text-warning">{{ac.priceLowest}} ~
+                        {{ac.priceHighest}} </span><span class="text-secondary mb-md-2"> 元</span></template>
+                    <template v-if="ac.priceLowest==ac.priceHighest && ac.priceLowest>0"><span
+                        class="text-warning">{{ac.priceLowest}}</span><span class="text-secondary mb-md-2">
+                        元</span></template>
+                    <template v-if="ac.priceLowest==0"><span class="text-warning mb-md-2">免費</span></template>
+                    <br>
+                    <button style="text-decoration: none;" id="signBtn" class="btn btn-link text-secondary"
+                      @click="signAc(ac.acid)">
+                      <span class="text-secondary text-end">
+                        <i class="bi bi-bookmark-check mr-sm-2" v-if="!activitiesSigned.includes(ac.acid)"></i>
+                        <i class="bi bi-bookmark-check-fill mr-sm-2" v-if="activitiesSigned.includes(ac.acid)"></i>
+                        {{ac.signedCount}}
+                      </span>
+                    </button>
+                  </div>
+                  </p>
+                </div>
+              </a>
+            </li>
+            <!--one jcard end-->
+
+          </ul>
+
+        </div>
+        <!--熱門活動end-->
+      </template>
+
+
+    </div>
+    <!--container end-->
+
+
+  </div>
+  <!--box end-->
+  <div th:replace="~{layout/footer}"></div>
+</body>
+<script type="module">
+  import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.min.js";
+  createApp({
+
+    data() {
+      return {
+        WEBROOT: WebRoot,
+        allAc: [],
+        freeAc: [],
+        soonAc: [],
+        activitiesLiked: [],
+        activitiesSigned: [],
+        userid: "",
+        randomIndexList: [],
+        isShowAll: false
+
+      }
+
+    },
+    methods: {
+      putNxtBtn() {
+        //console.log("mouseovered");
+        var nextBtn = document.getElementById("nextBtn");
+        setTimeout(function () {
+          nextBtn.click();
+        }, 1500);
+      },
+
+      hideHint(arrayName) {
+        document.getElementById(arrayName).style.visibility = "hidden";
+      },
+      showHint(arrayName) {
+        document.getElementById(arrayName).style.visibility = "visible";
+      },
+
+
+
+      // 計算字數限制
+      limitedTitle(title) {
+        const maxLength = 20; // 最大字數限制
+        return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
+      },
+      likeAc(acid) {
+        event.preventDefault();
+        //判斷登入
+        if (this.userid != "" && this.userid != null) {
+          let data = {
+            userid: "",
+            acid: ""
+          }
+
+          data.acid = acid;
+          data.userid = this.userid
+          //判斷目前沒有收藏
+          if (!this.activitiesLiked.includes(acid)) {
+
+            axios.post(`${this.WEBROOT}/like`, data)
+              .then((response) => {
+                //console.log(response);
+              })
+
+            this.activitiesLiked.push(acid);
+
+            for (let ac of this.allAc) {
+              if (ac.acid == acid) {
+                ac.favCount++;
+              }
+            }
+            for (let ac of this.soonAc) {
+              if (ac.acid == acid) {
+                ac.favCount++;
+              }
+            }
+            for (let ac of this.freeAc) {
+              if (ac.acid == acid) {
+                ac.favCount++;
+              }
+            }
+
+          } else {
+            axios.post(`${this.WEBROOT}/cancelLike`, data)
+              .then((response) => { })
+            let index = this.activitiesLiked.indexOf(acid);
+            this.activitiesLiked.splice(index, 1);
+            for (let ac of this.allAc) {
+              if (ac.acid == acid) {
+                ac.favCount--;
+              }
+            }
+            for (let ac of this.soonAc) {
+              if (ac.acid == acid) {
+                ac.favCount--;
+              }
+            }
+            for (let ac of this.freeAc) {
+              if (ac.acid == acid) {
+                ac.favCount--;
+              }
+            }
+
+          }
+        } else {
+
+
+          let likeInfo = {
+            acid: acid
+          };
+          $("#LoginModal").modal('show');
+          // 使用 localStorage 保存按讚資訊
+          localStorage.setItem('pendingLike', JSON.stringify(likeInfo));
+        }
+
+      },
+
+      signAc(acid) {
+        //點下連結
+        event.preventDefault();
+        window.open(`${this.WEBROOT}/sign/${acid}`);
+      },
+
+      convertAcObject(list) {
+        for (let ac of list) {
+          let acDateTime = new Date(ac.acStartDate);
+          let acDate = acDateTime.getFullYear() + "/" + ("0" + (acDateTime.getMonth() + 1)).slice(-2) + "/" + ("0" + acDateTime.getDate()).slice(-2);
+          let acTime = ("0" + acDateTime.getHours()).slice(-2) + ":" + ("0" + acDateTime.getMinutes()).slice(-2);
+          ac.date = acDate;
+          ac.time = acTime;
+          ac.alltypeids = [];
+          ac.typeNames = [];
+
+          for (let type of ac.allTypes) {
+            ac.alltypeids.push(type.alltypeid);
+            ac.typeNames.push(type.typeName);
+          }
+        }
+
+        return list;
+      },
+
+
+
+    },
+    computed: {
+
+    },
+    watch: {
+
+
+    },
+
+    mounted() {
+      this.isShowAll = true;
+
+
+
+    },
+    created() {
+
+      axios.get(`${WebRoot}/api/session/getUserinfo`)
+        .then(response => {
+          if (response.data != '') {
+            this.userid = response.data.userid;
+
+            axios.get(`${WebRoot}/userlike/${response.data.userid}`)
+              .then(response => {
+
+                this.activitiesLiked = response.data.acids;
+                this.activitiesSigned = response.data.asfids;
+
+              })
+          }
+        }),
+
+
+        //all Activities
+        axios.get(`${WebRoot}/all`)
+          .then(response => {
+            let soon = response.data[0];
+            let free = response.data[1];
+            let all = response.data[2];
+            this.convertAcObject(soon);
+            this.convertAcObject(free);
+            this.convertAcObject(all);
+            this.soonAc = soon;
+            this.freeAc = free;
+            this.allAc = all;
+            let randomSet = Array.from({ length: 10 }, () => Math.floor(Math.random() * all.length));
+            this.randomIndexList = randomSet;
+          })
+
+
+
+
+
+
+
+    },
+
+
+  }).mount("#index")
+
+</script>
+
+
+
+
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+  <meta charset="UTF-8">
+  <title>變更密碼</title>
+  <style>
+    body {
+      background-color: #FFFFF0;
+    }
+
+    .section {
+      background-color: #ffffff;
+      border-radius: 20px;
+      margin: 30px 40px 40px -500px;
+      padding: 50px 50px 100px 50px;
+      width: 70%;
+      box-shadow: 2px 2px 5px #8E8E8E;
+    }
+
+    .overlay-text {
+      position: absolute;
+      /* 將覆蓋文本設置為絕對定位 */
+      top: 35%;
+      /* 調整垂直位置，使其置於區塊中央 */
+      left: 50%;
+      /* 調整水平位置，使其置於區塊中央 */
+      transform: translate(-50%, -50%);
+      /* 使用transform屬性來調整位置，使其置於區塊中央 */
+      text-align: center;
+      /* 將文本居中 */
+      z-index: 2;
+      /* 確保覆蓋文本位於模糊背景的上方 */
+    }
+
+    .vague-block {
+      filter: blur(5px);
+      z-index: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div th:replace="~{layout/navbar}"></div>
+
+  <div style="display: flex;background-color:#FFFFF0">
+    <div th:replace="~{layout/users_sidebar}" style="width: 200px;position:fixed;"></div>
+    <div class="section" id="checkpasswordexist">
+      <div class="overlay-text" v-if="pwdEmpty">
+        <p>您還沒有設定密碼</p>
+        <button class="btn btn-warning" @click="setpwd">設定密碼</button>
+      </div>
+      <h3>變更密碼</h3>
+      <!-- :class="'vague-block':pwdEmpty" -->
+      <form id="inputForm" :class="{'vague-block':pwdEmpty}" th:action="@{/users/changePwd}" method="post">
+        <label for="oldPwd" style="font-size:15px;line-height: 2em;font-weight:bold;">目前密碼
+          <span style="font-size:15px;color:#EA0000;">*</span></label>
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">
+            <i class="bi bi-file-lock" style="font-size:25px;color:#8E8E8E;
+	  margin:-3px 3px -3px 3px;"></i>
+          </span>
+          <input type="password" class="form-control" placeholder="請輸入原密碼" id="oldPwd" name="oldPwd" required
+            aria-label="Username" aria-describedby="basic-addon1">
+          <span class="input-group-text">
+            <i class="bi bi-eye-fill" id="checkEye" style="font-size: 20px;"></i>
+          </span>
+        </div>
+
+        <label for="newPwd" style="font-size:15px;line-height: 2em;font-weight:bold;">新密碼
+          <span style="font-size:15px;color:#EA0000;">*</span></label>
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">
+            <i class="bi bi-file-lock-fill" style="font-size:25px;color:#8E8E8E;
+	  margin:-3px 3px -3px 3px;"></i></span>
+          <input type="password" class="form-control" placeholder="請輸入新密碼" aria-label="Username"
+            aria-describedby="basic-addon1" id="newPwd" name="newPwd" required>
+          <span class="input-group-text">
+            <i class="bi bi-eye-fill" id="checkEye2" style="font-size: 20px;"></i>
+          </span>
+        </div>
+        <br>
+
+        <div id="idsp1"></div>
+
+        <label for="newPwd2" style="font-size:15px;line-height: 2em;font-weight:bold;">確認新密碼
+          <span style="font-size:15px;color:#EA0000;">*</span></label>
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">
+            <i class="bi bi-file-lock2" style="font-size:25px;color:#8E8E8E;
+	  margin:-3px 3px -3px 3px;"></i></span>
+          <input type="password" class="form-control" placeholder="請再次輸入新密碼" id="newPwd2" aria-label="Username"
+            aria-describedby="basic-addon1" name="newPwd2" required>
+          <span class="input-group-text">
+            <i class="bi bi-eye-fill" id="checkEye3" style="font-size: 20px;"></i>
+          </span>
+        </div>
+
+        <!-- 密碼是否變更成功 -->
+        <div style="font-size: 25px; line-height: 2.5em; color:#EA0000" th:text="${changeSucess}"></div>
+        <div style="font-size: 25px; line-height: 2.5em; color:#EA0000" th:text="${FailToChange}"></div>
+        <br>
+        <br>
+
+        <button type="button" class="btn btn-primary" style="font-size:15px;float: right;
+    margin:5px;" data-bs-toggle="modal" data-bs-target="#confirmModal" id="preConfirmButton">確認變更</button>
+        <button type="button" class="btn btn-secondary" style="float: right;
+    margin:5px;" data-bs-toggle="modal" data-bs-target="#cancelModal">取消</button>
+
+        <br>
+
+
+
+        <!-- 確認變更 Modal -->
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">確認變更</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                確定要提交表單嗎？
+                <div id="idsp2"></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-primary" id="confirmButton">確認</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 取消 Modal -->
+        <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel">捨棄變更？</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                確定要捨棄變更嗎？
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="cancelChanges()">捨棄變更</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- Send  -->
+      <div id="successSendModal3" class="modal success-modal fade" data-bs-backdrop="static">
+        <div class="modal-dialog modal-confirm">
+          <div class="modal-content rounded-5 shadow">
+            <div class="modal-header">
+              <div class="icon-box">
+                <svg class="tick" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                  <circle class="path circle" fill="none" stroke="#FFD700" stroke-width="6" stroke-miterlimit="10"
+                    cx="65.1" cy="65.1" r="62.1" />
+                  <polyline class="path check" fill="none" stroke="#898121" stroke-width="6" stroke-linecap="round"
+                    stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 " />
+                </svg>
+              </div>
+              <h4 class="modal-title w-100">發送成功</h4>
+            </div>
+            <div class="modal-body">
+              <p class="text-center">
+                <span v-html="sentEmailmsgcreate" style="font-size: 14pt;"></span>
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-info shadow-sm rounded-pill col w-auto"
+                onclick="window.location = '/'">
+                回首頁
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- failed  -->
+      <div id="failedSendModal" class="modal failure-modal fade">
+        <div class="modal-dialog modal-confirm modal-sm">
+          <div class="modal-content rounded-5 shadow">
+            <div class="modal-header">
+              <div class="icon-box">
+                <svg class="exclamation" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                  <circle class="path circle" fill="none" stroke="#FFA500" stroke-width="6" stroke-miterlimit="10"
+                    cx="65.1" cy="65.1" r="62.1" />
+                  <line class="path line" fill="none" stroke="#FFA500" stroke-width="6" stroke-linecap="round"
+                    stroke-miterlimit="10" x1="65.1" y1="34.4" x2="65.1" y2="94.8" />
+                  <line class="path line" fill="none" stroke="#FFA500" stroke-width="6" stroke-linecap="round"
+                    stroke-miterlimit="10" x1="65.1" y1="47.5" x2="65.1" y2="56.5" />
+                </svg>
+              </div>
+              <h4 class="modal-title w-100">超過驗證次數</h4>
+            </div>
+            <div class="modal-body">
+              <p class="text-center" style="font-size: 14pt;">您已進行超過 3 次驗證<br>請5分鐘後再試</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-info shadow-sm rounded-pill col w-auto"
+                onclick="window.location = '/'">
+                回首頁
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <br>
+      <hr>
+      <div class="mt-6">
+        <b>第三方帳號管理</b>
+        <span style="color: #8E8E8E;">（綁定後可使用第三方帳號登入。）</span>
+        <div class="my-4" style="display: flex; align-items: center;">
+          <img th:src="@{/img/icon/google.png}" style="width: 20px;">
+          <span class="ms-3 me-6">Google 帳戶</span>
+          <span class="ms-3 me-6" style="color: #8E8E8E;">{{bindingMsg}}</span>
+          <span class="ms-3">
+            <a type="button" :href="binding ? null : '/oauth2/authorization/google'" class="btn btn-warning"
+              :disabled="binding">進行綁定</a>
+          </span>
+        </div>
+        <hr>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- <script>
+    //	這邊調整眨眼～
+    var checkEye = document.getElementById("checkEye");
+    var floatingPassword = document.getElementById("oldPwd");
+    checkEye.addEventListener("click", function (e) {
+      if (e.target.classList.contains('bi-eye-fill')) {
+        //換class 和 type
+        e.target.classList.remove('bi-eye-fill');
+        e.target.classList.add('bi-eye-slash-fill');
+        floatingPassword.setAttribute('type', 'text')
+      } else {
+        floatingPassword.setAttribute('type', 'password');
+        e.target.classList.remove('bi-eye-slash-fill');
+        e.target.classList.add('bi-eye-fill')
+      }
+    });
+
+    //2號眨眼
+    var checkEye2 = document.getElementById("checkEye2");
+    var floatingPassword2 = document.getElementById("newPwd");
+    checkEye2.addEventListener("click", function (e) {
+      if (e.target.classList.contains('bi-eye-fill')) {
+        //換class 和 type
+        e.target.classList.remove('bi-eye-fill');
+        e.target.classList.add('bi-eye-slash-fill');
+        floatingPassword2.setAttribute('type', 'text')
+      } else {
+        floatingPassword2.setAttribute('type', 'password');
+        e.target.classList.remove('bi-eye-slash-fill');
+        e.target.classList.add('bi-eye-fill')
+      }
+    });
+
+    //3號眨眼
+    var checkEye3 = document.getElementById("checkEye3");
+    var floatingPassword3 = document.getElementById("newPwd2");
+    checkEye3.addEventListener("click", function (e) {
+      if (e.target.classList.contains('bi-eye-fill')) {
+        //換class 和 type
+        e.target.classList.remove('bi-eye-fill');
+        e.target.classList.add('bi-eye-slash-fill');
+        floatingPassword3.setAttribute('type', 'text')
+      } else {
+        floatingPassword3.setAttribute('type', 'password');
+        e.target.classList.remove('bi-eye-slash-fill');
+        e.target.classList.add('bi-eye-fill')
+      }
+    });
+
+    //Password格式確認
+
+    document.getElementById("newPwd").addEventListener("blur", checkPwd);
+
+    function checkPwd() {
+      let thePwdObj = document.getElementById("newPwd");
+      let thePwdObjVal = thePwdObj.value;
+
+      let isValid = /^(?=.*[a-zA-Z])(?=.*\d).+$/.test(thePwdObjVal);
+      let sp1 = document.getElementById("idsp1");
+
+      if (thePwdObjVal == "") {
+        sp1.innerHTML = '<div id="noPwd" class="alert alert-danger" role="alert">密碼欄位不可空白，請輸入新的密碼</div>';
+      } else if (!isValid) {
+        sp1.innerHTML = '<div id="wrongPwd" class="alert alert-danger" role="alert">密碼格式錯誤，密碼必須包含英文、數字，請重新輸入</div>';
+      } else {
+        sp1.innerHTML = "";
+      }
+    }
+
+    document.getElementById("confirmButton").addEventListener("click", function () {
+      var password = document.getElementById("newPwd").value;
+      var confirmPassword = document.getElementById("newPwd2").value;
+
+      if (password !== confirmPassword) {
+        document.getElementById("idsp2").innerHTML = '<div style="font-size:15px;color:#EA0000;">' +
+          '「新密碼」和「確認新密碼」不相符，請重新輸入！</div>';
+        event.preventDefault(); // 阻止表單提交
+      } else {
+        document.getElementById("idsp2").innerHTML = "";
+
+      }
+    });
+
+    $('#confirmModal').on('show.bs.modal', function (e) {
+      // 清空訊息
+      document.getElementById("idsp2").innerHTML = "";
+    });
+
+
+    function cancelChanges() {
+      var form = document.getElementById("inputForm");
+
+      // 使用表單的 reset 方法來重置表單
+      form.reset();
+      $('#cancelModal').modal('hide'); // 使用 jQuery 關閉 Modal
+    }
+
+
+  </script> -->
+
+  <!-- 引入 Vue.js 和 Axios -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+
+  <script type="module">
+    import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.min.js";
+    createApp({
+      data() {
+        return {
+          binding: false,
+          bindingMsg: "",
+          pwdEmpty: false,
+          sentEmailmsgcreate: "",
+        }
+      },
+      methods: {
+        setpwd() {
+          $("#forgotPasswordModal").modal("hide");
+          $("#modal-loading").modal("show");
+
+          axios.get("/sentcreatepassword")
+            .then(rs => {
+              let volidCount = rs.data.volidCount
+              if (volidCount < 3) {
+                this.sentEmailmsgcreate = `網址已成功發送請至郵箱確認 <br>
+                        您已進行 <strong> ${volidCount} </strong> 次驗證<br>
+                        請於 5 分鐘內完成驗證`
+              } else {
+                this.sentEmailmsgcreate = `網址已成功發送請至郵箱確認 <br>
+                        注意喔！<br>
+                        這次是最後1次驗證呦～<br>`
+              }
+              $("#successSendModal3").modal("show");
+              $("#modal-loading").modal("hide");
+            })
+            .catch(error => {
+              console.error(error);
+              setTimeout(function () {
+                $("#modal-loading").modal("hide");
+                $("#failedSendModal").modal("show");
+              }, 1000); // 延遲 1000 毫秒後顯示失敗 modal
+
+              // this.error = true;
+            })
+        },
+      },
+      mounted() {
+        axios.get(`/api/user/googleid`)
+          .then(response => {
+            this.binding = false;
+            this.bindingMsg = "未綁定"
+          })
+          .catch(error => {
+            this.binding = true;
+            this.bindingMsg = "已綁定"
+          });
+        axios.get(`/api/checkPwdExist`)
+          .then(rs => {
+            //console.log(rs.data)
+            this.pwdEmpty = true;
+          })
+          .catch(error => {
+            this.pwdEmpty = false;
+            console.error(error);
+          });
+
+        // 原本 JS 的部分移到 vue.js 的 mounted
+        var checkEye = document.getElementById("checkEye");
+        var floatingPassword = document.getElementById("oldPwd");
+        checkEye.addEventListener("click", function (e) {
+          if (e.target.classList.contains('bi-eye-fill')) {
+            //換class 和 type
+            e.target.classList.remove('bi-eye-fill');
+            e.target.classList.add('bi-eye-slash-fill');
+            floatingPassword.setAttribute('type', 'text')
+          } else {
+            floatingPassword.setAttribute('type', 'password');
+            e.target.classList.remove('bi-eye-slash-fill');
+            e.target.classList.add('bi-eye-fill')
+          }
+        });
+
+        //2號眨眼
+        var checkEye2 = document.getElementById("checkEye2");
+        var floatingPassword2 = document.getElementById("newPwd");
+        checkEye2.addEventListener("click", function (e) {
+          if (e.target.classList.contains('bi-eye-fill')) {
+            //換class 和 type
+            e.target.classList.remove('bi-eye-fill');
+            e.target.classList.add('bi-eye-slash-fill');
+            floatingPassword2.setAttribute('type', 'text')
+          } else {
+            floatingPassword2.setAttribute('type', 'password');
+            e.target.classList.remove('bi-eye-slash-fill');
+            e.target.classList.add('bi-eye-fill')
+          }
+        });
+
+        //3號眨眼
+        var checkEye3 = document.getElementById("checkEye3");
+        var floatingPassword3 = document.getElementById("newPwd2");
+        checkEye3.addEventListener("click", function (e) {
+          if (e.target.classList.contains('bi-eye-fill')) {
+            //換class 和 type
+            e.target.classList.remove('bi-eye-fill');
+            e.target.classList.add('bi-eye-slash-fill');
+            floatingPassword3.setAttribute('type', 'text')
+          } else {
+            floatingPassword3.setAttribute('type', 'password');
+            e.target.classList.remove('bi-eye-slash-fill');
+            e.target.classList.add('bi-eye-fill')
+          }
+        });
+
+        //Password格式確認
+
+        document.getElementById("newPwd").addEventListener("blur", checkPwd);
+
+        function checkPwd() {
+          let thePwdObj = document.getElementById("newPwd");
+          let thePwdObjVal = thePwdObj.value;
+
+          let isValid = /^(?=.*[a-zA-Z])(?=.*\d).+$/.test(thePwdObjVal);
+          let sp1 = document.getElementById("idsp1");
+
+          if (thePwdObjVal == "") {
+            sp1.innerHTML = '<div id="noPwd" class="alert alert-danger" role="alert">密碼欄位不可空白，請輸入新的密碼</div>';
+          } else if (!isValid) {
+            sp1.innerHTML = '<div id="wrongPwd" class="alert alert-danger" role="alert">密碼格式錯誤，密碼必須包含英文、數字，請重新輸入</div>';
+          } else {
+            sp1.innerHTML = "";
+          }
+        }
+
+        document.getElementById("confirmButton").addEventListener("click", function () {
+          var password = document.getElementById("newPwd").value;
+          var confirmPassword = document.getElementById("newPwd2").value;
+
+          if (password !== confirmPassword) {
+            document.getElementById("idsp2").innerHTML = '<div style="font-size:15px;color:#EA0000;">' +
+              '「新密碼」和「確認新密碼」不相符，請重新輸入！</div>';
+            event.preventDefault(); // 阻止表單提交
+          } else {
+            document.getElementById("idsp2").innerHTML = "";
+
+          }
+        });
+
+        $('#confirmModal').on('show.bs.modal', function (e) {
+          // 清空訊息
+          document.getElementById("idsp2").innerHTML = "";
+        });
+
+
+        function cancelChanges() {
+          var form = document.getElementById("inputForm");
+
+          // 使用表單的 reset 方法來重置表單
+          form.reset();
+          $('#cancelModal').modal('hide'); // 使用 jQuery 關閉 Modal
+        }
+      }
+    }).mount("#checkpasswordexist");
+  </script>
+</body>
+
+</html>

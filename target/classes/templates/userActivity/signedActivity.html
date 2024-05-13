@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.14/vue.esm-browser.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js" integrity="sha512-gEM2INjX66kRUIwrPiTBzAA6d48haC9kqrWZWjzrtnpCtBNxOXqXVFEeRDOeVC13pw4EOBrvlsJnNr2MXiQGvg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<link th:href="@{/css/cards.css}" rel="stylesheet" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<title>活動管理頁面</title>
+<style>
+
+.profile-container {
+        display: flex;
+        align-items: center;
+        margin-top:35px;
+        margin-left:-450px;
+    }
+
+    .profile-img {
+        width: 120px; 
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden; 
+        margin-right:25px; 
+    }
+
+    .profile-img img {
+        width: 100%;
+        height: auto;
+    }
+
+    .nickname {
+        font-size: 30px; 
+    }
+#allCard {
+  display: inline-block;
+  flex-wrap: wrap;
+  margin-left:30px;
+  margin-top:20px;
+}
+
+.actCard {
+  font-size: 20px;
+  width: 320px;
+  height: 320px;
+  margin: 20px; 
+  margin-bottom:40px;
+}
+
+.noData{
+  font-size: 25px;
+  color:#7B7B7B;
+  margin-left:500px;
+  margin-top:30px;
+}
+
+</style>
+</head>
+<body  style="background-color:#FFFFF0">
+<div th:replace="~{layout/navbar}"></div>
+<div style="display: flex;">
+<div th:replace="~{layout/users_sidebar}" style="width: 200px;position:fixed;"></div>
+
+<div style="flex-grow: 1; margin-top:0px;">
+
+<div class="profile-container">
+    <div class="profile-img">
+        <img th:if="${photoPath}" th:src="@{|${photoPath}|}"/>
+        <img th:unless="${photoPath}" th:src="@{/img/web/jojo_bird.png}"/>
+    </div>
+    <div th:if="${nickname}" class="nickname" th:text="${nickname}"></div>
+    <div th:unless="${nickname}" class="nickname" th:text="${session.userinfo.uName}"></div>
+</div> 
+
+<ul class="nav nav-tabs" style="margin-top:10px;margin-left:-500px">
+  <li class="nav-item"  id="tab1" style="font-size:20px">
+    <a class="nav-link active" th:href="@{/users/manageActivity/signed}" aria-current="page">已報名活動</a>
+  </li>
+  <li class="nav-item" id="tab2" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/joined}">已參加活動</a>
+  </li>
+  <li class="nav-item" id="tab3" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/canceled}">已取消活動</a>
+  </li>
+  <li class="nav-item" id="tab4" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/like}">收藏的活動</a>
+  </li>
+  <li class="nav-item" id="tab5" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/comment}">待評論活動</a>
+  </li>
+  <li class="nav-item" id="tab6" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/followOrg}">已追蹤的主辦單位 </a>
+  </li>
+</ul>
+</div>
+ </div>
+ <div id="app" style="margin-left:250px;margin-top:15px;">
+ <div id="allCard" v-for="dto in dtos" :key="dto.acid">
+ 
+ <div class="card mb-3" style="width: 800px;height:190px;margin:-20px;">
+  <div class="row g-0">
+  
+    <div class="col-md-4">
+    <a :href=`/showActivity/activityPage/${dto.acid}` style="color:#000000;">
+      <div class="card" style="width: 170px;height:185px;border:none;
+      margin:2px;">
+	  <img :src="dto.acImg" class="card-img-top" style="height:110px;">
+	  <div class="card-body" style="background-color:#FFFAFA;height:80px;">
+	    <p style="font-size:12px;text-align:left;margin-top:-5px;margin-left:-5px;">{{limitedTitle(dto.acName)}}</p>
+	  </div>
+	</div>
+   </a>
+    </div>
+    <div class="col-md-8">
+        <div class="card-body" style="margin-left:-90px;margin-top:-7px;font-size:12px;flex: 1;">
+        <div>
+            <div style="margin:5px;display: flex;">報名序號：{{dto.asfid}}</div>
+            <div style="margin:5px;">報名日期：{{dto.formattedasfDate}}</div>
+            <div style="margin:5px;">活動日期：{{dto.formattedacStartDate}}</div>
+            <div style="margin:5px;">報名狀態：{{dto.asfSignStatus}}</div>
+            <div style="margin:5px;">報名方案：{{dto.atName}}</div>
+            <div style="margin:5px;">付款方式：{{dto.pmid}}</div>
+        </div>
+            <div class="card" style="width: 150px;float:right;margin-top:-150px;">
+				  <ul class="list-group list-group-flush">
+				    <li class="list-group-item" style="background-color:#FFFAFA;">票券資訊</li>
+				    <li class="list-group-item" style="height:70px;line-height: 60px;text-align:center;
+				    font-size:20px;font-family:Comic Sans MS, Comic Sans, cursive;color:#4F4F4F">NT${{dto.atPrice}}</li>
+				    <li class="list-group-item" style="text-align:center;font-size:15px;">
+				    <button type="button" class="btn btn-outline-warning"
+				    @click="cancelSign(dto.asfid)">取消報名</button></li>
+				  </ul>
+	</div>
+        </div>
+    </div>
+    </div>
+</div>
+
+
+</div>
+<div class="noData" v-if="dtos.length === 0">～～您目前還沒有報名活動喔～～</div>
+
+</div>
+
+
+
+
+
+
+
+<script>
+Vue.createApp({
+      data() {
+      return { 
+      activities:[],
+      dtos:[],
+      };
+      },
+      methods: {
+      //把日期格式改為年月日
+	  formattedDate(dateString) {
+	  const startDate = new Date(dateString);
+	  const year = startDate.getFullYear();
+	  const month = String(startDate.getMonth() + 1).padStart(2, '0');
+	  const day = String(startDate.getDate()).padStart(2, '0');
+	  const hours = String(startDate.getHours()).padStart(2, '0');
+	  return `${year}年${month}月${day}日 ${hours}:00`;
+	  },
+	  transformPmid(pmid) {
+      switch (pmid) {
+        case 1:
+          return "現場付款";
+        case 2:
+          return "匯款";
+        case 3:
+          return "linePay";
+        case 4:
+          return "綠界信用卡";
+        case 5:
+          return "免費活動";
+      }
+      },
+      transformStatus(status) {
+      switch (status) {
+        case 0:
+          return "取消報名";
+        case 1:
+          return "已報名，未付費";
+        case 2:
+          return "已付費";
+      }
+    },
+      //取活動的資料～
+      fetchData() {
+      axios.get('/users/signedActivity')
+        .then(response => {
+          this.dtos = response.data;
+          this.dtos.forEach(dto => {
+		  dto.formattedasfDate = this.formattedDate(dto.asfDate);
+		  dto.asfSignStatus = this.transformStatus(dto.asfSignStatus);
+		  dto.formattedacStartDate = this.formattedDate(dto.acStartDate);
+		  dto.pmid = this.transformPmid(dto.pmid);
+		  });
+          //console.log(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+        },
+ 
+      //取消報名
+      cancelSign(asfid) {
+		  axios.post(`/cancelSignedActivity/${asfid}`)
+		     .then(response => {
+		        //console.log("取消報名成功");
+		         this.dtos = this.dtos.filter(dto => dto.asfid !== asfid);
+		      })
+		     .catch(error => {
+		            // 處理錯誤
+		       console.error('取消報名錯誤', error);
+		     });
+		},
+      // 計算字數限制
+      limitedTitle(title) {
+        const maxLength = 36; // 最大字數限制
+        return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
+      },
+        },
+      created() {
+      	this.fetchData();
+      	fetchUserData();
+      	},
+      }).mount("#app");
+ </script>
+
+</body>
+</html>

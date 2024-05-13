@@ -1,0 +1,2558 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Facebook 分享 -->
+    <meta property="og:url" content="這裡放置頁面的 URL" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" th:content="${fbShareDTO.title}" />
+    <meta property="og:description" th:content="${fbShareDTO.description}" />
+    <meta property="og:image" th:content="${fbShareDTO.image}" />
+
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- vue3 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+
+    <!-- DOMPurify -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2"></script>
+    <!-- googleMap -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhfE-e9LqH5W7NC7xNID0waaqxMjSw-DQ" async
+        defer></script>
+
+
+    <!--引入bootstrap要用的icon和本體-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.bundle.min.js"></script>
+    <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css">-->
+
+    <!-- bootstrap5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-8Lb23xW0bxCt4Pp4R4KzGFMhNP6F3nZMnH1L6+J4y4OgWLF6OjRie+7+4lx" crossorigin="anonymous"></script>
+
+
+    <title>活動頁</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Noto Sans", "Apple Casual", Corbel, "Microsoft JhengHei Fixed", "Microsoft JhengHei", sans-serif;
+            color: #757575;
+            margin: 0;
+        }
+
+        div {
+            display: block;
+            unicode-bidi: isolate;
+        }
+
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            /* 水平置中 */
+            align-items: center;
+            /* 垂直置中 */
+            min-height: 100vh;
+            /* 使父容器至少有視窗的高度 */
+            margin: 0;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            /* Light grey */
+            border-top: 4px solid #0455eb;
+            /* Blue */
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            /* 動畫 名稱 持續時間 恆定速度 無限重複 */
+            animation: spin 2s linear infinite;
+            margin: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-height: 100%;
+        }
+
+        /* loading動畫 */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .EventDetail-event-detail-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .EventDetail-event-detail-inner {
+            max-width: 100%;
+            width: 1080px;
+            height: 100%;
+            filter: drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.1));
+            margin: 10px 0px;
+
+        }
+
+        .EventDetail-event-banner-container {
+            position: relative;
+        }
+
+        .EventDetail-event-banner-bg-container {
+            overflow: hidden;
+            border-radius: 16px 16px 0 0;
+        }
+
+        element.style {
+            min-height: 540px;
+            background-image: url(https://static.accupass.com/eventbanner/2402240….jpg);
+        }
+
+        .EventDetail-event-banner-bg {
+            background-size: cover;
+            min-height: 540px;
+            transition: transform 0.8s ease;
+        }
+
+        .EventDetail-event-banner-bg:hover {
+            transform: scale(1.05);
+            transition: transform 0.8s ease;
+        }
+
+        .EventDetail-event-banner-mobile-bar {
+            position: absolute;
+            top: 2.5%;
+            width: 100%;
+            padding: 8px 5%;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .EventDetail-event-banner-mobile-bar-button:last-child {
+            margin-left: 10px;
+        }
+
+        .EventDetail-event-banner-mobile-bar-button {
+            color: #fff;
+            padding: 6px 10px;
+            border: 1px solid #fff;
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0);
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: "Noto Sans", "Apple Casual", Corbel, "Microsoft JhengHei", sans-serif;
+        }
+
+        button,
+        select {
+            text-transform: none;
+        }
+
+        button,
+        input {
+            overflow: visible;
+        }
+
+        button,
+        input,
+        optgroup,
+        select,
+        textarea {
+            font-family: inherit;
+            font-size: 100%;
+            line-height: 1.15;
+            margin: 0;
+        }
+
+        .EventDetail-event-banner-image-mobile {
+            position: absolute;
+            top: 40px;
+            transform: scale(0.9);
+            border-radius: 8px;
+            box-shadow: 0px 4px 16px rgba(0, 0, 0, .1);
+        }
+
+        img {
+            /* max-width: 100%; */
+            max-height: auto;
+            border-style: none;
+        }
+
+        .EventDetail-event-detail {
+            display: flex;
+            background-color: #fff;
+        }
+
+        .EventDetail-event-detail-content {
+            font-size: 16px;
+            flex: 1 1;
+            border-radius: 16px;
+            word-break: break-word;
+            max-width: calc(100% - 300px);
+        }
+
+        main {
+            display: block;
+            unicode-bidi: isolate;
+        }
+
+        .EventDetail-event-basicinfo-container {
+            padding: 24px 0 32px 48px;
+            background-color: #fff;
+        }
+
+        .EventDetail-categories-container {
+            display: flex;
+            gap: 8px 16px;
+            flex-wrap: wrap;
+        }
+
+        .spacer {
+            /* 自動填充可用空間，被推的元素到最右邊 */
+            flex-grow: 1;
+
+        }
+
+        .EventDetail-event-category:not(.EventDetail-event-category.EventDetail-postponed, .EventDetail-event-category.EventDetail-covid-free) {
+            cursor: pointer;
+        }
+
+        .EventDetail-event-category:not(.EventDetail-loading-placeholder) {
+            background-color: #f58300;
+            box-shadow: 0px 2px 4px rgba(0, 170, 245, .3);
+        }
+
+        .EventDetail-event-category {
+            border-radius: 4px;
+            font-size: 1rem;
+            line-height: 1.5;
+            font-weight: normal;
+            padding: 4px 16px;
+            white-space: nowrap;
+            letter-spacing: 1px;
+            color: #fff;
+            transition: filter 0.5s ease;
+            /* 平滑效果 */
+        }
+
+        .category-report {
+            background-color: #ff2323 !important;
+        }
+
+        .EventDetail-event-category:hover {
+            filter: brightness(80%);
+            /* 懸停降低亮度 */
+        }
+
+        .EventDetail-event-header-container {
+            margin-top: 10px;
+            margin-bottom: 24px;
+        }
+
+        .EventTitle-module-root {
+            font-size: 32px;
+            font-weight: 600;
+            color: #212121;
+        }
+
+        blockquote,
+        body,
+        dd,
+        dl,
+        dt,
+        fieldset,
+        figure,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        hr,
+        html,
+        iframe,
+        legend,
+        li,
+        ol,
+        p,
+        pre,
+        textarea,
+        ul {
+            margin: 0;
+            padding: 0;
+        }
+
+        .EventPopularity-module-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+        }
+
+        .EventPopularity-module-layout .EventPopularity-module-d8550c11-item {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+            color: #000000;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .EventPopularity-module-layout .EventPopularity-module-icon {
+            margin-right: 4px;
+            font-size: 16px;
+        }
+
+        .EventDetail-org-title-container-mobile {
+            display: none;
+        }
+
+        .EventMobileOrgAvatar-module-root {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
+        }
+
+        .EventMobileOrgTitle-module-root {
+            display: block;
+            font-weight: 600;
+            margin-left: 10px;
+            color: #595e64;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all .2s;
+        }
+
+        .OrgGradeIcon-verified-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .EventDetail-event-info-container {
+            color: #b5bac1;
+            font-weight: 400;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
+            padding: 24px;
+            border-radius: 16px;
+            font-size: 16px;
+        }
+
+        .EventDetail-event-subtitle-container {
+            display: flex;
+            margin-top: 10px;
+
+        }
+
+        .EventDetail-event-subtitle-icon.EventDetail-clock-icon {
+            background-image: url(https://static.accupass.com/frontend/image/event/icon_time.svg);
+        }
+
+        .EventDetail-event-subtitle-icon {
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            background-position-x: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+
+        .EventDetail-event-subtitle-content {
+            flex: 1 1;
+            margin-left: 10px;
+        }
+
+        .EventDetail-event-subtitle {
+            font-weight: 700;
+            color: #595e64;
+            font-size: 16px;
+        }
+
+        .EventDetail-event-subtitle-icon.EventDetail-location-icon {
+            background-image: url(https://static.accupass.com/frontend/image/event/icon_map.svg);
+        }
+
+        .EventDetail-event-external-link {
+            font-weight: 700;
+            color: #595e64;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        .EventDetail-event-external-link .EventDetail-icon-link {
+            margin-left: 4px;
+            width: 16px;
+            height: 16px;
+            background-position-x: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-image: url(https://static.accupass.com/frontend/image/event/icon_link.svg);
+            flex-shrink: 0;
+        }
+
+        a:hover .EventDetail-icon-link {
+            filter: sepia(100%) hue-rotate(545deg) brightness(150%) saturate(500%);
+        }
+
+        .EventDetail-event-detail-address-remark {
+            margin: 0;
+            color: #b5bac1;
+            font-size: 16px;
+        }
+
+        .EventDetail-event-subtitle-icon.EventDetail-site-icon {
+            background-image: url(https://static.accupass.com/frontend/image/event/icon_website.svg);
+        }
+
+        .EventDetail-event-related-link {
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .EventDetail-event-description {
+            color: #959ba1;
+            font-size: 14px;
+            margin-top: 30px;
+            padding: 32px;
+            border: 1px solid #eff4fb;
+            border-radius: 80px;
+        }
+
+        .EventDetail-event-content-container {
+            padding: 2% 48px;
+        }
+
+        .EventDetail-event-content-section-title {
+            text-align: left;
+            padding-bottom: 10px;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #f5f5f5;
+            color: #262626;
+            font-weight: 600;
+            font-size: 24px;
+        }
+
+        .EventDetail-event-content-container .EventDetail-event-content {
+            position: relative;
+            color: #000;
+            word-wrap: break-word;
+        }
+
+        .EventDetail-event-content img {
+            /* 確保圖片不會超過article的寬度 */
+            max-width: 100%;
+            /* 維持圖片的原始比例 */
+            height: auto !important;
+        }
+
+        .OrgInfo-org-container {
+            width: 300px;
+            padding: 24px;
+        }
+
+        .OrgInfo-org-box {
+            position: sticky;
+            top: var(--top);
+        }
+
+        .OrgInfo-org-info-box {
+            background-color: #fff;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
+            border-radius: 16px;
+            padding: 24px 24px 36px;
+        }
+
+        a {
+            text-decoration: none !important;
+        }
+
+        a:hover .OrgInfo-org-title {
+            color: #00b7ff;
+        }
+
+        a:hover .EventDetail-event-external-link {
+            color: #00b7ff;
+        }
+
+        .EventDetail-event-external-link:hover {
+            color: #00b7ff;
+        }
+
+        /* .link-hover:hover .OrgInfo-org-title {
+            color: #ff0000; 
+        } */
+
+        p {
+            display: block;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            unicode-bidi: isolate;
+        }
+
+
+        .OrgInfo-org-title-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+        }
+
+        .AvatarBase-module_size-md__oNIfk {
+            height: 52px;
+            width: 52px;
+        }
+
+        .AvatarBase-module_root__sUirA {
+            display: inline-block;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .StyledOrgAvatar-module-avatar-img-container {
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
+            position: relative;
+            z-index: 0;
+            border: none;
+        }
+
+        .AvatarBase-module_avatar-img-container__zpAmQ {
+            border: 1px solid #e7ecf3;
+            border-radius: 50%;
+            box-sizing: border-box;
+            height: 100%;
+
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .AvatarBase-module_avatar-img__uo01s {
+            height: 100%;
+            object-fit: cover;
+            transition: .8s;
+            width: 100%;
+            transition: transform 0.8s ease;
+        }
+
+        .AvatarBase-module_avatar-img__uo01s:hover {
+            transform: scale(1.2);
+            transition: transform 0.8s ease;
+        }
+
+        .OrgInfo-org-title {
+            color: #1a1f23;
+            align-items: center;
+            font-size: 16px;
+            word-break: break-word;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .OrgInfo-org-description.OrgInfo---expand {
+            max-height: 1000px;
+        }
+
+        .OrgInfo-org-description {
+            color: #6d7278;
+            transition: max-height .3s ease-in-out;
+            font-size: 14px;
+        }
+
+        .OrgInfo-org-description .OrgInfo-text {
+            margin: 16px 0 4px;
+            word-break: break-word;
+            font-weight: 700;
+        }
+
+        .OrgInfo-org-description .OrgInfo-date-time {
+            font-weight: 300;
+        }
+
+        .OrgInfo-register-button {
+            /* position: relative; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+            padding: 16px;
+            border-radius: 4px;
+            color: #000000;
+            background-image: linear-gradient(131.01deg, rgb(255, 217, 0) 16.3%, #f58300 115.92%);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s;
+            margin-top: 16px;
+        }
+
+        .OrgInfo-register-button:hover {
+            color: #ffffff !important;
+            /*懸停增加亮度*/
+            filter: brightness(108%);
+        }
+
+        .OrgInfo-unRelease-button {
+            /* position: relative; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+            padding: 16px;
+            border-radius: 4px;
+            color: #000000;
+            background-image: linear-gradient(131.01deg, rgb(187, 187, 187) 16.3%, #bdbdbd 115.92%);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s;
+            margin-top: 16px;
+        }
+
+        .OrgInfo-unRelease-button:hover {
+            color: #000000;
+        }
+
+        .OrgInfo-org-buttons-container {
+            display: flex;
+            margin-top: 16px;
+        }
+
+        .OrgInfo-fav-btn {
+            position: relative;
+            min-width: 66px;
+            min-height: 44px;
+
+        }
+
+        /* 設定邊線 */
+        .OrgInfo-fav-btn:after {
+            content: "";
+            position: absolute;
+            right: 0;
+            /* 邊框在右側 */
+            top: 40%;
+            /* 起始位置 */
+            bottom: 10%;
+            /* 結束位置 */
+            width: 1px;
+            background: #bdbdbd;
+        }
+
+        .org-facebook {
+            padding: 16px 24px 4px;
+        }
+
+        /* 設定邊線 */
+        .org-facebook:after {
+            content: "";
+            position: absolute;
+            right: 0;
+            /* 邊框在右側 */
+            top: 40%;
+            /* 起始位置 */
+            bottom: 10%;
+            /* 结束位置 */
+            width: 1px;
+            background: #bdbdbd;
+        }
+
+
+        .OrgInfo-org-button {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            cursor: pointer;
+            color: #bdbdbd;
+        }
+
+
+        .org-facebook:hover {
+            color: #1985ff;
+            /* 懸停時的顏色 */
+        }
+
+        .AddToFavoriteIcon-module-root {
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+
+        .org-email:hover {
+            color: #1985ff;
+            /* 懸停時的顏色 */
+
+        }
+
+        .AccuIcon-root {
+            --icon-size: 24px;
+            /* --icon-color: inherit; */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+            display: inline-block;
+            flex-shrink: 0;
+            font-size: var(--icon-size);
+            /* color: var(--icon-color); */
+            fill: currentColor;
+            /* color: #bdbdbd; */
+        }
+
+
+        .svg-hover-fill-not-liked {
+            transition: 0.3s ease;
+            color: none;
+        }
+
+        .svg-hover-fill-liked {
+            transition: 0.3s ease;
+            color: #db79af;
+        }
+
+        /* 未喜歡狀態下，hover的颜色 */
+        .svg-hover-fill-not-liked:hover {
+            color: #db79af;
+            /* 鼠標懸停的顏色 */
+        }
+
+        /* 已喜歡狀態下，hover的顏色 */
+        .svg-hover-fill-liked:hover {
+            color: none;
+            /* 鼠標懸停的顏色 */
+        }
+
+
+        .EventDetail-event-detail-inner>*:last-child {
+            border-radius: 0 0 16px 16px;
+        }
+
+        .EventDetail-event-guests-container,
+        .EventDetail-event-map-container {
+            background-color: #fff;
+            padding: 32px 48px;
+        }
+
+        .EventDetail-event-guests {
+            padding: 10px 0;
+            display: flex;
+            flex-flow: row wrap;
+            margin-left: -8px;
+            margin-right: -8px;
+        }
+
+        .EventDetail-event-guest {
+            cursor: pointer;
+            width: 16.66%;
+
+            padding: 8px;
+        }
+
+        .EventDetail-guest-avatar-img {
+            width: 100%;
+            height: 127.44px;
+            border-radius: 50%;
+            background-color: #ededed;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+            transition: transform .3s, box-shadow .3s;
+            overflow: hidden;
+            transform: translateZ(0);
+            margin-bottom: 16px;
+        }
+
+        .EventDetail-guest-avatar-img img {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s ease;
+        }
+
+        .EventDetail-guest-avatar-img:hover img {
+            transform: scale(1.1);
+            transition: transform 0.8s ease;
+        }
+
+        .EventDetail-guest-name {
+            width: 100%;
+            word-break: break-word;
+            font-size: 16px;
+            text-align: center;
+            font-weight: 700;
+            color: #595e64;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+        }
+
+
+        .EventDetail-event-map {
+            border-radius: 16px;
+        }
+
+        .EventDetail-event-address-container {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .EventDetail-event-address-container .fill {
+            width: 24px;
+            height: 24px;
+            background-position-x: center;
+            background-repeat: no-repeat;
+            margin-bottom: 4px;
+        }
+
+        .EventDetail-event-address {
+            color: #959ba1;
+            font-weight: 700;
+        }
+
+        .EventDetail-event-page-adcards-container {
+            width: 1080px;
+            margin: 40px 0 0;
+        }
+
+        .EventDetail-event-page-adcards-title {
+            margin: 0 5% 1rem;
+        }
+
+
+        .EventDetail-event-message-container {
+            max-width: 100%;
+            width: 1080px;
+            height: 100%;
+            filter: drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.1));
+            margin: 10px 0px 20px 0px;
+
+            padding: 16px 60px 32px 60px;
+            border-radius: 16px;
+            background-color: #ffffff;
+
+
+        }
+
+        .EventDetail-event-message-count {
+            font-size: 20px;
+            font-weight: 500;
+            color: #6e6d74;
+        }
+
+        .EventDetail-event-page-message-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: #212121;
+            margin: 0 0 25px 0;
+            border: none;
+        }
+
+        .EventDetail-event-message-box {
+            width: 100%;
+            height: auto;
+            display: flex;
+            padding: 10px 0px;
+            border-top: 1px solid #e2dfdfbb;
+
+        }
+
+        .EventDetail-event-message-user-img-box {
+            width: 50px;
+            height: auto;
+            min-height: 60px;
+            margin: 3px;
+        }
+
+        .EventDetail-event-message-user-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ededed;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+            transition: transform .3s, box-shadow .3s;
+            overflow: hidden;
+            transform: translateZ(0);
+            margin-right: 5px;
+        }
+
+        .EventDetail-event-message-user-img img {
+            max-width: 100%;
+            max-height: 100%;
+            transition: transform 0.8s ease;
+        }
+
+        .EventDetail-event-message-user-img:hover img {
+            transform: scale(1.2);
+            transition: transform 0.8s ease;
+        }
+
+
+        .EventDetail-event-message-content-box {
+            width: 100%;
+
+        }
+
+        .EventDetail-event-message-userName {
+            width: 100%;
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .EventDetail-event-message-userName span {
+            font-size: 14px;
+            font-weight: bold;
+            color: #36353c;
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .EventDetail-event-message-content {
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        .EventDetail-event-message-content span {
+            font-size: 18px;
+            font-weight: 500;
+            color: #36353c;
+            margin-right: 10px;
+
+        }
+
+        .EventDetail-event-message-floor {
+            width: 100%;
+            margin-top: 5px;
+            display: flex;
+
+        }
+
+        .EventDetail-event-message-floor span {
+            font-size: 14px;
+            font-weight: bold;
+            color: #71707a;
+            width: auto;
+            margin-right: 5px;
+        }
+
+
+
+        .Carousel-module-root {
+            position: relative;
+        }
+
+        .CarouselList-module-root {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .Modal-old-modal-wrapper {
+            position: fixed;
+            z-index: 100;
+            top: 0;
+            left: 0;
+            display: flex;
+            height: 100%;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, .8);
+        }
+
+        .Modal-closeable-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        .Modal-old-modal {
+            position: relative;
+            background: #ffffff;
+            max-width: 95vw;
+            border-radius: 8px;
+        }
+
+        .Modal-arrow-btn:hover {
+            filter: unset;
+        }
+
+        .Modal-arrow-btn:disabled {
+            filter: brightness(0) saturate(100%) invert(90%) sepia(19%) saturate(58%) hue-rotate(170deg) brightness(100%) contrast(98%);
+            opacity: .3;
+        }
+
+        .Modal-arrow-btn.Modal---left {
+            left: -56px;
+            transform: scale(-1);
+        }
+
+        .Modal-arrow-btn {
+            position: absolute;
+            top: calc(50% - 30px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1500;
+            cursor: pointer;
+            width: 56px;
+            height: 56px;
+            filter: brightness(0) saturate(100%) invert(99%) sepia(1%) saturate(7325%) hue-rotate(179deg) brightness(98%) contrast(94%);
+            background-color: rgba(0, 0, 0, 0);
+            border: none;
+            padding: 0;
+        }
+
+        button {
+            overflow: visible;
+            text-transform: none;
+            font-family: "Noto Sans", "Apple Casual", Corbel, "Microsoft JhengHei", sans-serif;
+        }
+
+        .Modal-arrow-btn.Modal---right {
+            right: -56px;
+        }
+
+        .Modal-arrow-btn-img {
+            width: 70%;
+            height: 70%;
+            max-width: 100% !important;
+            max-height: auto !important;
+        }
+
+        .Modal-close-button.Modal-guest-modal {
+            top: 32px;
+            right: 32px;
+            background-color: rgba(224, 248, 6, 0);
+        }
+
+        .Modal-close-button {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 24px;
+            width: 24px;
+            background-color: #cecece;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 2000;
+            transition: all .2s;
+        }
+
+        .Modal-inner-guest {
+            width: 488px;
+            height: 543px;
+            padding: 60px 32px 32px;
+        }
+
+        .EventGuestModal-guest-modal {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .EventGuestModal-guest-modal .EventGuestModal-avatar {
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            display: block;
+            margin: 0 auto 16px;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
+        }
+
+        .EventGuestModal-guest-modal-info {
+            text-align: center;
+            padding: 8px;
+            flex: 1 1;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .EventGuestModal-guest-modal-info .EventGuestModal-description {
+            color: #c2bf14;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: .3px;
+            white-space: pre-line;
+            text-align: left;
+        }
+
+        .EventGuestModal-f4b6a722-guest-modal-button {
+            color: #000000;
+            background-color: #ffc400;
+            width: 100%;
+            padding: 16px 32px 16px 48px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 700;
+            line-height: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .EventGuestModal-f4b6a722-guest-modal-button:hover {
+            filter: brightness(1.1);
+            color: #000000;
+        }
+
+        .EventGuestModal-guest-modal-info>div {
+            font-size: 16px;
+            line-height: 22px;
+            color: #959ba1;
+            word-break: break-word;
+        }
+
+        .EventGuestModal-guest-modal-info .EventGuestModal-name {
+            color: #595e64;
+            font-weight: 700;
+        }
+
+        .EventGuestModal-name,
+        .EventGuestModal-company,
+        .EventGuestModal-jobTietle {
+            margin-bottom: 5px;
+        }
+
+        /* 從左邊進入的動畫 */
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+
+        .fade-enter,
+        .fade-leave-to {
+            opacity: 0;
+        }
+
+        /* 從左邊進入 */
+        .slide-left-enter-active {
+            transition: transform 0.5s ease;
+        }
+
+        .slide-left-enter {
+            transform: translateX(-40%);
+        }
+
+        /* 從右邊進入 */
+        .slide-right-enter-active {
+            transition: transform 0.5s ease;
+        }
+
+        .slide-right-enter {
+            transform: translateX(40%);
+        }
+
+
+        .Popup-module_closeable-area__L0Ec4,
+        .Popup-module_popup__0Yd9x {
+            height: 100%;
+            left: 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+
+        .Popup-module_popup__0Yd9x {
+            background-color: rgba(0, 0, 0, .3);
+            margin: 0;
+            z-index: 1500;
+        }
+
+        .Popup-module_popup-container__Kt79n {
+            align-items: center;
+            display: flex;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .Popup-module_popup-paper__1mhEU.Popup-module_size-md__dq098 {
+            max-width: 512px;
+        }
+
+        .Popup-module_popup-paper__1mhEU {
+            background-color: #fff;
+            border-radius: 36px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            padding: 32px;
+            position: relative;
+            width: calc(100vw - 32px);
+        }
+
+        h4 {
+            display: block;
+            margin-block-start: 1.33em;
+            margin-block-end: 1.33em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            font-weight: bold !important;
+            unicode-bidi: isolate;
+        }
+
+        .Popup-module_popup-paper__1mhEU header>h4.Popup-module_--text-left__4Mp-Y {
+            text-align: left;
+        }
+
+        .ContactOrgDialog-fb85c07e-root header h4 {
+            font-size: 24px;
+        }
+
+        .Popup-module_popup-paper__1mhEU header>h4 {
+            color: #1a1f23;
+            line-height: 24px;
+            margin: 0;
+            text-align: center;
+        }
+
+        .Popup-module_popup-paper__1mhEU .Popup-module_close-btn__JzAdo {
+            cursor: pointer;
+            position: absolute;
+            right: 32px;
+            top: 32px;
+        }
+
+        .Popup-module_close-btn__JzAdo:hover svg {
+            fill: #4d4b4b;
+        }
+
+        .Popup-module_popup-paper__1mhEU main {
+            color: #1a1f23;
+            margin-bottom: 12px;
+            overflow-y: auto;
+        }
+
+        .ContactOrgDialog-fb85c07e-root .ContactOrgDialog-a403c6ea-org-name {
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
+            border-radius: 16px;
+            padding: 8px 16px;
+            margin: 16px 4px 24px;
+            color: #a7a7a7;
+            font-size: 14px;
+            overflow-wrap: break-word;
+        }
+
+        .ContactOrgDialog-fb85c07e-root .ContactOrgDialog-c3cd4ec5-field {
+            margin-bottom: 8px;
+        }
+
+        .TextFieldBase-module_root__Ftbz8 {
+            width: 100%;
+        }
+
+        .TextFieldBase-module_text-field-group__BtoQm {
+            position: relative;
+        }
+
+        .InputLabel-module_controlled__LFqqa {
+            left: 16px;
+            pointer-events: none;
+            position: absolute;
+            top: 16px;
+            transition: .2s cubic-bezier(0, 0, .2, 1) 0ms;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .InputLabel-module_root__hp15c {
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+            color: #b5bac1;
+            display: -webkit-box;
+            font-size: 16px;
+            font-weight: 300;
+            line-height: 22px;
+            overflow: hidden;
+        }
+
+        .InputLabel-module_required__9ZT6k {
+            color: #ff6243;
+        }
+
+        .Input-module_root__rSgdy {
+            border-bottom: 2px solid #e7ecf3;
+            padding: 16px 16px 8px;
+            transition: .2s cubic-bezier(0, 0, .2, 1) 0ms;
+        }
+
+        .Input-module_root__rSgdy:focus-within {
+            border-color: #ecf01b;
+        }
+
+        .InputBase-module_full-width__rk1UO {
+            width: 100%;
+        }
+
+        .InputBase-module_root__i-43G {
+            align-items: flex-start;
+            box-sizing: border-box;
+            display: inline-flex;
+        }
+
+        .InputBase-module_wrapper__z4LNR {
+            align-items: center;
+            display: flex;
+            flex: 1;
+            flex-wrap: wrap;
+            overflow: hidden;
+        }
+
+        .InputBase-module_full-width__rk1UO .InputBase-module_input__G9aa- {
+            flex: 1;
+        }
+
+        .Input-module_input__M9uon {
+            font-size: 16px !important;
+            line-height: 22px;
+        }
+
+        .InputBase-module_input__G9aa- {
+            -webkit-tap-highlight-color: transparent;
+            background: none;
+            border: 0;
+            color: currentColor;
+            display: block;
+            font: inherit;
+            height: 1.375em;
+            letter-spacing: inherit;
+            margin: 0;
+            min-width: 0;
+            padding: 0;
+        }
+
+        .InputBase-module_input__G9aa-:focus {
+            outline: none;
+        }
+
+        .TextFieldBase-module_text-field-bottom__NhQKb {
+            color: #b5bac1;
+            display: flex;
+            font-size: 12px;
+            line-height: 14px;
+            min-height: 14px;
+        }
+
+        .ContactOrgDialog-fb85c07e-root .ContactOrgDialog-c3cd4ec5-field {
+            margin-bottom: 8px;
+        }
+
+        .TextFieldBase-module_root__Ftbz8 {
+            width: 100%;
+        }
+
+        .TextFieldBase-module_text-field-group__BtoQm {
+            position: relative;
+        }
+
+        .InputLabel-module_shrink__yel6D {
+            color: #97a5b3;
+            font-size: 14px;
+            line-height: 16px;
+            pointer-events: auto;
+            top: 0;
+        }
+
+        .InputLabel-module_shrink__yel6D-focused {
+
+            color: #ff9100;
+        }
+
+        .TextFieldBase-module_root__Ftbz8 {
+            width: 100%;
+        }
+
+        .TextFieldBase-module_text-field-group__BtoQm {
+            position: relative;
+        }
+
+        .InputBase-module_textarea__0sDzM {
+            resize: none;
+        }
+
+        .Popup-module_popup-paper__1mhEU footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .Button-module_style-primary__QjcsM:disabled {
+            fill: #b5bac1;
+            background-color: #d87300;
+            color: #b3a797;
+        }
+
+
+        .Button-module_button__CsZ-5:disabled {
+            cursor: not-allowed;
+        }
+
+        .Button-module_button__CsZ-5.Button-module_full-width__YZyaS {
+            width: 100%;
+        }
+
+        .Button-module_button__CsZ-5 {
+            align-items: center;
+            border-radius: 22px;
+            display: inline-flex;
+            font-size: 14px;
+            font-weight: 700;
+            height: -webkit-fit-content;
+            height: -moz-fit-content;
+            height: fit-content;
+            justify-content: center;
+            letter-spacing: .8px;
+            line-height: 1;
+            position: relative;
+        }
+
+        .ButtonBase-module_root__WnIsR {
+            -webkit-tap-highlight-color: transparent;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            box-sizing: border-box;
+            color: inherit;
+            cursor: pointer;
+            font: inherit;
+            margin: 0;
+            outline: 0;
+            padding: 0;
+            text-decoration: none;
+            -webkit-user-select: none;
+            user-select: none;
+            vertical-align: middle;
+        }
+
+        .Button-module_style-primary__QjcsM {
+            fill: #b5bac1;
+            background-color: #ff9900;
+            color: #ffffff;
+            border-radius: 10px;
+        }
+
+        .Button-module_style-primary__QjcsM:hover {
+            filter: brightness(90%);
+        }
+
+        .Button-module_size-md__hkXeR {
+            padding: 11px 16px;
+        }
+
+        .Button-module_button__CsZ-5:not(.Button-module_--loading__-MEzr) .Button-module_circle-spinner__Yan2l {
+            visibility: hidden;
+        }
+
+        .Button-module_circle-spinner__Yan2l {
+            height: 16px;
+            position: absolute;
+            width: 16px;
+        }
+
+        .CircleSpinner-module_root__rBJPu {
+            align-items: center;
+            display: inline-flex;
+            justify-content: center;
+        }
+
+        .Button-module_content__qzRNV {
+            align-items: center;
+            display: inline-flex;
+            justify-content: center;
+        }
+
+
+        /*檢舉的旗子*/
+        .flagIcon {
+            font-size: 16px;
+            color: #d10000;
+        }
+
+        .flagIcon:hover {
+            cursor: pointer;
+            /* 讓鼠標指針變成手指形狀 */
+            transform: scale(1.1);
+            /* 稍微放大圖標 */
+            transition: all 0.3s ease;
+            /* 平滑的過渡效果 */
+            color: #8d1111;
+        }
+
+        .containerforflex {
+            display: flex;
+        }
+
+        .col-md-1 {
+            width: auto !important;
+        }
+
+        .spinner-border {
+            width: 21px !important;
+            height: 21px !important;
+        }
+
+        .noRelease-Contanier {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            margin-top: 300px;
+        }
+
+        .noRelease-span {
+            font-size: 50px;
+            color: #b60505;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div th:replace="~{layout/navbar}"></div>
+
+    <div id="app">
+        <template v-if="!releaseStatus">
+            <div class="noRelease-Contanier">
+                <span class="noRelease-span">活動尚未發布，敬請期待</span>
+            </div>
+        </template>
+        <template v-if="loadingFinish && releaseStatus">
+
+            <!-- <div v-if="loadingFinish" class="loader-container">
+            <div class="loader"></div>
+        </div> -->
+
+            <div>
+                <div id="content">
+                    <div>
+                        <div style="position: relative;">
+                            <div>
+                                <div class="EventDetail-event-detail-wrapper">
+                                    <div class="EventDetail-event-detail-inner">
+                                        <div class="EventDetail-event-banner-container">
+                                            <div class="EventDetail-event-banner-bg-container">
+                                                <img class="EventDetail-event-banner-bg" :src="activityDetail.acImg" />
+                                            </div>
+                                        </div>
+
+                                        <div class="EventDetail-event-detail">
+                                            <main class="EventDetail-event-detail-content" role="main">
+                                                <section class="EventDetail-event-basicinfo-container">
+                                                    <div class="EventDetail-categories-container">
+                                                        <template v-for="category in activityDetail.allTypes">
+                                                            <span
+                                                                class="EventDetail-event-category">{{category.typeName}}</span>
+                                                        </template>
+
+                                                    </div>
+                                                    <div class="EventDetail-event-header-container">
+                                                        <h1 class="EventTitle-module-root">
+                                                            {{activityDetail.acName}}</h1>
+                                                        <div class="EventPopularity-module-layout">
+                                                            <div class="containerforflex">
+
+                                                                <div class="EventPopularity-module-d8550c11-item">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em"
+                                                                        height="1em" fill="none" viewBox="0 0 24 24"
+                                                                        class="AccuIcon-root EventPopularity-module-icon">
+                                                                        <path fill="#000" fill-rule="evenodd"
+                                                                            d="M12.422 16.979h-.037l-.037.003c-1.893.12-3.791-.352-5.48-1.379-1.348-.82-2.525-1.972-3.438-3.38a.407.407 0 0 1 0-.444C4.346 10.373 5.523 9.22 6.87 8.4c1.69-1.027 3.588-1.5 5.482-1.384l.037.002.037.001c1.764.042 3.502.592 5.044 1.614a10.944 10.944 0 0 1 3.092 3.14c.09.136.09.31 0 .448a10.985 10.985 0 0 1-3.096 3.137c-1.541 1.022-3.28 1.574-5.044 1.62Zm-6.593.333c2.029 1.234 4.332 1.811 6.645 1.666 2.151-.056 4.252-.729 6.098-1.952a12.981 12.981 0 0 0 3.66-3.706 2.407 2.407 0 0 0 .003-2.642 12.942 12.942 0 0 0-3.66-3.711c-1.846-1.224-3.949-1.895-6.101-1.946-2.312-.142-4.614.438-6.643 1.672-1.616.983-3.008 2.35-4.077 3.996a2.407 2.407 0 0 0-.002 2.622c1.068 1.648 2.46 3.017 4.077 4ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 4a2 2 0 1 1 4 0 2 2 0 0 1-4 0Z"
+                                                                            clip-rule="evenodd">
+                                                                        </path>
+                                                                    </svg>
+                                                                    <span>{{activityDetail.acCheckStatus==2?activityDetail.acViewsCount:0}}</span>
+                                                                </div>
+                                                                <div class="EventPopularity-module-d8550c11-item">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em"
+                                                                        height="1em" fill="none" viewBox="0 0 24 24"
+                                                                        class="AccuIcon-root EventPopularity-module-icon">
+                                                                        <path fill="#000" fill-rule="evenodd"
+                                                                            d="M7.229 5.109c-.935 0-2.099.747-2.686 2.184-.605 1.48-.354 3.09.752 4.449A131.466 131.466 0 0 0 12 19.361a131.683 131.683 0 0 0 6.705-7.619c1.106-1.36 1.357-2.967.752-4.448-.587-1.436-1.75-2.182-2.686-2.182-1 0-1.787.586-2.468 1.407-.294.353-.531.705-.748 1.028l-.09.133c-.11.163-.241.352-.37.503a1.833 1.833 0 0 1-.29.278 1.307 1.307 0 0 1-.786.269h-.039c-.4 0-.676-.187-.785-.268a1.833 1.833 0 0 1-.29-.278c-.13-.151-.26-.341-.37-.504l-.092-.136c-.218-.322-.455-.674-.749-1.027C9.012 5.695 8.226 5.11 7.23 5.11ZM2.471 6.53C3.281 4.55 5.108 3 7.23 3c2.033 0 3.391 1.224 4.211 2.213.21.252.397.505.56.735.161-.23.348-.482.557-.734.82-.988 2.18-2.21 4.214-2.21 2.12 0 3.948 1.547 4.758 3.528.9 2.206.49 4.586-1.064 6.498M11.36 6.865Zm1.275-.004a.075.075 0 0 1 .003.004l-.003-.004Zm-10.164-.33c-.9 2.205-.49 4.587 1.064 6.499a133.668 133.668 0 0 0 6.832 7.761c.875.919 2.39.918 3.266 0a133.737 133.737 0 0 0 6.832-7.761"
+                                                                            clip-rule="evenodd"></path>
+                                                                    </svg><span>{{activityDetail.acCheckStatus==2?likeComputed:0}}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-1" title="檢舉">
+                                                                <span sec:authorize="isAuthenticated()">
+                                                                    <!-- 這是登入的檢舉 有登入才會出現 -->
+                                                                    <i class="bi bi-flag-fill flagIcon"
+                                                                        data-toggle="modal"
+                                                                        data-target="#reportModal"></i>
+                                                                </span>
+                                                                <span sec:authorize="!isAuthenticated()">
+                                                                    <!-- 這是沒登入才出現的檢舉 會跳轉到登入頁面 -->
+                                                                    <i class="bi bi-flag-fill flagIcon"
+                                                                        @click="checkLogin"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="EventDetail-event-info-container">
+                                                        <div class="EventDetail-event-subtitle-container">
+                                                            <i
+                                                                class="EventDetail-event-subtitle-icon EventDetail-clock-icon"></i>
+                                                            <div class="EventDetail-event-subtitle-content">
+                                                                <div class="EventDetail-event-subtitle">
+                                                                    {{formattedDate}}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="EventDetail-event-subtitle-container">
+                                                            <i
+                                                                class="EventDetail-event-subtitle-icon EventDetail-location-icon"></i>
+                                                            <div class="EventDetail-event-subtitle-content">
+                                                                <a :href="`https://www.google.com/maps/search/?api=1&amp;query=${googleMapUrl}`"
+                                                                    class="EventDetail-event-external-link"
+                                                                    target="_blank">
+                                                                    <div class="EventDetail-event-external-link">
+                                                                        {{activityDetail.acAddress!=null?currentAddress:activityDetail.acOnline!=null?'此活動為線上活動，購票後可於票券頁進入直播連結':''}}<i
+                                                                            class="EventDetail-icon-link"></i>
+                                                                    </div>
+                                                                </a>
+                                                                <p class="EventDetail-event-detail-address-remark">
+                                                                    {{activityDetail.acAddNote!=null?activityDetail.acAddNote:''}}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="EventDetail-event-subtitle-container"
+                                                            v-if="activityDetail.acLinkUrl"><i
+                                                                class="EventDetail-event-subtitle-icon EventDetail-site-icon"></i>
+                                                            <div class="EventDetail-event-subtitle-content">
+                                                                <p class="EventDetail-event-related-link">
+                                                                    相關連結</p>
+                                                                <a :href="activityDetail.acLinkUrl"
+                                                                    class="EventDetail-event-external-link">{{activityDetail.acLinkName?activityDetail.acLinkName:activityDetail.acLinkUrl}}<i
+                                                                        class="EventDetail-icon-link"></i></a>
+                                                            </div>
+                                                        </div>
+                                                        <section class="EventDetail-event-description">
+                                                            {{activityDetail.acSummary}}</section>
+                                                    </div>
+                                                </section>
+                                                <section class="EventDetail-event-content-container">
+                                                    <div class="EventDetail-event-content-section-title">
+                                                        活動介紹</div>
+                                                    <article class="EventDetail-event-content" v-html="cleanHTML">
+                                                    </article>
+                                                </section>
+                                            </main>
+                                            <div class="OrgInfo-org-container">
+                                                <div></div>
+                                                <div class="OrgInfo-org-box" style="--top: 60px;">
+                                                    <div class="OrgInfo-org-info-box"><a
+                                                            :href="`/api/organizers/${activityDetail.oid}`">
+                                                            <div class="OrgInfo-org-title-container">
+                                                                <div
+                                                                    class="AvatarBase-module_root__sUirA AvatarBase-module_size-md__oNIfk AvatarBase-module_animated__CmXDj">
+                                                                    <div
+                                                                        class="AvatarBase-module_avatar-img-container__zpAmQ StyledOrgAvatar-module-avatar-img-container">
+                                                                        <img class="AvatarBase-module_avatar-img__uo01s"
+                                                                            :src="activityDetail.oheadshot"
+                                                                            alt=" avatar">
+                                                                    </div>
+                                                                </div>
+                                                                <p class="OrgInfo-org-title">
+                                                                    {{activityDetail.oname}}</p>
+
+                                                            </div>
+                                                        </a>
+                                                        <div class="OrgInfo-org-description">
+                                                            <p class="OrgInfo-text">
+                                                                {{activityDetail.acName}}</p>
+                                                            <p class="OrgInfo-date-time">
+                                                                {{formattedDateWithoutZone}}</p>
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <a :class="activityDetail.acCheckStatus == 2?'OrgInfo-register-button':'OrgInfo-unRelease-button'"
+                                                                :href="activityDetail.acCheckStatus == 2 ? `/sign/${acid}` : 'javascript:void(0);'">{{activityDetail.acCheckStatus==2?'立即報名':'尚未發布'}}</a>
+                                                        </div>
+                                                        <div class="OrgInfo-org-buttons-container">
+                                                            <div>
+                                                                <div class="OrgInfo-org-button OrgInfo-fav-btn "
+                                                                    :class="{'svg-hover-fill-not-liked': !activityDetail.liked, 'svg-hover-fill-liked': activityDetail.liked}"
+                                                                    style="padding: 16px 24px 4px 12px;"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                                                    title="加入收藏" @click="toggleFavorite">
+                                                                    <div class="AddToFavoriteIcon-module-root">
+
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            width="1em" height="1em" viewBox="0 0 24 24"
+                                                                            class="AccuIcon-root svg-fill">
+                                                                            <path fill="currentColor"
+                                                                                stroke="currentColor" stroke-width="2"
+                                                                                d="M3.242 6.987C3.946 5.17 5.535 3.75 7.38 3.75c1.769 0 2.95 1.122 3.663 2.028.183.232.346.463.487.674.14-.21.303-.442.485-.672.713-.907 1.895-2.027 3.665-2.027 1.845 0 3.434 1.418 4.139 3.235.783 2.021.426 4.203-.926 5.956a120.885 120.885 0 0 1-5.943 7.115 1.913 1.913 0 0 1-2.84 0 120.782 120.782 0 0 1-5.943-7.115c-1.351-1.753-1.709-3.936-.925-5.957Z">
+                                                                            </path>
+                                                                            <path fill="currentColor"
+                                                                                fill-rule="evenodd"
+                                                                                d="M7.229 5.109c-.935 0-2.099.747-2.686 2.184-.605 1.48-.354 3.09.752 4.449A131.466 131.466 0 0 0 12 19.361a131.683 131.683 0 0 0 6.705-7.619c1.106-1.36 1.357-2.967.752-4.448-.587-1.436-1.75-2.182-2.686-2.182-1 0-1.787.586-2.468 1.407-.294.353-.531.705-.748 1.028l-.09.133c-.11.163-.241.352-.37.503a1.833 1.833 0 0 1-.29.278 1.307 1.307 0 0 1-.786.269h-.039c-.4 0-.676-.187-.785-.268a1.833 1.833 0 0 1-.29-.278c-.13-.151-.26-.341-.37-.504l-.092-.136c-.218-.322-.455-.674-.749-1.027C9.012 5.695 8.226 5.11 7.23 5.11ZM2.471 6.53C3.281 4.55 5.108 3 7.23 3c2.033 0 3.391 1.224 4.211 2.213.21.252.397.505.56.735.161-.23.348-.482.557-.734.82-.988 2.18-2.21 4.214-2.21 2.12 0 3.948 1.547 4.758 3.528.9 2.206.49 4.586-1.064 6.498M11.36 6.865Zm1.275-.004a.075.075 0 0 1 .003.004l-.003-.004Zm-10.164-.33c-.9 2.205-.49 4.587 1.064 6.499a133.668 133.668 0 0 0 6.832 7.761c.875.919 2.39.918 3.266 0a133.737 133.737 0 0 0 6.832-7.761"
+                                                                                clip-rule="evenodd">
+                                                                            </path>
+                                                                        </svg>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="OrgInfo-org-button org-facebook"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                                                    title="分享到FB" @click="shareOnFacebook">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em"
+                                                                        height="1em" viewBox="0 0 24 24"
+                                                                        class="AccuIcon-root ">
+                                                                        <path fill="currentColor"
+                                                                            d="M14.143 6.13H17V3h-2.857c-2.363 0-4.085 2.017-4.085 4.499v1.73H7v2.941h3.058V21h3.37v-8.83h3.033l.54-2.941H13.43V7.167c0-.592.376-1.038.714-1.038Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="OrgInfo-org-button org-email"
+                                                                    style="padding: 16px 12px 4px 24px;"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                                                    title="聯絡主辦" @click="showMailModal=true">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em"
+                                                                        height="1em" viewBox="0 0 24 24"
+                                                                        class="AccuIcon-root OrgInfo-cfce7438-icon">
+                                                                        <path fill="currentColor" fill-rule="evenodd"
+                                                                            d="M12 11.617 3.003 7.12A2.25 2.25 0 0 1 5.25 5h13.5a2.25 2.25 0 0 1 2.246 2.12L12 11.617Zm0 2.516 9-4.5v6.617a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 16.25V9.633l9 4.5Z"
+                                                                            clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <template v-if="activityDetail.activityGuests.length>0">
+                                            <section class="EventDetail-event-guests-container">
+                                                <h2 class="EventDetail-event-content-section-title">活動嘉賓
+                                                </h2>
+                                                <div class="EventDetail-event-guests">
+                                                    <div class="EventDetail-event-guest"
+                                                        v-for="(guest,guestIndex) in activityDetail.activityGuests"
+                                                        @click="showGuestDetail(guestIndex)">
+                                                        <div class=" EventDetail-guest-avatar-img"><img
+                                                                :src="guest.guestImage" alt="Stephanie Hesterberg "
+                                                                loading="lazy">
+                                                        </div>
+                                                        <div class="EventDetail-guest-name">
+                                                            {{guest.guestName}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </template>
+                                        <template v-if="activityDetail.acPlaceStatus==1">
+                                            <section class="EventDetail-event-map-container">
+                                                <div class="EventDetail-event-content-section-title">活動地圖
+                                                </div>
+                                                <iframe class="EventDetail-event-map" width="100%" height="360px"
+                                                    frameborder="0" :src="googleMapUrl" allowfullscreen="">
+                                                </iframe>
+                                                <div class="EventDetail-event-address-container">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="#959ba1" class="bi bi-signpost-fill fill"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M7.293.707A1 1 0 0 0 7 1.414V4H2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h5v6h2v-6h3.532a1 1 0 0 0 .768-.36l1.933-2.32a.5.5 0 0 0 0-.64L13.3 4.36a1 1 0 0 0-.768-.36H9V1.414A1 1 0 0 0 7.293.707" />
+                                                    </svg>
+                                                    <p class="EventDetail-event-address">
+                                                        {{currentAddress}}</p>
+                                                </div>
+                                            </section>
+                                        </template>
+                                    </div>
+
+                                    <template v-if="isStarted">
+                                        <div class="EventDetail-event-message-container">
+                                            <p class=" EventDetail-event-page-message-title">活動評論</p>
+                                            <span class="EventDetail-event-message-count">共
+                                                {{activityDetail.activityCommentsDTOs.length}}
+                                                則評論</span>
+                                            <div class="EventDetail-event-message-box"
+                                                v-for="(activityComment,index) in activityDetail.activityCommentsDTOs">
+
+                                                <div class="EventDetail-event-message-user-img-box">
+                                                    <div class="EventDetail-event-message-user-img">
+                                                        <img :src="activityComment.userinfo.uimgpath" alt="">
+                                                    </div>
+                                                </div>
+                                                <div class="EventDetail-event-message-content-box">
+                                                    <div class="EventDetail-event-message-userName">
+                                                        <span>{{activityComment.userinfo.unickname}}</span>
+                                                        <div v-if="activityComment.commentScore">
+
+
+                                                            <template v-for="star in activityComment.commentScore">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20"
+                                                                    height="20" fill="#f1ee17" class="bi bi-star-fill"
+                                                                    viewBox="0 0 16 16">
+                                                                    <path
+                                                                        d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                                                                </svg>
+                                                            </template>
+                                                            <template v-for="star in (5-activityComment.commentScore)">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20"
+                                                                    height="20" fill="#f1ee17" class="bi bi-star"
+                                                                    viewBox="0 0 16 16">
+                                                                    <path
+                                                                        d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
+                                                                </svg>
+                                                            </template>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="EventDetail-event-message-content">
+                                                        <span>{{activityComment.commentContent}}</span>
+                                                    </div>
+                                                    <div class="EventDetail-event-message-floor">
+                                                        <span>B{{index+1}}</span>
+                                                        <span>‧</span>
+                                                        <span>{{formateDate(activityComment.commentTime)}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- 寄信 modal -->
+                        <template v-if="showMailModal">
+                            <div class="Popup-module_popup__0Yd9x">
+                                <div class="Popup-module_closeable-area__L0Ec4" @click="toggleShowMailModal">
+                                </div>
+                                <div class="Popup-module_popup-container__Kt79n">
+                                    <div class="Popup-module_popup-paper__1mhEU ContactOrgDialog-fb85c07e-root Popup-module_size-md__dq098"
+                                        style="max-height: 70%">
+                                        <header>
+                                            <h4 class="Popup-module_--text-left__4Mp-Y">聯繫主辦</h4>
+                                            <div class="Popup-module_close-btn__JzAdo" @click="toggleShowMailModal">
+                                                <svg viewBox="0 0 24 24" fill="#d8dde4"
+                                                    xmlns="http://www.w3.org/2000/svg" width="24">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                                        d="M19.614 19.636a1.258 1.258 0 0 0 .016-1.798L13.81 12l5.821-5.838c.5-.501.492-1.306-.016-1.798a1.305 1.305 0 0 0-1.72-.077l-.105.093L12 10.186 6.21 4.38l-.103-.093a1.305 1.305 0 0 0-1.72.077 1.258 1.258 0 0 0-.017 1.798L10.19 12 4.37 17.838c-.5.501-.492 1.306.016 1.798.475.459 1.218.483 1.72.077l.105-.093L12 13.814l5.79 5.806.103.093a1.305 1.305 0 0 0 1.72-.077Z"
+                                                        fill="current"></path>
+                                                </svg>
+                                            </div>
+                                        </header>
+                                        <main class="">
+                                            <div class="ContactOrgDialog-a403c6ea-org-name">
+                                                主辦單位
+                                                :
+                                                {{activityDetail.oname}}
+                                            </div>
+                                            <div
+                                                class="TextFieldBase-module_root__Ftbz8 ContactOrgDialog-c3cd4ec5-field">
+                                                <div class="TextFieldBase-module_text-field-group__BtoQm">
+                                                    <label
+                                                        class="InputLabel-module_root__hp15c InputLabel-module_controlled__LFqqa InputLabel-module_shrink__yel6D"
+                                                        for="accu:4"
+                                                        :class="{'InputLabel-module_shrink__yel6D-focused':isNameFocused}"
+                                                        @click="handleNameFocus(true)"><span
+                                                            class="InputLabel-module_required__9ZT6k">*
+                                                        </span>姓名</label>
+                                                    <div
+                                                        class="InputBase-module_root__i-43G Input-module_root__rSgdy InputBase-module_full-width__rk1UO">
+                                                        <div class="InputBase-module_wrapper__z4LNR">
+                                                            <input
+                                                                class="InputBase-module_input__G9aa- Input-module_input__M9uon"
+                                                                id="accu:4" placeholder="姓名" type="text" required=""
+                                                                v-model="uName" @focus="handleNameFocus(true)"
+                                                                @blur="handleNameFocus(false)" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="TextFieldBase-module_text-field-bottom__NhQKb">
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="TextFieldBase-module_root__Ftbz8 ContactOrgDialog-c3cd4ec5-field">
+                                                <div class="TextFieldBase-module_text-field-group__BtoQm">
+                                                    <label
+                                                        class="InputLabel-module_root__hp15c InputLabel-module_controlled__LFqqa InputLabel-module_shrink__yel6D"
+                                                        for="accu:5"
+                                                        :class="{'InputLabel-module_shrink__yel6D-focused':isEmailFocused}"
+                                                        @click="handleEmailFocus(true)"><span
+                                                            class="InputLabel-module_required__9ZT6k">*
+                                                        </span>電子郵件</label>
+                                                    <div
+                                                        class="InputBase-module_root__i-43G Input-module_root__rSgdy InputBase-module_full-width__rk1UO">
+                                                        <div class="InputBase-module_wrapper__z4LNR">
+                                                            <input
+                                                                class="InputBase-module_input__G9aa- Input-module_input__M9uon"
+                                                                id="accu:5" placeholder="您的電子郵件" type="text" required=""
+                                                                v-model="uEmail" @focus="handleEmailFocus(true)"
+                                                                @blur="handleEmailFocus(false)" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="TextFieldBase-module_text-field-bottom__NhQKb">
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="TextFieldBase-module_root__Ftbz8 ContactOrgDialog-c3cd4ec5-field">
+                                                <div class="TextFieldBase-module_text-field-group__BtoQm">
+                                                    <label
+                                                        class="InputLabel-module_root__hp15c InputLabel-module_controlled__LFqqa InputLabel-module_shrink__yel6D"
+                                                        for="accu:6"
+                                                        :class="{'InputLabel-module_shrink__yel6D-focused':isTelFocused}"
+                                                        @click="handleTelFocus(true)"><span
+                                                            class="InputLabel-module_required__9ZT6k">*
+                                                        </span>電話</label>
+                                                    <div
+                                                        class="InputBase-module_root__i-43G Input-module_root__rSgdy InputBase-module_full-width__rk1UO">
+                                                        <div class="InputBase-module_wrapper__z4LNR">
+                                                            <input
+                                                                class="InputBase-module_input__G9aa- Input-module_input__M9uon"
+                                                                id="accu:6" placeholder="您的電話" type="text" required=""
+                                                                v-model="uTel" @focus="handleTelFocus(true)"
+                                                                @blur="handleTelFocus(false)" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="TextFieldBase-module_text-field-bottom__NhQKb">
+                                                </div>
+                                            </div>
+                                            <div class="TextFieldBase-module_root__Ftbz8">
+                                                <div class="TextFieldBase-module_text-field-group__BtoQm">
+                                                    <label
+                                                        class="InputLabel-module_root__hp15c InputLabel-module_controlled__LFqqa InputLabel-module_shrink__yel6D"
+                                                        for="accu:7"
+                                                        :class="{'InputLabel-module_shrink__yel6D-focused':isQuestionFocused}"
+                                                        @click="handleQuestionFocus(true)"><span
+                                                            class="InputLabel-module_required__9ZT6k">*
+                                                        </span>問題描述</label>
+                                                    <div
+                                                        class="InputBase-module_root__i-43G Input-module_root__rSgdy InputBase-module_full-width__rk1UO">
+                                                        <div class="InputBase-module_wrapper__z4LNR">
+                                                            <textarea
+                                                                class="InputBase-module_input__G9aa- Input-module_input__M9uon InputBase-module_textarea__0sDzM"
+                                                                rows="5" id="accu:7" type="text" required=""
+                                                                style="height: 110px !important"
+                                                                v-model="questionContent"
+                                                                @focus="handleQuestionFocus(true)"
+                                                                @blur="handleQuestionFocus(false)"></textarea><textarea
+                                                                aria-hidden="true"
+                                                                class="InputBase-module_input__G9aa- Input-module_input__M9uon InputBase-module_textarea__0sDzM"
+                                                                readonly="" tabindex="-1" style="
+                                                  visibility: hidden;
+                                                  position: absolute;
+                                                  overflow: hidden;
+                                                  height: 0px;
+                                                  top: 0px;
+                                                  left: 0px;
+                                                  transform: translateZ(0px);
+                                                  padding-top: 0px;
+                                                  padding-bottom: 0px;
+                                                  width: 399px;
+                                                "></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="TextFieldBase-module_text-field-bottom__NhQKb">
+                                                </div>
+                                            </div>
+                                        </main>
+                                        <footer class="popup-buttons">
+                                            <button
+                                                class="ButtonBase-module_root__WnIsR Button-module_button__CsZ-5 Button-module_size-md__hkXeR Button-module_style-primary__QjcsM Button-module_full-width__YZyaS Button-module_disabled__UDoEp"
+                                                type="button" @click="sendMail">
+                                                <div class="CircleSpinner-module_root__rBJPu Button-module_circle-spinner__Yan2l"
+                                                    style="--icon-size: 16px">
+                                                    <svg viewBox="0 0 24 24" fill="inherit"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                                            d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12h1.818A8.182 8.182 0 1 0 12 3.818V2c5.523 0 10 4.477 10 10Z"
+                                                            fill="current"></path>
+                                                    </svg>
+                                                </div>
+                                                <span v-if="sendMailLoading" class="spinner-border " role="status"
+                                                    aria-hidden="true"></span>
+                                                <span class="Button-module_content__qzRNV"
+                                                    v-if="!sendMailLoading">送出</span>
+                                            </button>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <!-- 嘉賓 modal -->
+                <template v-if="showModal">
+                    <div class="Modal-old-modal-wrapper">
+                        <div class="Modal-closeable-area" @click="showModal = false"></div>
+                        <div class="Modal-old-modal">
+                            <button class="Modal-arrow-btn Modal---left" @click="switchGuest('prev')"
+                                :disabled="currentGuestIndex === 0">
+                                <img src="https://static.accupass.com/frontend/image/common/slider_icon_arrow_right.svg"
+                                    alt="icon-left" class="Modal-arrow-btn-img"></button>
+                            <button class="Modal-arrow-btn Modal---right" @click="switchGuest('next')"
+                                :disabled="currentGuestIndex === activityDetail.activityGuests.length - 1">
+                                <img src="https://static.accupass.com/frontend/image/common/slider_icon_arrow_right.svg"
+                                    alt="icon-right" class="Modal-arrow-btn-img">
+                            </button>
+                            <div class="Modal-close-button Modal-guest-modal" @click="showModal = false">
+                                <img src="https://static.accupass.com/frontend/image/common/icon_close_grey.svg"
+                                    alt="Close">
+                            </div>
+                            <div class="Modal-fe64c621-inner Modal-inner-guest" disable="true">
+                                <transition :name="transitionName">
+                                    <div class="EventGuestModal-guest-modal" v-if="showGuest" key="currentGuest">
+                                        <img :src="currentGuest.guestImage" class="EventGuestModal-avatar">
+                                        <div class="EventGuestModal-guest-modal-info">
+                                            <div class="EventGuestModal-name">{{currentGuest.guestName}}</div>
+                                            <div class="EventGuestModal-company">{{currentGuest.guestCompany}}
+                                            </div>
+                                            <div class="EventGuestModal-jobTietle">
+                                                {{currentGuest.guestJobTitle}}
+                                            </div>
+                                            <div class="EventGuestModal-description">{{currentGuest.guestIntro}}</div>
+                                        </div>
+                                        <a class="EventGuestModal-f4b6a722-guest-modal-button"
+                                            :href="currentGuest.guestLink" target="_blank">相關連結<i
+                                                class="EventDetail-icon-link"></i></a>
+                                    </div>
+                                </transition>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <!-- 寄信成功modal -->
+                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header">
+
+                            <strong class="me-auto">通知</strong>
+                            <small>剛剛</small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            信件已發送，請耐心等待主辦單位回復!
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </template>
+        <!-- 按下檢舉的 modal -->
+        <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reportModalLabel">檢舉事由</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <select class="form-control" id="reportReason" @change="showTextarea($event.target.value)">
+                            <option value="">請選擇檢舉事由</option>
+                            <option value="洗版">洗版</option>
+                            <option value="謾罵">謾罵</option>
+                            <option value="限制級">限制級</option>
+                            <option value="盜版">盜版</option>
+                            <option value="其他">其他</option>
+                        </select>
+                        <textarea id="otherReason" class="form-control mt-2" style="display: none"
+                            placeholder="請輸入檢舉事由"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            關閉
+                        </button>
+                        <button type="button" class="btn btn-primary" @click="submitReport" data-dismiss="modal"
+                            id="submitReportButton" disabled>
+                            送出
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+    <script type="module">
+        Vue.createApp({
+            data() {
+                return {
+                    activityDetail: {
+                        acName: null,
+                        acIntro: null,
+                        acSummary: null,
+                        acStartDate: null,
+                        acEndDate: null,
+                        acCity: null,
+                        acAddress: null,
+                        acAddNote: null,
+                        acOnline: null,
+                        acImg: null,
+                        acLinkName: null,
+                        acLinkUrl: null,
+                        acViewsCount: null,
+                        acPlaceStatus: null,
+                        oid: null,
+                        oname: null,
+                        oheadshot: null,
+                        acEmail: null,
+                        likeCount: null,
+                        liked: false,
+                        userInfo: null,
+                        allTypes: null,
+                        activityGuests: null,
+                        acCheckStatus: null,
+                        ownerUserid: null,
+                    },
+                    //是否為發布狀態
+                    releaseStatus: true,
+                    //是否載入完成
+                    loadingFinish: false,
+                    acid: null,
+                    //處理完的時間
+                    formattedDate: null,
+                    //處理完沒時區的時間
+                    formattedDateWithoutZone: null,
+                    //city+address
+                    currentAddress: null,
+                    //是否顯示guestmodal視窗
+                    showModal: false,
+                    currentGuestIndex: 0, // 目前的嘉宾索引值
+                    transitionName: 'fade', // 預設動畫方向
+                    //是否顯示mail視窗
+                    showMailModal: false,
+                    //已經開始舉辦的活動才顯示留言
+                    isStarted: false,
+                    //聯絡主辦的field
+                    uName: null,
+                    uEmail: null,
+                    uTel: null,
+                    questionContent: null,
+                    //送信狀態
+                    isNameFocused: false,
+                    isEmailFocused: false,
+                    isTelFocused: false,
+                    isQuestionFocused: false,
+                    //寄信中狀態
+                    sendMailLoading: false,
+                }
+            },
+            mounted() {
+                this.setAcid();
+                this.setReport();
+                this.updateViews();
+                this.getActivityDetail();
+
+            },
+            methods: {
+                // 處理日期格式
+                formatDate(startDate, endDate) {
+                    //console.log(startDate);
+                    //console.log(endDate);
+
+                    const dateStart = new Date(startDate);
+                    const dateEnd = new Date(endDate);
+
+                    // 日期格式選項
+                    const options = {
+                        month: '2-digit',
+                        day: '2-digit',
+                        weekday: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false, // 使用24小時制
+                    };
+
+                    // 時間部分格式化選項
+                    const timeOptions = {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false, // 使用24小时制
+                    };
+
+                    // 檢查是否同一天
+                    const isSameDay = dateStart.toDateString() === dateEnd.toDateString();
+                    //針對年分處理(如果是同一年但不同天，則不顯示 endDate 年分)
+                    const startYear = dateStart.getFullYear();
+                    const endYear = dateEnd.getFullYear();
+                    const yearOption = { year: 'numeric' };
+
+                    // 格式化
+                    const dateFormatter = new Intl.DateTimeFormat('zh-TW', options);
+                    const yearFormatter = new Intl.DateTimeFormat('zh-TW', yearOption);
+                    const timeFormatter = new Intl.DateTimeFormat('zh-TW', timeOptions);
+                    const timeZoneFormatter = new Intl.DateTimeFormat('zh-TW', { timeZoneName: 'short', timeZone: 'Asia/Taipei' });
+
+                    // 格式化日期和時間
+                    let formattedStartDate = yearFormatter.format(dateStart).replace('年', '.') + dateFormatter.format(dateStart).replace('週', '').replace('/', '.').replace(/ /g, '').replace('（', ' (').replace('）', ') ');
+                    let formattedEndDate;
+                    let formattedTimeZone = timeZoneFormatter.format(dateStart).split(' ')[1]; // 取得時區
+
+                    // 如果是同一天，只顯示 endDate 的時間
+                    if (isSameDay) {
+                        formattedEndDate = timeFormatter.format(dateEnd);
+                    } else {
+                        // 如果不是同一天，檢查是否同一年
+                        formattedEndDate = (startYear === endYear ? "" : yearFormatter.format(dateEnd).replace('年', '.')) + dateFormatter.format(dateEnd).replace('週', '').replace('/', '.').replace(/ /g, '').replace('（', ' (').replace('）', ') ');
+                    }
+
+                    this.formattedDate = formattedStartDate + " - " + formattedEndDate + " " + "(" + formattedTimeZone + ")";
+
+                    this.formattedDateWithoutZone = formattedStartDate + " - " + formattedEndDate;
+                },
+                setAcid() {
+                    //取得頁面路徑
+                    const path = window.location.pathname;
+                    const segments = path.split("/");
+                    //從最後一個索引值獲取 acid
+                    this.acid = segments[segments.length - 1];
+                },
+                setReport() {
+
+                    //初始化 BS 提示工具
+                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl)
+                    })
+                    document
+                        .getElementById("otherReason")
+                        .addEventListener("input", function () {
+                            var submitButton = document.getElementById("submitReportButton");
+                            if (!this.value.trim()) {
+                                submitButton.disabled = true; // 檢查 textarea 不能是空的才能送出
+                            } else {
+                                submitButton.disabled = false;
+                            }
+                        });
+
+                    document
+                        .getElementById("reportReason")
+                        .addEventListener("change", function () {
+                            var reason = this.value;
+                            var submitButton = document.getElementById("submitReportButton");
+                            var otherReason = document
+                                .getElementById("otherReason")
+                                .value.trim();
+
+                            if (
+                                reason === "" ||
+                                reason === "請選擇檢舉事由" ||
+                                (reason === "其他" && otherReason === "")
+                            ) {
+                                submitButton.disabled = true;
+                            } else {
+                                submitButton.disabled = false;
+                            }
+                        });
+                },
+                updateViews() {
+                    //更新瀏覽人數
+                    axios.post('/activity/updateViews', { acid: this.acid })
+                        .then(response => {
+                            //console.log(response.data);
+
+
+                        })
+                        .catch(error => {
+                            console.error('瀏覽次數更新失敗', error);
+                        });
+                },
+                getActivityDetail() {
+                    axios
+                        .get(`/activity/getActivityDetail/${this.acid}`)
+                        .then((response) => {
+
+                            if (response.data.acCheckStatus != 2 && (response.data.userInfo == null || response.data.ownerUserid != response.data.userInfo.userid)) {
+                                this.releaseStatus = false;
+                            }
+                            this.activityDetail = response.data;
+                            this.currentAddress = response.data.acCity + response.data.acAddress;
+                            this.formatDate(response.data.acStartDate, response.data.acEndDate); //處理日期格式
+                            if (response.data.userInfo != null) {
+                                this.uName = response.data.userInfo.uName;
+                                this.uEmail = response.data.userInfo.uAccountEmail;
+                                this.uTel = '0' + response.data.userInfo.uTel.substring(5);;
+                            }
+                            //控制 templete 顯示
+                            this.loadingFinish = true;
+                            //是否已舉辦的活動
+                            this.isStartedCheck();
+                            //更新 Open Graph meta
+                            // this.updateMetaTags();
+
+
+                        }).catch((error) => {
+                            //console.log(error);
+                        })
+                },
+                // 設定 Open Graph 標籤 (FB 分享參數)
+                // updateMetaTags() {
+                //     document.querySelector('meta[property="og:title"]').setAttribute('content', this.activityDetail.acName);
+                //     document.querySelector('meta[property="og:description"]').setAttribute('content', this.activityDetail.acSummary);
+                //     document.querySelector('meta[property="og:image"]').setAttribute('content', this.activityDetail.acImgCompress);
+
+                // },
+
+                switchGuest(direction) {
+                    this.transitionName = direction === 'next' ? 'slide-right' : 'slide-left';
+                    const maxIndex = this.activityDetail.activityGuests.length - 1;
+                    if (direction === 'next') {
+                        this.currentGuestIndex = (this.currentGuestIndex + 1) > maxIndex ? 0 : this.currentGuestIndex + 1;
+                    } else {
+                        this.currentGuestIndex = (this.currentGuestIndex - 1) < 0 ? maxIndex : this.currentGuestIndex - 1;
+                    }
+                },
+                showGuestDetail(GuestIIndex) {
+                    this.currentGuestIndex = GuestIIndex;
+                    this.showModal = true;
+                },
+                toggleFavorite() {
+                    //console.log(this.acid);
+                    if (this.activityDetail.userInfo != null) {
+                        this.activityDetail.liked = !this.activityDetail.liked;
+                        if (this.activityDetail.liked) {
+                            axios
+                                .post('/activity/insertFavorite', {
+                                    userid: this.activityDetail.userInfo.userid,
+                                    acid: this.acid,
+                                })
+                                .then((response) => {
+                                    //console.log(response.data);
+
+                                    this.activityDetail.likeCount = response.data;
+                                }).catch((error) => {
+                                    //console.log(error);
+                                })
+                        } else {
+
+                            axios
+                                .post('/activity/deleteFavorite', {
+                                    userid: this.activityDetail.userInfo.userid,
+                                    acid: this.acid,
+                                })
+                                .then((response) => {
+                                    //console.log(response.data);
+                                    this.activityDetail.likeCount = response.data;
+                                }).catch((error) => {
+                                    //console.log(error);
+                                })
+                        }
+                    } else {
+                        $("#LoginModal").modal('show');
+                    }
+
+                },
+
+                formateDate(date) {
+                    const dateObj = new Date(date);
+                    const today = new Date();
+                    //console.log(today.getDate() + "-" + dateObj.getDate() + "=" + today.getDate() - dateObj.getDate())
+
+                    const isSameDay = dateObj.getFullYear() === today.getFullYear() &&
+                        dateObj.getMonth() === today.getMonth() &&
+                        dateObj.getDate() === today.getDate();
+
+                    const year = today.getFullYear() > dateObj.getFullYear() ? dateObj.getFullYear() + " 年" : "";
+                    const month = !isSameDay && !(today.getMonth() == dateObj.getMonth() && today.getDate() - dateObj.getDate() == 1) ? " " + (dateObj.getMonth() + 1).toString() + " 月" : "";
+                    const day = !isSameDay ? today.getMonth() == dateObj.getMonth() && today.getDate() - dateObj.getDate() == 1 ? "昨天" : " " + dateObj.getDate().toString() + " 日" : "今天";
+                    const hour = " " + dateObj.getHours().toString().padStart(2, '0');
+                    const min = dateObj.getMinutes().toString().padStart(2, '0');
+                    const formatedDate = `${year}${month}${day}${hour}:${min}`;
+                    return formatedDate;
+                },
+                isStartedCheck() {
+                    const dateObj = new Date(this.activityDetail.acStartDate);
+                    const today = new Date();
+                    this.isStarted = dateObj < today;
+                },
+                shareOnFacebook() {
+                    // this.updateMetaTags();
+                    //console.log(document.querySelector('meta[property="og:title"]').getAttribute('content'));
+                    // 分享頁面
+                    const pageUrl = encodeURIComponent(window.location.href);
+                    // 建立 Facebook 連接
+                    const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
+                    // 開新視窗分享
+                    //console.log(pageUrl);
+                    window.open(facebookShareUrl, 'newwindow', 'width=600, height=400');
+                },
+                handleNameFocus(focused) {
+                    this.isNameFocused = focused;
+                },
+                handleEmailFocus(focused) {
+                    this.isEmailFocused = focused;
+                },
+                handleTelFocus(focused) {
+                    this.isTelFocused = focused;
+                },
+                handleQuestionFocus(focused) {
+                    this.isQuestionFocused = focused;
+                },
+                toggleShowMailModal() {
+                    this.showMailModal = !this.showMailModal;
+                    this.sendMailLoading = false;
+                    this.questionContent = null;
+                },
+                sendMail() {
+                    this.sendMailLoading = true;
+                    axios
+                        .post('/activity/sendMail', {
+                            activityEmail: this.activityDetail.acEmail,
+                            userEmail: this.uEmail,
+                            activityName: this.activityDetail.acName,
+                            userName: this.uName,
+                            userTel: this.uTel,
+                            content: this.questionContent,
+
+                        })
+                        .then((response) => {
+                            //console.log(response.data);
+
+
+                            setTimeout(() => {
+                                this.sendMailLoading = false;
+                                this.questionContent = null;
+                                this.showMailModal = false;
+                                const toastEl = document.getElementById('successToast');
+                                const toast = new bootstrap.Toast(toastEl);
+                                toast.show();
+
+                            }, 1000)
+
+                        }),
+                        error => {
+                            this.sendMailLoading = false;
+                            this.showMailModal = false;
+                        }
+                },
+
+
+                checkLogin() {
+                    $("#LoginModal").modal("show");
+
+                },
+                showTextarea(value) {
+                    var otherReasonTextarea = document.getElementById("otherReason");
+                    var submitButton = document.getElementById("submitReportButton");
+
+                    if (value === "其他") {
+                        otherReasonTextarea.style.display = "block";
+                        if (!otherReasonTextarea.value.trim()) {
+                            submitButton.disabled = true;
+                        }
+                    } else {
+                        otherReasonTextarea.style.display = "none";
+                        submitButton.disabled = false;
+                    }
+                },
+                submitReport() {
+                    //console.log("65165")
+                    var reason = document.getElementById("reportReason").value;
+
+                    if (reason === "其他") {
+                        reason = document.getElementById("otherReason").value;
+                    }
+                    var sessionUserId = this.activityDetail.userInfo.userid;
+                    var acid = this.acid;
+                    //這是要送到後端的物件
+                    var reportData = {
+                        vrViolationtype: reason,
+                        vrReportuserid: sessionUserId,
+                        acid: this.acid,
+                    };
+                    //console.log("6565165156165")
+                    //console.log(reportData);
+                    axios
+                        .post("/articles/report", reportData)
+                        .then(function (response) {
+                            // //console.log(response.data);
+                            $("#reportModal").modal("hide");
+                        })
+                        .catch(function (error) {
+                            console.error(error);
+                        });
+
+                    $("#reportModal").modal("hide");
+                    alert("檢舉成功");
+                },
+            },
+
+            computed: {
+                googleMapUrl() {
+                    // 編碼地址，確保 URL 的有效性
+                    const address = encodeURIComponent(this.currentAddress);
+
+                    return `https://maps.google.com/maps?q=${address}&output=embed`;
+                },
+                // 回傳當前嘉賓
+                currentGuest() {
+                    return this.activityDetail.activityGuests[this.currentGuestIndex];
+                },
+                showGuest() {
+                    return this.activityDetail.activityGuests.length > 0;
+                },
+
+                cleanHTML() {
+                    // 使用 DOMPurify 來清理  HTML 中的 XSS 攻擊
+                    return DOMPurify.sanitize(this.activityDetail.acIntro);
+                },
+
+                likeComputed() {
+                    return this.activityDetail.likeCount;
+                },
+
+            },
+            watch: {
+                // 每當活動內容變更時，更新 meta 標籤
+                // 'activityDetail': {
+                //     // 確保 Vue 監聽器能深入追蹤對象或物件內部的變化
+                //     deep: true,
+                //     handler() {
+                //         this.updateMetaTags();
+                //     }
+                // }
+            }
+        }).mount('#app')
+
+
+
+    </script>
+</body>
+
+</html>

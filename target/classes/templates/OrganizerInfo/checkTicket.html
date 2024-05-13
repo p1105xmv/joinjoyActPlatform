@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>驗票系統</title>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"
+        integrity="sha512-r6rDA7W6ZeQhvl8S7yRVQUKVHdexq+GAlNkNNqVC7YyIV+NwqCTJe2hDWCiffTyRNOeGEzRRJ9ifvRm/HCzGYg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&display=swap"
+        rel="stylesheet">
+
+
+    <style>
+        .custom-large-btn {
+            padding: 2vw;
+            font-size: 1.5vw;
+            width: 80vw;
+            max-width: 500px;
+            font-family: 'Indie Flower', cursive !important
+        }
+
+        @media (max-width: 600px) {
+            .custom-large-btn {
+                padding: 2vw;
+                font-size: 1.5vw;
+                width: 80vw;
+                max-width: 500px;
+                font-family: 'Indie Flower', cursive;
+            }
+        }
+
+        #qr-reader {
+            width: 80vw;
+            height: 80vw;
+            max-width: 500px;
+            max-height: 500px;
+            margin: auto;
+        }
+
+        .controls-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+
+
+
+        body {
+            font-family: 'Varela Round', sans-serif;
+        }
+
+        .modal-confirm {
+            color: #636363;
+            width: 325px;
+            font-size: 14px;
+        }
+
+        .modal-confirm .modal-content {
+            padding: 20px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .modal-confirm .modal-header {
+            border-bottom: none;
+            position: relative;
+        }
+
+        .modal-confirm h4 {
+            text-align: center;
+            font-size: 26px;
+            margin: 30px 0 -15px;
+        }
+
+        .modal-confirm .form-control,
+        .modal-confirm .btn {
+            min-height: 40px;
+            border-radius: 3px;
+        }
+
+        .modal-confirm .close {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .modal-confirm .modal-footer {
+            border: none;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .modal-confirm .icon-box {
+            color: #fff;
+            position: absolute;
+            margin: 0 auto;
+            left: 0;
+            right: 0;
+            top: -70px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            z-index: 9;
+            background: #fff;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-confirm .icon-box i {
+            font-size: 58px;
+            position: relative;
+            top: 3px;
+        }
+
+        .modal-confirm.modal-dialog {
+            margin-top: 80px;
+        }
+
+        .modal-confirm .btn {
+            color: #fff;
+            border-radius: 4px;
+            /* background: #82ce34; */
+            background: #8CEA00;
+            text-decoration: none;
+            transition: all 0.4s;
+            line-height: normal;
+            border: none;
+            font-size: 15px;
+        }
+
+        .modal-confirm .btn:hover,
+        .modal-confirm .btn:focus {
+            /* background: #6fb32b; */
+            background: #73BF00;
+            outline: none;
+        }
+
+        .trigger-btn {
+            display: inline-block;
+            margin: 100px auto;
+        }
+
+        #tick svg {
+            width: 100px;
+            display: block;
+            margin: 0;
+        }
+
+        .path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 0;
+
+            &.circle {
+                -webkit-animation: dash .9s ease-in-out;
+                animation: dash .9s ease-in-out;
+            }
+
+            &.line {
+                stroke-dashoffset: 1000;
+                -webkit-animation: dash .9s .35s ease-in-out forwards;
+                animation: dash .9s .35s ease-in-out forwards;
+            }
+
+            &.check {
+                stroke-dashoffset: -100;
+                -webkit-animation: dash-check .9s .35s ease-in-out forwards;
+                animation: dash-check .9s .35s ease-in-out forwards;
+            }
+        }
+
+        p {
+            text-align: center;
+            margin: 20px 0 60px;
+            font-size: 1.25em;
+
+            &.success {
+                color: #ffffff;
+            }
+
+            &.error {
+                color: #D06079;
+            }
+        }
+
+        @-webkit-keyframes dash {
+            0% {
+                stroke-dashoffset: 1000;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes dash {
+            0% {
+                stroke-dashoffset: 1000;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @-webkit-keyframes dash-check {
+            0% {
+                stroke-dashoffset: -100;
+            }
+
+            100% {
+                stroke-dashoffset: 900;
+            }
+        }
+
+        @keyframes dash-check {
+            0% {
+                stroke-dashoffset: -100;
+            }
+
+            100% {
+                stroke-dashoffset: 900;
+            }
+        }
+
+        .modal-header.error-modal {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-bottom: 1px solid #f5c6cb;
+        }
+
+        .modal-body.error-modal {
+            background-color: #f8d7da;
+        }
+
+        .modal-title.error-modal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        i.fa-times-circle {
+            color: #721c24;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{layout/footer}"></div>
+
+    <div th:replace="~{layout/navbar}"></div>
+  
+    <div id="app">
+        <div class="controls-container" style="margin-top: 20px;">
+            <button @click="startScan" class="btn btn-warning btn-lg custom-large-btn"
+                style="font-family: 'Noto Sans TC', sans-serif !important; font-size: 35px; font-weight: bold;">
+                驗票
+            </button>
+        </div>
+        <div id="qr-reader"></div>
+
+        <div id="checkTicket" class="modal success-modal fade">
+            <div class="modal-dialog modal-confirm modal-sm">
+                <div class="modal-content rounded-5 shadow">
+                    <div class="modal-header">
+                        <div class="icon-box">
+                            <svg class="tick" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 130.2 130.2">
+                                <circle class="path circle" fill="none" stroke="#FFD700" stroke-width="6"
+                                    stroke-miterlimit="10" cx="65.1" cy="65.1" r="62.1" />
+                                <polyline class="path check" fill="none" stroke="#898121" stroke-width="6"
+                                    stroke-linecap="round" stroke-miterlimit="10"
+                                    points="100.2,40.2 51.5,88.8 29.8,67.5 " />
+                            </svg>
+                        </div>
+                        <h4 class="modal-title w-100">驗票完成！<br />歡迎~{{ ticketDetails.asfName }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-title w-100">活動：{{ ticketDetails.atName }}</p>
+                        <p class="modal-title w-100">方案：{{ ticketDetails.acName }}</p>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info shadow-sm rounded-pill col w-auto"
+                            onclick="window.location.reload()"> 確定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 錯誤 Modal -->
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #f57f89; color: #721c24;">
+                        <h5 class="modal-title w-100 text-center" id="errorModalLabel">
+                            <i class="fas fa-times-circle"></i> 錯誤
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="background-color: #f8d7da;">
+                        <p>{{ errorMessage }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    Html5Qrcode,
+                    ticketDetails: {},
+                    errorMessage: '',
+
+                    isScanning: false,
+                    isCooldown: false,  
+
+                };
+            },
+            methods: {
+                startScan() {
+                    if (this.isScanning || this.isCooldown) return; 
+                    this.isScanning = true;
+                    const html5QrCode = new Html5Qrcode("qr-reader");
+                    html5QrCode.start({ facingMode: "environment" }, { fps: 10 }, qrCodeMessage => {
+                        if (this.isCooldown) return;  
+                        this.isCooldown = true; 
+                        setTimeout(() => { this.isCooldown = false; }, 3000);
+                        html5QrCode.stop().then(() => {
+                            axios.post("/catchQRcodeUUID", { qrCodeMessage })
+                                .then(response => {
+                                    this.isScanning = false;
+                                    if (response.status === 200) {
+                                        this.ticketDetails = response.data;
+                                        $('#checkTicket').modal('show');
+                                        setTimeout(() => {
+                                            $('#checkTicket').modal('hide');
+                                            this.startScan();
+                                        }, 3200);
+                                    } else {
+                                        this.errorMessage = response.data;
+                                        $('#errorModal').modal('show');
+                                        setTimeout(() => {
+                                            $('#errorModal').modal('hide');
+                                            this.startScan();
+                                        }, 3200);
+                                    }
+                                })
+                                .catch(error => {
+                                    this.isScanning = false;
+                                    this.errorMessage = error.response.data;
+                                    $('#errorModal').modal('show');
+                                    setTimeout(() => {
+                                        $('#errorModal').modal('hide');
+                                        this.startScan();
+                                    }, 3200);
+                                });
+                        }).catch(err => {
+                            console.error("Error stopping the QR scanner", err);
+                        });
+                    }).catch(err => {
+                        this.isScanning = false;
+                        console.error(`Unable to start scanning, error: ${err}`);
+                    });
+                }
+
+
+
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

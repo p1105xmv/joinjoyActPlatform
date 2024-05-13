@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+    <meta charset="utf-8">
+    <title>登入</title>
+    <!-- Bootstrap CSS -->
+    <style>
+        body {
+            background-color: rgb(255, 252, 233) !important;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            background-image: url("../img/web/jojo_bird.png");
+            background-position: right bottom;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: 20%;
+        }
+
+        .centered-card {
+            display: flex;
+            /* justify-content: center; */
+            align-items: center;
+            min-height: 100vh;
+            /* 100% viewport height */
+        }
+
+        #LoginApp #checkEyeforModel {
+            font-size: 22px;
+            position: absolute;
+            top: 50%;
+            cursor: pointer;
+            right: 10px;
+            /* 調整眼睛圖示與右側的距離 */
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{layout/navbar_onlyLogo}"></div>
+    <section class="centered-card" id="LoginApp">
+        <div class="container h-100">
+            <div class="row justify-content-sm-center h-100">
+                <div class="col-xxl-4 col-xl- col-lg-5 col-md-7 col-sm-9">
+                    <div class="card shadow rounded-5">
+                        <div class="card-body p-5">
+                            <h1 class="card-title text-center fw-bold mb-4">登入</h1>
+                            <div class="alert alert-danger" role="alert" th:if="${param.error}">
+                                無效的使用者名稱和密碼。
+                            </div>
+                            <div class="alert alert-success" role="alert" th:if="${param.logout}">
+                                你已經登出
+                            </div>
+                            <form method="POST" th:action="@{/login}" class="needs-validation" novalidate=""
+                                autocomplete="off">
+                                <div class="form-group mb-3">
+                                    <div class="input-group borderless">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-envelope"></i>
+                                        </span>
+                                        <input type="text" id="username" name="username" class="form-control"
+                                            placeholder="電子信箱" required autofocus>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <div class="input-group borderless">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </span>
+                                        <input :type="isActive ? 'password' : 'text'" id="password" name="password"
+                                            class="form-control" placeholder="密碼" required>
+                                        <i id="checkEyeforModel" :class="isActive ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                                            @click="isActive=!isActive"></i>
+                                    </div>
+                                </div>
+                                <div class="text-center d-grid gap-2">
+                                    <button class="btn btn-block mb-3 btn-warning rounded-pill"
+                                        type="submit">登入</button>
+                                </div>
+
+                                <div class="text-end">
+                                    <a th:href="@{/user/forgotPassword}">忘記密碼</a>
+                                </div>
+                                <div class="text-center">
+                                    還不是 Jo寶 嗎？ <a th:href="@{/register}">註冊</a>
+                                </div>
+                            </form>
+
+                            <div class="text-center">
+                                <div class="d-flex" style="margin-top: 1em;margin-bottom: 1em">
+                                    <hr class="my-auto flex-grow-1">
+                                    <div class="px-4">使用其他帳號登入</div>
+                                    <hr class="my-auto flex-grow-1">
+                                </div>
+                                <a href="/oauth2/authorization/google" style="background-color: transparent">
+                                    <button class="gsi-material-button">
+                                        <div class="gsi-material-button-state"></div>
+                                        <div class="gsi-material-button-content-wrapper">
+                                            <div class="gsi-material-button-icon">
+                                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                    style="display: block">
+                                                    <path fill="#EA4335"
+                                                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                                    </path>
+                                                    <path fill="#4285F4"
+                                                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                                    </path>
+                                                    <path fill="#FBBC05"
+                                                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                                    </path>
+                                                    <path fill="#34A853"
+                                                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                                    </path>
+                                                    <path fill="none" d="M0 0h48v48H0z"></path>
+                                                </svg>
+                                            </div>
+                                            <span class="gsi-material-button-contents">使用 Google 帳戶登入</span>
+                                            <span style="display: none">Sign in with Google</span>
+                                        </div>
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- 引入 Vue.js 和 Axios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+
+    <script type="module">
+        import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.min.js";
+        createApp({
+            data() {
+                return {
+                    isActive: true,
+                }
+            }
+        }).mount("#LoginApp");
+    </script>
+</body>
+
+</html>

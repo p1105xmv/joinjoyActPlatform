@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+<meta charset="UTF-8">
+<title>更改Email</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<style>
+body{
+	background-color: #FFFFF0;
+}
+.section{
+	background-color: #ffffff;
+    border-radius: 20px;
+    margin: 30px 40px 40px -500px;
+    padding: 50px 50px 100px 50px;
+    width:70%;
+    box-shadow: 2px 2px 5px #8E8E8E;
+}
+
+.toast-container {
+    position: fixed;
+    top: 50px;
+    right: 0;
+    z-index: 1050; /* 覆蓋 Bootstrap modal 的 z-index */
+    padding: 1rem;
+}
+
+.toast {
+    width: 300px; /* 設定 Toast 寬度 */
+    position: relative;
+    top: 0;
+    right: 0;
+    margin: 0;
+    background-color: #343a40; /* 背景顏色 */
+    color: #ffffff; /* 文字顏色 */
+    border-radius: 0.25rem; /* 圓角 */
+}
+
+
+
+</style>
+</head>
+<body>
+<div th:replace="~{layout/navbar}"></div>
+
+<div style="display: flex;background-color:#FFFFF0">
+<div th:replace="~{layout/users_sidebar}" style="width: 200px;position:fixed;"></div>
+
+<div class="section">
+<h3>變更Email</h3>
+
+<div class="nowEmail">
+<span style="font-size:20px;line-height: 2.5em;">
+<i class="fa fa-envelope" style="font-size:20px;color:#FFDC35;"></i>&nbsp;目前Email：</span>
+<span style="font-size:20px;line-height: 2.5em;" th:text="${currentEmail} ? ${currentEmail}"></span>
+<span style="font-size:20px;line-height: 2.5em;" th:text="${changedEmail} ? ${changedEmail}"></span>
+</div>
+
+<form id="inputForm" th:action="@{/users/changeEmail}" method="post">
+    <label for="newEmail" style="font-size:15px;line-height: 2em;font-weight:bold;">新Email
+    <span style="font-size:15px;color:#EA0000;">*</span></label>
+    <div class="input-group mb-3">
+	  <span class="input-group-text" id="basic-addon1">
+	  <span style="font-size:25px;color:#8E8E8E;
+	  margin:-3px 3px -3px 3px;">&#9993;</span></span>
+	  <input type="text" class="form-control" placeholder="請輸入新Email" id="newEmail"
+	  name="newEmail" required aria-label="Username" aria-describedby="basic-addon1">
+	</div>
+	
+	<!-- email格式確認 -->
+	<div id="idsp1">
+ 	</div>
+    
+    <button id="sendEmailButton" class="btn btn-outline-primary" style="font-size:15px;
+    ">發送驗證碼</button>
+    <span style="font-size:15px;color:#4F4F4F;">請至您新設的電子郵件收信，以接收6位數的驗證碼！</span>
+    <br>
+    
+    <!-- 這裡放一個吐司試試看(通知驗證碼已寄送) -->
+    <div class="toast-container">
+	<div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+	  <div class="toast-header">
+	  <i class="bi bi-send-check" style="font-size:20px;color:#0000C6;"></i>
+	    <span class="me-auto" style="font-size:15px;font-weight:500;
+	    color:#0000C6">&nbsp;驗證碼已寄送</span>
+	    <small>剛剛</small>
+	    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+	  </div>
+	  <div class="toast-body">
+	    <div id="sp2">驗證碼已經寄送至您的信箱！
+	    <p style="font-size: 18px;; color:#EA0000" th:text="${newEmail}"></p></div>
+	  </div>
+	</div>
+	</div>
+    
+    <br>
+    
+    <label for="Pwd" style="font-size:15px;line-height: 2em;font-weight:bold;">密碼
+    <span style="font-size:15px;color:#EA0000;">*</span></label>
+    <div class="input-group mb-3">
+	  <span class="input-group-text" id="basic-addon1">
+	  <i class="bi bi-key" style="font-size:20px;color:#8E8E8E;
+	  margin:3px 3px 1px 1px"></i></span>
+	  <input type="password" class="form-control" placeholder="請輸入密碼" aria-label="Username" 
+	  aria-describedby="basic-addon1" id="Pwd" name="Pwd" required>
+	</div>
+    <br>
+    
+    <label for="code" style="font-size:15px;line-height: 2em;font-weight:bold;">驗證碼
+    <span style="font-size:15px;color:#EA0000;">*</span></label>
+    <div class="input-group mb-3">
+	  <span class="input-group-text" id="basic-addon1">
+	  <i class="bi bi-person-check" style="font-size:20px;color:#8E8E8E;
+	  margin:2px 2px 1px 1px"></i></span>
+	  <input type="text" class="form-control" placeholder="請輸入驗證碼" id="code"
+	  aria-label="Username" aria-describedby="basic-addon1" name="code" required>
+	</div>
+	
+	<div style="font-size: 25px; line-height: 2.5em; color:#EA0000" th:text="${changeSucess}"></div>
+    <div style="font-size: 25px; line-height: 2.5em; color:#EA0000" th:text="${FailToChange}"></div>
+	
+	<br>
+	<br>
+    
+    <button type="button" class="btn btn-primary" style="font-size:15px;float: right;
+    margin:5px;" data-bs-toggle="modal" data-bs-target="#confirmModal">確認變更</button>
+    <button type="button" class="btn btn-secondary" style="float: right;
+    margin:5px;" data-bs-toggle="modal" data-bs-target="#cancelModal">取消</button>
+	
+	<br>
+
+
+<!-- 確認變更 Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">確認變更</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        確定要提交表單嗎？
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="submit" class="btn btn-primary">確認</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 取消 Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cancelModalLabel">捨棄變更？</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        確定要捨棄變更嗎？
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" onclick="cancelChanges()">捨棄變更</button>
+      </div>
+    </div>
+  </div>
+</div>
+	
+ 
+    
+</form>
+   <br>
+</div>
+</div>
+  
+<script>
+
+	//Email格式確認
+	
+	document.getElementById("newEmail").addEventListener("blur", checkName);
+
+	function checkName() {
+	    let theNameObj = document.getElementById("newEmail");
+	    let theNameObjVal = theNameObj.value;
+	    let isValid = /\S+@\S+\.\S+/.test(theNameObjVal);
+	    let sp1 = document.getElementById("idsp1");
+	
+	    if (theNameObjVal == "") {
+	        sp1.innerHTML = '<div id="noEmail" class="alert alert-danger" role="alert">Email欄位不可空白，請輸入新的Email</div>';
+	    } else if (!isValid) {
+	        sp1.innerHTML = '<div id="wrongEmail" class="alert alert-danger" role="alert">Email格式錯誤，請重新輸入</div>';
+	    } else {
+	        sp1.innerHTML = "";
+	    }
+	}
+	
+	function cancelChanges() {
+		var form = document.getElementById("inputForm");
+    
+    	// 使用表單的 reset 方法來重置表單
+    	form.reset();
+    	$('#cancelModal').modal('hide'); // 使用 jQuery 關閉 Modal
+  	}
+
+   //發送驗證碼
+   var sendEmailButton = document.getElementById('sendEmailButton');
+   
+   sendEmailButton.addEventListener('click', function() {
+        var newEmailValue = document.getElementById('newEmail').value;
+        //console.log(newEmailValue);
+ 
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/users/changeEmail/getVeriCode', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            //console.log('郵件發送成功');
+            
+            //顯示toast
+            var toastElement = document.querySelector('.toast');
+            //console.log(toastElement);
+            var toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        } else {
+            console.error('郵件發送失敗');
+        }
+    };
+    xhr.send('newEmail=' + encodeURIComponent(newEmailValue));
+}); 
+
+
+	//自動帶入new Email
+	document.getElementById("basic-addon1").addEventListener("click", showEmail);
+
+	function showEmail() {
+	    var newMail = document.getElementById("newEmail");
+	    newMail.value = 'joinjoyad2024@gmail.com';
+	    //console.log('joinjoyad2024@gmail.com');
+	}
+
+
+</script>
+
+
+
+</body>
+</html>

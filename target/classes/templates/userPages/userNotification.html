@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Demo</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"
+        integrity="sha512-gEM2INjX66kRUIwrPiTBzAA6d48haC9kqrWZWjzrtnpCtBNxOXqXVFEeRDOeVC13pw4EOBrvlsJnNr2MXiQGvg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script src="https://unpkg.com/vue@next"></script> -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+
+    <div id="app">
+        <div>123<div>
+                <div v-for="notification in notifications" :key="notification.id">
+                    {{ notification.ntfType }}
+                </div>
+            </div>
+
+
+            <script>
+                const app = Vue.createApp({
+                    data() {
+                        return {
+                            notifications: [],
+                            socket: null
+                        };
+                    },
+                    created() {
+                        this.connectWebSocket();
+                    },
+                    methods: {
+                        connectWebSocket() {
+                            this.socket = new WebSocket('ws://localhost:8081/ws');
+
+                            this.socket.onopen = () => {
+                                //console.log('Connected to   eeWebSocket server');
+                            };
+
+                            this.socket.onmessage = (event) => {
+                                //console.log("Received message: ", event.data);
+                                const notification = JSON.parse(event.data);
+                                this.notifications.push(notification);
+                            };
+
+                            this.socket.onclose = () => {
+                                //console.log('Disconnected from WebSocket server');
+                                // Reconnect logic could go here
+                            };
+
+                            this.socket.onerror = (error) => {
+                                console.error('WebSocket error:', error);
+                                // Error handling logic could go here
+                            };
+                        }
+                    }
+                });
+
+                app.mount('#app');
+            </script>
+</body>
+
+</html>

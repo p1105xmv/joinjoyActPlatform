@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+
+  <link th:href="@{/favicon.ico}" rel="icon" type="image/x-icon" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <link th:href="@{/css/cards.css }" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <link th:href="@{/css/cards.css }" rel="stylesheet" />
+  <link th:href="@{/css/ckeditor.css }" rel="stylesheet" />
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+  <title th:text="${organizer.get().oName}"></title>
+</head>
+<style>
+  .fade-and-grow {
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .rounded-img {
+    max-width: 1080px;
+    max-height: 360px;
+
+    width: 100%;
+    height: auto;
+
+    object-fit: cover;
+    border-radius: 20px;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .headshot-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    margin-top: -50px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 5px solid #ffffff;
+  }
+
+  .activity {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 550px;
+    padding: 16px;
+    padding-top: 0;
+    box-shadow: 2px 2px 10px #aaa;
+    overflow: hidden;
+  }
+
+  .event-image {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+
+  .event-info {
+    margin-top: 8px;
+  }
+
+  .event-date {
+    color: #555;
+    font-size: 0.9em;
+  }
+
+  .event-description {
+    color: #333;
+    font-size: 1em;
+    margin-top: 4px;
+  }
+
+  .activity img {
+    transition: transform 0.3s ease;
+    transform: scale(1);
+    object-fit: cover;
+    border-radius: 20px;
+  }
+
+  .activity img:hover {
+    transform: scale(1.05);
+  }
+
+  .cover-div {
+    position: relative;
+    width: calc(80% - 40px);
+    margin-top: -50px;
+    z-index: 10;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .info-table td {
+    text-align: center;
+    padding: 5px;
+  }
+
+  .separator {
+    border-left: 1px solid #ccc;
+  }
+
+  .info-table td:first-child+.separator,
+  .info-table td:last-child+.separator {
+    border: none;
+  }
+
+  .info-table tr:first-child td,
+  .info-table tr:last-child td {
+    border-top: none;
+    border-bottom: none;
+  }
+
+  #ajaxContent {
+    width: 1080px;
+    margin: auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-light {
+    background: linear-gradient(to right, #fafaf5, #fffbed);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .btn-light:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transform: scale(1.05);
+  }
+
+  .btn-secondary2 {
+    background: linear-gradient(to right, #fefe98, #fed028);
+    color: #333;
+    transition: all 0.3s;
+  }
+
+  .btn-secondary2:hover {
+    background: linear-gradient(to right, #fefb88, #feda38);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+  }
+
+  .activity-info {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .date-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #fffef3;
+    border-radius: 15px;
+    width: 100px;
+    height: 100px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: "Arial", sans-serif;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .date-icon .month {
+    font-size: 1.75rem;
+    color: #9e9e9e;
+  }
+
+  .date-icon .day {
+    font-size: 2.5rem;
+    color: #212121;
+  }
+
+  .past-activities {
+    margin: 0 auto;
+    padding: 0 20px;
+    max-width: 1200px;
+  }
+
+  .acImg {
+    width: 184px;
+    height: 92px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  .activity-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+
+  .activity-item:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .no-style-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .no-style-link:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .birdtd {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  .stars {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+  }
+
+  .star {
+    justify-content: center;
+    margin-right: 0px;
+    position: relative;
+  display: inline-block; 
+  width:50px; 
+  height: 50px; 
+
+  }
+
+  .birdimg{
+    position: absolute;
+    top: 0;
+  left: 0;
+
+    max-width: 50px;
+    max-width: 50px;
+  }
+
+
+  .star-overlay{
+    position: relative;
+  }
+
+  .MediaListItem-module-dcdf9c25-root {
+    color: #a0a195;
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-top: 1px solid #f9f9f6;
+    z-index: 1;
+    overflow: hidden;
+    position: relative;
+    text-decoration: none !important; 
+    border-radius: 20px;
+}
+
+.MediaListItem-module-dcdf9c25-root:hover::after {
+    left: 0;
+    text-decoration: none !important; 
+
+}
+.MediaListItem-module-dcdf9c25-root:hover {
+  color: inherit !important;
+  text-decoration: none !important; 
+}
+
+.MediaListItem-module-dcdf9c25-root::after {
+    content: "";
+    background: #f8f8cf;
+    z-index: -1;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: -100%;
+    transition: all .8s ease;
+    text-decoration: none !important; 
+
+}
+.MediaListItem-module-d1de8818-about-icon-container {
+  display: flex;
+  align-items: center; 
+  text-decoration: none !important; 
+
+}
+
+
+</style>
+
+<body>
+  <div th:replace="~{layout/footer}"></div>
+
+  <div th:replace="~{layout/navbar}"></div>
+  <div class="container" id="app">
+    <div>
+      <img
+        th:src="@{${organizer.get().oPicture}!=null ? ${organizer.get().oPicture} : '/img/orgBanner/orgdefault/testbird.png'}"
+        alt="主辦封面" class="rounded-img fade-and-grow" />
+      <br />
+
+      <div class="cover-div">
+        <div class="headshot-wrapper">
+          <img
+            th:src="@{${organizer.get().oHeadshot}!=null ? ${organizer.get().oHeadshot} : '/img/web/unloginUser.svg'}"
+            alt="主辦頭貼" class="headshot-img" />
+        </div>
+
+        <br />
+        <h2 style="text-align: center" th:text="${organizer.get().oName}"></h2>
+
+        <table class="info-table">
+          <tr>
+            <td><span style="font-weight: bold; font-size: larger">粉絲數</span></td>
+            <td><span style="font-weight: bold; font-size: larger">活動總數</span></td>
+            <td class="birdtd">
+              <div class="stars">
+                <div v-for="index in 5" :key="index" class="star">
+                  <img src="../../img/web/colorfulbird.svg" v-if="index <= integerPart" class="birdimg" />
+              
+                  <div v-else-if="index === integerPart + 1 && fractionalPart > 0" class="star-overlay">
+                    <img src="../../img/web/colorfulbird.svg" class="birdimg"
+                         :style="{ 'clip-path': 'inset(0 ' + (100 - fractionalPart * 100) + '% 0 0)' }" />
+                    <img src="../../img/web/unloginUser.svg" class="birdimg"
+                         :style="{ 'clip-path': 'inset(0 0 0 ' + (fractionalPart * 100) + '%)' }" />
+                  </div>
+              
+                  <img src="../../img/web/unloginUser.svg" v-else class="birdimg" />
+                </div>
+              </div>
+                                                      </td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; font-size: larger" id="followedCount">
+              <span>{{followerCount}}</span>
+            </td>
+            <td style="font-weight: bold; font-size: larger" id="activityCount">
+              <span>{{activityCount}}</span>
+            </td>
+            <td style="font-weight: bold; font-size: larger">
+              <span>{{organizerAverageScore}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p sec:authorize="!isAuthenticated()">
+                <!-- 未登入的追蹤按鈕 -->
+                <button class="btn btn-secondary2" @click="showlogin">
+                  追蹤
+                </button>
+              </p>
+              <!-- 追蹤按鈕 -->
+              <button id="followButton" style="display: none" type="button" class="btn btn-secondary2"
+                data-toggle="modal" data-target="#myModal">
+                追蹤
+              </button>
+              <button id="unfollowButton" style="display: none" class="btn btn-light">
+                取消追蹤
+              </button>
+            </td>
+            <td>
+              <button id="toggleButtonTop" class="btn btn-light">關於</button>
+            </td>
+            <td>
+              <button type="button" class="btn btn-light" data-toggle="modal" data-target="#formModal">
+                聯繫主辦
+              </button>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div>
+        <template v-if="isShowAll">
+          <div class="h-25 w-100">
+            <div class="text-center m-4">
+              <h4><b style="font-size: larger">即將舉行</b></h4>
+              <div v-if="filteredUpcomingActivities.length===0">
+                目前沒有即將舉行的活動<br />沒關係！追蹤主辦就可以收到最新活動上架的消息囉！
+              </div>
+            </div>
+
+            <ul class="cards">
+              <li v-for="ac in filteredUpcomingActivities">
+                <!--one card start-->
+                <a style="width: 330px" :href="`${WEBROOT}/showActivity/activityPage/${ac.acid}`" class="jcard shadow">
+                  <img v-if="ac.acImg" style="height: 250px; padding-bottom: 40px" :src="`${WEBROOT}${ac.acImg}`"
+                    class="jcard__image" alt="" />
+
+                  <div class="jcard__overlay">
+                    <div class="jcard__header">
+                      <svg class="jcard__arc" xmlns="http://www.w3.org/2000/svg">
+                        <path />
+                      </svg>
+                      <div class="jcard__header-text">
+                        <h3 class="jcard__title mb-2">{{ac.acName}}</h3>
+
+                        <span class="jcard__status"></span><span class="jcard__status"><i
+                            class="bi bi-pin-map-fill mr-sm-2"> </i>{{ac.acCity}}</span>
+                      </div>
+
+                      <div class="jcard__thumbnum">
+                        <button style="text-decoration: none" id="likeBtn" class="btn btn-link text-warning"
+                          @click="likeAc(ac.acid)">
+                          <span>
+                            <i class="bi bi-heart mr-sm-2" v-if="!activitiesLiked.includes(ac.acid)"></i>
+                            <i class="bi bi-heart-fill mr-sm-2" v-if="activitiesLiked.includes(ac.acid)"></i>
+                            {{ac.favCount}}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                    <p class="jcard__description"></p>
+                    <div class="jcard__description_timeinfo">
+                      <span class="jcard__status">日期：{{ac.date}}</span><br />
+                      <span class="jcard__status">時間：{{ac.time}}</span>
+                    </div>
+                    <span v-if="ac.typeNames.length>0"
+                      class="jcard__description_type">#{{ac.typeNames.join("、")}}</span>
+                    <div class="jcard__description_info">
+                      <template v-if="ac.priceLowest<ac.priceHighest && ac.priceLowest>0">
+                        <span class="text-warning">{{ac.priceLowest}} ~ {{ac.priceHighest}} </span><span
+                          class="text-secondary mb-md-2"> 元</span>
+                      </template>
+                      <template v-if="ac.priceLowest==ac.priceHighest && ac.priceLowest>0">
+                        <span class="text-warning">{{ac.priceLowest}}</span><span class="text-secondary mb-md-2">
+                          元</span>
+                      </template>
+                      <template v-if="ac.priceLowest==0">
+                        <span class="text-warning mb-md-2">免費</span>
+                      </template>
+                      <br />
+                      <button style="text-decoration: none" id="signBtn" class="btn btn-link text-secondary"
+                        @click="signAc(ac.acid)">
+                        <span class="text-secondary text-end">
+                          <i class="bi bi-bookmark-check mr-sm-2" v-if="!activitiesSigned.includes(ac.acid)"></i>
+                          <i class="bi bi-bookmark-check-fill mr-sm-2" v-if="activitiesSigned.includes(ac.acid)"></i>
+                          {{ac.signedCount}}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <!--one jcard end-->
+            </ul>
+          </div>
+          <!--熱門活動end-->
+        </template>
+      </div>
+      </br>
+      <div class="past-activities">
+        <h3 v-if="activitiesByYear.length>0">過往活動</h3>
+
+        <div v-for="yearActivities in activitiesByYear" :key="yearActivities.year">
+          <h2>{{ yearActivities.year }} 年</h2>
+          <div v-for="activity in yearActivities.activities" :key="activity.acid">
+            <a :href="`/showActivity/activityPage/${activity.acid}`" class="no-style-link">
+              <div class="activity-item">
+                <div class="date-icon">
+                  <span class="month">{{ formatMonth(activity.acStartDate) }}</span>
+                  <span class="day">{{ formatDay(activity.acStartDate) }}</span>
+                </div>
+                <div class="activity-info">
+                  <img :src="activity.acImg" class="acImg" alt="活動圖片" />
+                  <div class="activity-details">
+                    <h3>{{ activity.acName }}</h3>
+                    <span
+                      v-html="activity.acPlaceStatus === 0 ? '<i class=&quot;bi bi-camera-video&quot;></i> 線上活動' : '<i class=&quot;bi bi-geo-alt&quot;></i> ' + activity.acCity"></span>
+
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div id="ajaxContent" style="display: none">
+        <hr />
+        <div>簡介</div>
+        </br>
+        <h4 th:text="${organizer.get().oIntroduction}"></h4>
+        <hr />
+
+        <div
+          th:if="${organizer.get().oLinkA != null or organizer.get().oLinkB != null or organizer.get().oLinkC != null}">
+          <div>相關連結</div>
+          <a th:if="${organizer.get().oLinkA != null}" th:href="@{${organizer.get().oLinkA}}" target="_blank">
+            <img th:src="@{/img/orgBanner/orgdefault/icon_facebook.svg}" alt="fb" />
+          </a>
+          &nbsp
+          <a th:if="${organizer.get().oLinkB != null}" th:href="@{${organizer.get().oLinkB}}" target="_blank">
+            <img th:src="@{/img/orgBanner/orgdefault/icon_instagram.svg}" alt="ig" />
+          </a>
+          &nbsp
+        </br>
+          <div style="border-radius: 20px;">
+            <a th:if="${organizer.get().oLinkC != null}" th:href="@{${organizer.get().oLinkC}}" target="_blank" class="MediaListItem-module-dcdf9c25-root">
+              <div class="MediaListItem-module-ec6e6f9f-about-text-container">
+                <div class="MediaListItem-module-d1de8818-about-icon-container">
+                  <img src="https://static.accupass.com/frontend/image/org/detail/icon_website.svg" class="OrgAbout-module-de8e39b8-about-icon">
+                  &nbsp<span>官方網站
+                  </span>
+  
+                </div>
+              </div>
+              
+              <div class="MediaListItem-module-edd5b0c7-about-arrow">
+                <svg width="8" height="13" viewBox="0 0 8 13">
+                  <path d="M7.3174 5.82571C7.5609 6.06021 7.5609 6.43911 7.3174 6.67431L1.53902 12.2455C1.18755 12.5848 0.6157 12.5848 0.26361 12.2455C-0.08787 11.9062 -0.08787 11.3556 0.26361 11.0163L5.2067 6.24971L0.26361 1.48434C-0.08787 1.14444 -0.08787 0.593767 0.26361 0.254467C0.6157 -0.0848225 1.18755 -0.0848225 1.53902 0.254467L7.3174 5.82571Z">
+                  </path>
+                </svg>
+                </div>
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <span id="oid" th:text="${organizer.get().oid}" style="display: none"></span>
+
+      <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 th:text="'聯絡主辦：'+${organizer.get().oName}" class="modal-title" id="modalLabel"></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="myForm" method="POST">
+                <div class="form-group">
+                  <label for="inputName">姓名<span style="color: red">*</span></label>
+                  <input type="text" class="form-control" id="inputName" name="name"
+                    th:value="${session.uf?.uName != null ? session.uf?.uName : ''}" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="inputEmail">電子郵件<span style="color: red">*</span></label>
+                  <input type="email" class="form-control" id="inputEmail" name="email"
+                    th:value="${session.uf?.uAccountEmail != null ? session.uf?.uAccountEmail : ''}" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="inputPhone">電話<span style="color: red">*</span></label>
+                  <input type="tel" class="form-control" id="inputPhone"
+                    th:value="${session.uf?.uTel != null ? session.uf?.uTel : ''}" name="phone" 
+                    required title="請輸入7到20碼的數字" />
+                </div>
+
+                <div class="form-group">
+                  <label for="inputDescription">問題描述<span style="color: red">*</span></label>
+                  <textarea class="form-control" id="inputDescription" name="description" rows="3" required
+                    placeholder="在這裡寫下想聯繫主辦的內容..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-warning" data-bs-dismiss="modal">送出</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">追蹤後要做什麼？</h4>
+              <button type="button" class="close" data-dismiss="modal">
+                &times;
+              </button>
+            </div>
+
+            <div class="modal-body">
+              當主辦發布新活動時，你會即時在網站通知列和Email收到通知，好活動不漏接！
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">
+                我知道了
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        let organizerId = document.getElementById("oid").innerText; 
+        $(window).on("scroll", function () {
+          var scroll = $(window).scrollTop();
+          $(".fade-and-grow").css({
+            opacity: 1 - scroll / 500, 
+            transform: "scale(" + (1 + scroll / 1000) + ")", 
+          });
+        });
+
+        $(document).ready(function () {
+          $("#toggleButton,#toggleButtonTop").click(function () {
+            $("#ajaxContent").toggle();
+            if ($("#ajaxContent").is(":visible")) {
+              $("html, body").animate(
+                {
+                  scrollTop: $("#ajaxContent").offset().top, 
+                },
+                500
+              ); 
+            }
+          });
+
+          $.get(
+            "/api/isFollowing",
+            { organizerId: organizerId },
+            function (isFollowing) {
+              if (isFollowing) {
+                $("#unfollowButton").show();
+              } else {
+                $("#followButton").show();
+              }
+            }
+          );
+
+          $("#followButton").click(function () {
+            $.post(
+              "/api/follow",
+              { organizerId: organizerId },
+              function (data) {
+                $("#followButton").hide();
+                $("#unfollowButton").show();
+                updateFollowedCount(); 
+              }
+            );
+          });
+
+          $("#unfollowButton").click(function () {
+            $.post(
+              "/api/unfollow",
+              { organizerId: organizerId },
+              function (data) {
+                $("#unfollowButton").hide();
+                $("#followButton").show();
+                updateFollowedCount();
+              }
+            ).fail(function () {
+            });
+          });
+          function updateFollowedCount() {
+            $.get(
+              "/api/organizerFollowedCount",
+              { oid: organizerId },
+              function (followedCount) {
+                $("#followedCount").text(followedCount);
+              }
+            ).fail(function () {
+              $("#followedCount").text("無法載入");
+            });
+          }
+
+          $.get(
+            "/api/organizerFollowedCount",
+            { oid: organizerId },
+            function (followedCount) {
+              $("#followedCount").text(followedCount);
+            }
+          ).fail(function () {
+            $("#followedCount").text("無法載入");
+          });
+          $.get(
+            "/api/organizerActivitysCount",
+            { oid: organizerId },
+            function (activityCount) {
+              $("#activityCount").text(activityCount);
+            }
+          ).fail(function () {
+            $("#activityCount").text("無法載入");
+          });
+
+          $("#myForm").submit(function (event) {
+            event.preventDefault();
+
+            var formData = {
+              name: $("#inputName").val(),
+              email: $("#inputEmail").val(),
+              phone: $("#inputPhone").val(),
+              description: $("#inputDescription").val(),
+              organizerId: organizerId,
+            };
+
+            $.ajax({
+              type: "POST",
+              url: "/api/submitform",
+              contentType: "application/json",
+              data: JSON.stringify(formData),
+              success: function (response) {
+                alert("寄信完成");
+                $("#formModal").modal("hide");
+              },
+              error: function (xhr, status, error) {
+                console.error("表單送出失敗: " + error);
+              },
+            });
+          });
+        });
+
+        Vue.createApp({
+          data() {
+            return {
+              activities: [],
+              organizerAverageScore: 0.0,
+              WEBROOT: WebRoot,
+              allAc: [],
+              freeAc: [],
+              soonAc: [],
+              activitiesLiked: [],
+              activitiesSigned: [],
+              userid: "",
+              randomIndexList: [],
+              isShowAll: false,
+
+            };
+          },
+          methods: {
+            hideHint(arrayName) {
+              document.getElementById(arrayName).style.visibility = "hidden";
+            },
+            showHint(arrayName) {
+              document.getElementById(arrayName).style.visibility = "visible";
+            },
+
+            likeAc(acid) {
+              event.preventDefault();
+              if (this.userid != "" && this.userid != null) {
+                let data = {
+                  userid: "",
+                  acid: "",
+                };
+                data.acid = acid;
+                data.userid = this.userid;
+                if (!this.activitiesLiked.includes(acid)) {
+                  axios
+                    .post(`${this.WEBROOT}/like`, data)
+                    .then((response) => { });
+
+                  this.activitiesLiked.push(acid);
+
+                  for (let ac of this.allAc) {
+                    if (ac.acid == acid) {
+                      ac.favCount++;
+                    }
+                  }
+                  for (let ac of this.soonAc) {
+                    if (ac.acid == acid) {
+                      ac.favCount++;
+                    }
+                  }
+                  for (let ac of this.freeAc) {
+                    if (ac.acid == acid) {
+                      ac.favCount++;
+                    }
+                  }
+                } else {
+                  axios
+                    .post(`${this.WEBROOT}/cancelLike`, data)
+                    .then((response) => { });
+                  let index = this.activitiesLiked.indexOf(acid);
+                  this.activitiesLiked.splice(index, 1);
+                  for (let ac of this.allAc) {
+                    if (ac.acid == acid) {
+                      ac.favCount--;
+                    }
+                  }
+                  for (let ac of this.soonAc) {
+                    if (ac.acid == acid) {
+                      ac.favCount--;
+                    }
+                  }
+                  for (let ac of this.freeAc) {
+                    if (ac.acid == acid) {
+                      ac.favCount--;
+                    }
+                  }
+                }
+              } else {
+                alert("請先登入");
+              }
+            },
+
+            signAc(acid) {
+              event.preventDefault();
+              window.open(`${this.WEBROOT}/sign/${acid}`);
+            },
+            showlogin() {
+              $("#LoginModal").modal("show");
+            },
+
+            convertAcObject(list) {
+              for (let ac of list) {
+                let acDateTime = new Date(ac.acStartDate);
+                let acDate =
+                  acDateTime.getFullYear() +
+                  "/" +
+                  ("0" + (acDateTime.getMonth() + 1)).slice(-2) +
+                  "/" +
+                  ("0" + acDateTime.getDate()).slice(-2);
+                let acTime =
+                  ("0" + acDateTime.getHours()).slice(-2) +
+                  ":" +
+                  ("0" + acDateTime.getMinutes()).slice(-2);
+                ac.date = acDate;
+                ac.time = acTime;
+                ac.alltypeids = [];
+                ac.typeNames = [];
+
+                for (let type of ac.allTypes) {
+                  ac.alltypeids.push(type.alltypeid);
+                  ac.typeNames.push(type.typeName);
+                }
+              }
+
+              return list;
+            },
+            formatMonth(dateString) {
+              const date = new Date(dateString);
+              return date.toLocaleString("default", { month: "short" });
+            },
+            formatDay(dateString) {
+              const date = new Date(dateString);
+              return date.getDate();
+            },
+            getStarImage(index) {
+              if (index <= this.integerPart) {
+                return "../../img/web/colorfulbird.svg"; 
+              }
+              return "../../img/web/unloginUser.svg"; 
+            },
+            getStarStyle(index) {
+              let style = {};
+              if (index === this.integerPart + 1 && this.fractionalPart > 0) {
+                const coloredPercentage = this.fractionalPart * 100;
+                style = {
+                  position: "relative",
+                  display: "inline-block",
+                  "white-space": "nowrap",
+                };
+                this.partialColorStyle = {
+                  position: "absolute",
+                  top: "0",
+                  left: "0",
+                  width: `${coloredPercentage}%`,
+                  overflow: "hidden",
+                  "white-space": "nowrap",
+                };
+                this.partialBWStyle = {
+                  display: "inline-block",
+                  width: `calc(${100 - coloredPercentage}% + 1px)`, 
+                  overflow: "hidden",
+                  "white-space": "nowrap",
+                };
+              }
+              return style;
+            },
+            getPartialColorStyle() {
+              return this.partialColorStyle;
+            },
+            getPartialBWStyle() {
+              return this.partialBWStyle;
+            },
+
+          },
+
+          created() {
+            axios
+              .get("/api/organizers/" + organizerId + "/activities")
+              .then((response) => {
+                let activitys = response.data;
+                //console.log(activitys);
+                this.convertAcObject(activitys);
+                this.allAc = activitys;
+                let randomSet = Array.from({ length: 10 }, () =>
+                  Math.floor(Math.random() * activitys.length)
+                );
+                this.randomIndexList = randomSet;
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+
+            axios
+              .get("/api/organizers/" + organizerId + "/ocomments")
+              .then((response) => {
+                this.organizerAverageScore = response.data;
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+
+
+            axios
+              .get(`${WebRoot}/api/session/getUserinfo`)
+              .then((response) => {
+                if (response.data != "") {
+                  this.userid = response.data.userid;
+
+                  axios
+                    .get(`${WebRoot}/userlike/${response.data.userid}`)
+                    .then((response) => {
+                      this.activitiesLiked = response.data.acids;
+                      this.activitiesSigned = response.data.asfids;
+                    });
+                }
+              }),
+              axios.get(`${WebRoot}/endSoon`).then((response) => {
+                let activitys = response.data;
+                this.convertAcObject(activitys);
+                this.soonAc = activitys;
+                //console.log(this.soonAc);
+              }),
+              axios.get(`${WebRoot}/free`).then((response) => {
+                let activitys = response.data;
+                this.convertAcObject(activitys);
+                this.freeAc = activitys;
+              });
+          },
+
+          mounted() {
+            this.isShowAll = true;
+          },
+
+          computed: {
+            pastActivities() {
+              const now = new Date();
+              return this.allAc.filter(
+                (activity) => new Date(activity.acStartDate) < now
+              );
+            },
+            upcomingActivities() {
+              const now = new Date();
+              return this.allAc.filter((activity) => {
+                //console.log(activity);
+                return new Date(activity.acStartDate) >= now;
+              });
+            },
+            filteredPastActivities() {
+              return this.pastActivities.filter(
+                (activity) =>
+                  activity.acCheckStatus == 2 && activity.acPublicStatus == 1
+              );
+            },
+            filteredUpcomingActivities() {
+              return this.upcomingActivities.filter(
+                (activity) =>
+                  activity.acCheckStatus == 2 && activity.acPublicStatus == 1
+              );
+            },
+            activitiesByYear() {
+              const groupedActivities = this.filteredPastActivities.reduce(
+                (acc, activity) => {
+                  const year = new Date(activity.acStartDate).getFullYear();
+                  if (!acc[year]) {
+                    acc[year] = [];
+                  }
+                  acc[year].push(activity);
+                  return acc;
+                },
+                {}
+              );
+
+              Object.keys(groupedActivities).forEach((year) => {
+                groupedActivities[year].sort(
+                  (a, b) => new Date(b.acStartDate) - new Date(a.acStartDate)
+                );
+              });
+
+              const activitiesArray = Object.keys(groupedActivities)
+                .sort((a, b) => b - a) 
+                .map((year) => ({
+                  year,
+                  activities: groupedActivities[year],
+                }));
+
+              return activitiesArray; 
+            },
+            integerPart() {
+              return Math.floor(this.organizerAverageScore);
+            },
+            fractionalPart() {
+              return this.organizerAverageScore % 1; 
+            },
+
+
+          },
+        }).mount("#app");
+      </script>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+<link th:href="@{/css/inputbordless.css}" rel="stylesheet" />
+
+<!-- 引入登入的互動視窗 -->
+<div th:replace="~{authentication/loginModal}"></div>
+<!-- 引入傳統註冊的互動視窗 -->
+<div th:replace="~{authentication/registerModal}"></div>
+<!-- 引入Oauth2註冊的互動視窗 -->
+<div th:replace="~{authentication/oauth2rigisterModal}"></div>
+<!-- 引入成功的互動視窗 -->
+<div th:replace="~{authentication/successModal}"></div>
+<!-- 引入轉圈圈的互動視窗 -->
+<div th:replace="~{authentication/LoadingModal}"></div>
+<!-- 引入忘記密碼的互動視窗 -->
+<div th:replace="~{authentication/forgotPasswordModal}"></div>

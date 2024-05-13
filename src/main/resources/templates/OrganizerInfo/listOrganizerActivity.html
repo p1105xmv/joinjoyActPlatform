@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <style>
+    .btn.dropdown-toggle::after {
+      display: none;
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: #FFFFF4;
+    }
+
+    .btn-oval {
+      border-radius: 30px !important;
+      padding-left: 20px;
+      padding-right: 20px;
+
+    }
+
+    .image-container {
+      position: relative;
+      width: 144px;
+      height: 72px;
+      overflow: hidden;
+      border-radius: 10px;
+      cursor: pointer;
+
+    }
+
+    .image-hover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .image-hover:hover {
+      transform: scale(1.2);
+    }
+
+    .status-bar {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      text-align: center;
+      padding: 5px 0;
+    }
+
+
+    td {
+      text-align: center;
+      text-align: center !important;
+      vertical-align: middle !important;
+      border: 1px solid #000;
+
+    }
+
+    td span {
+      font-weight: bold;
+      font-size: larger;
+    }
+
+    table {
+      width: 100%;
+      height: 100px;
+      border-collapse: collapse;
+    }
+
+    .center-container {
+      width: 80%;
+      margin: auto;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 30px;
+      border-radius: 40px;
+
+    }
+
+    /*把活動名稱壓縮成...*/
+    .text-ellipsis {
+      display: inline-block;
+      max-width: 550px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .custom-tooltip {
+      position: fixed;
+      padding: 4px 8px;
+      color: #fff;
+      background: #333;
+      border-radius: 4px;
+      font-size: 0.9em;
+      pointer-events: none;
+      z-index: 1000;
+      display: block;
+      transition: opacity 0.1s ease-in-out;
+      opacity: 0.7;
+    }
+  </style>
+
+  <meta charset="UTF-8">
+  <title>主辦中心</title>
+</head>
+
+<body>
+  <div th:replace="~{layout/footer}"></div>
+
+  <div th:replace="~{layout/navbar}"></div>
+  <span id="userId" th:text="${session.userinfo?.userid}" style="display: none;"></span>
+
+  <div id="app" class="center-container">
+    <h2 style="font-weight: bold; font-weight: bold; margin-left: 50px;">活動列表</h2>
+
+    <h5 style="color: #888888; font-weight: bold; margin-left: 50px;">你的所有活動都可以透過此頁進入編輯或管理</h5>
+    </br>
+    <div class="btn-group" role="group" aria-label="Basic example">
+      <button type="button" class="btn btn-light btn-lg"
+        @click="fetchEvents(organizer.oid, 0)">草稿({{countDraft}})</button>
+      <button type="button" class="btn btn-light btn-lg"
+        @click="fetchEvents(organizer.oid, 1)">審核中({{countReviewing}})</button>
+      <button type="button" class="btn btn-light btn-lg"
+        @click="fetchEvents(organizer.oid, 2)">已發布({{countPublished}})</button>
+      <button type="button" class="btn btn-light btn-lg"
+        @click="fetchEvents(organizer.oid, 3)">已結束({{countEnded}})</button>
+      <button type="button" class="btn btn-light btn-lg"
+        @click="fetchEvents(organizer.oid, 4)">全部({{countAll}})</button>
+    </div>
+
+
+
+    <table class="table table-hover">
+      <tr v-for="activity in orgActivities" :key="activity.id">
+
+        <td><span>{{ mapStatusToText(activity.acCheckStatus) }}</span>
+          </br>
+          {{ checkIfPublic(activity.acPublicStatus) }}</td>
+        <td>
+          <div class="image-container" @click="goToOrganizerAcManage(activity)">
+            <img :src="activity.acImgCompress" class="image-hover">
+            <div class="status-bar">{{ mapPlaceStatusToText(activity.acPlaceStatus) }}</div>
+          </div>
+        </td>
+        <td><span class="text-ellipsis" :title="activity.acName" @click="goToOrganizerAcManage(activity)">{{
+            activity.acName }}</span></td>
+
+        <td :style="{ color: '#999' ,cursor: pointer}"
+          v-html="formatActivityDate(activity.acStartDate, activity.acEndDate)" @click="openDatePicker(activity)"></td>
+
+        <td>
+          <div class="dropdown">
+            <button class="btn btn-light btn-oval dropdown-toggle " type="button" id="dropdownMenuButton1"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <span style="font-weight: bold;font-size: 20px">···</span>
+              </br>
+              更多
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li v-if="activity.acCheckStatus === 0 || activity.acCheckStatus !== 0"><a class="dropdown-item" href="#"
+                  @click="cloneActivity(activity, $event)">複製活動</a></li>
+              <li v-if="activity.acCheckStatus === 2"><a class="dropdown-item"
+                  :href="`/showActivity/activityPage/${activity.acid}`">瀏覽活動</a></li>
+              <li v-if="activity.acCheckStatus === 2"><a class="dropdown-item" href="#"
+                  @click="downloadAcSignForm(activity, $event)">下載參加名單</a></li>
+              <li v-if="activity.acCheckStatus ===2"><a class="dropdown-item" href="#"
+                  @click="saveActivityToSession(activity)">售票資訊</a></li>
+              <li v-if="activity.acCheckStatus ===2"><a class="dropdown-item" href="#"
+                  @click="jumpToCheckTicket(activity)">驗票</a></li>
+              <li v-if="activity.acCheckStatus === 0 || activity.acCheckStatus === 1"><a class="dropdown-item" href="#"
+                  @click="deleteActivity(activity, $event)">刪除</a></li>
+
+            </ul>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+
+
+    <!-- Modal Structure -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">複製活動</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            你將複製一檔 <span style="font-weight: bold"> “ {{selectedActivityName}} ” </span> 到草稿中
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-warning" @click="confirmAction(selectedActivity)">確認</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="deleteActivityModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">刪除活動</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            此操作無法恢復，您確定要刪除活動 <span style="font-weight: bold"> “ {{selectedActivityName}} ” </span>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-warning" @click="deleteAction(selectedActivity)">確認</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="downloadAcSignFormModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">名單已產生</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            請於15分鐘內下載最新活動名冊
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-warning" @click="downloadSignForm(selectedActivity)">下載</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let userId = document.getElementById('userId').innerText;
+
+    Vue.createApp({
+      data() {
+        return {
+          organizer: {},
+          orgActivities: [],
+          selectedActivityName: '',  // 當前活動列的活動名
+          selectedActivity: '', //當前活動，
+          countDraft: 0, // 草稿數量
+          countReviewing: 0, // 審核中數量
+          countPublished: 0, // 已發布數量
+          countEnded: 0, // 已結束數量
+          countAll: 0, // 全部數量
+
+        };
+      },
+      created() {
+
+      },
+      mounted() {
+        let organizer = JSON.parse(sessionStorage.getItem("currentOrganizer"));
+        if (organizer) {
+          this.organizer = organizer; // 將 sessionStorage 中的數據賦值給 organizer
+          if (this.organizer.oid) {
+            this.fetchEvents(this.organizer.oid, 2); // 使用 organizer 的 ID 撈活動 預設是2已發布
+          }
+        }
+        this.fetchAllCounts();
+
+      },
+      methods: {
+
+        fetchEvents(organizerId, status) {//撈主辦篩選過的活動
+          axios.get('/api/organizers/getOrgActivitys/' + organizerId + '/' + status)
+            .then(response => {
+              this.orgActivities = response.data;
+            });
+        },
+        fetchCountForStatus(status) {
+          axios.get('/api/organizers/getOrgActivitys/' + this.organizer.oid + '/' + status)
+            .then(response => {
+              const count = response.data.length; // 假設回應的數據是一個陣列
+              if (status === 0) {
+                this.countDraft = count;
+              } else if (status === 1) {
+                this.countReviewing = count;
+              } else if (status === 2) {
+                this.countPublished = count;
+              } else if (status === 3) {
+                this.countEnded = count;
+              } else if (status === 4) {
+                this.countAll = count;
+              }
+            });
+        },
+        fetchAllCounts() {
+          for (let i = 0; i <= 4; i++) {
+            this.fetchCountForStatus(i);
+          }
+        },
+        goToOrganizerAcManage(activity) {//跳頁到主辦的活動管理頁面 帶session
+          sessionStorage.setItem('selectedActivity', JSON.stringify(activity));
+
+          window.location.href = '/organizerBiz/OrganizerAcManage/' + activity.acid;
+        },
+
+        formatDateTime(dateString) {
+          const date = new Date(dateString);
+          const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false };
+          return date.toLocaleString('zh-TW', options).replace('週', '');
+        },
+        formatActivityDate(start, end) {
+          const startFormatted = this.formatDateTime(start);
+          const endFormatted = this.formatDateTime(end);
+          // 直接返回格式化後的開始和結束時間
+          return startFormatted + ' ~ <br>' + endFormatted;
+        },
+
+
+        mapStatusToText(status) {//把AcCheckStatus轉換成文字
+          const statusMap = {
+            0: '草稿',
+            1: '審核中',
+            2: '已發布'
+          };
+          return statusMap[status] || '未知';
+        },
+        mapPlaceStatusToText(status) {//把AcPlaceStatus轉換成文字
+          const statusMap = {
+            0: '線上活動',
+            1: '線下活動',
+          };
+          return statusMap[status] || '未知';
+
+        },
+        checkIfPublic(status) {//把AcPublicStatus轉換成文字  
+          return status === 1 ? '公開' : '非公開';
+        },
+        cloneActivity(activity, event) { //跳出複製活動的modal
+          event.preventDefault(); // 防止超連結的預設行為
+          this.selectedActivityName = activity.acName;
+          this.selectedActivity = activity;
+          $('#confirmationModal').modal('show');
+        },
+
+        confirmAction(selectedActivity) {
+  $('#confirmationModal').modal('hide');
+  axios.post('/api/cloneActivity', selectedActivity)
+    .then(response => {
+      alert("複製完成");
+      this.fetchEvents(this.organizer.oid, 0);
+      // 進一步更新草稿的數量
+      this.fetchCountForStatus(0);
+    })
+    .catch(error => {
+      console.error('Error during fetch events:', error);
+    });
+},
+        deleteActivity(activity, event) { //跳出刪除活動的modal
+          event.preventDefault(); // 防止超連結的預設行為
+          this.selectedActivityName = activity.acName;
+          this.selectedActivity = activity;
+          $('#deleteActivityModal').modal('show');
+        },
+        deleteAction(selectedActivity) {//這是modal的確認扭  把活動傳給後端刪除
+          $('#deleteActivityModal').modal('hide');
+          axios.delete(`/api/deleteActivity/${selectedActivity.acid}`
+          )
+            .then(response => {
+              alert("刪除完成");
+              this.fetchEvents(this.organizer.oid, 2);
+            })
+            .catch(function (error) {
+            });
+        },
+        downloadAcSignForm(activity, event) { //跳出複製活動的modal
+          event.preventDefault(); 
+          this.selectedActivityName = activity.acName;
+          this.selectedActivity = activity;
+          $('#downloadAcSignFormModal').modal('show');
+        },
+
+        downloadSignForm(selectedActivity) {//這是modal的確認扭  把活動傳給後端複製
+          $('#downloadAcSignFormModal').modal('hide');
+
+          axios.post('/api/downloadAcSignForm', selectedActivity,
+            { responseType: 'blob', } 
+          )
+            .then(response => {
+              const url = window.URL.createObjectURL(new Blob([response.data]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', '活動參加名單.xlsx'); 
+              document.body.appendChild(link);
+              link.click();
+            }).catch(error => console.error(error));
+        },
+        saveActivityToSession(activity) { //跳頁到售票資訊時把活動存進session給下一頁使用
+          event.preventDefault();
+          sessionStorage.setItem('selectedActivity', JSON.stringify(activity));
+          window.location.href = '/organizerBiz/OrganizerAcManage/ticket/' + activity.acid;
+        },
+        jumpToCheckTicket(activity) { //跳頁到驗票時把活動存進session給下一頁使用
+          event.preventDefault();
+          sessionStorage.setItem('selectedActivity', JSON.stringify(activity));
+          window.location.href = '/organizerBiz/checkTicket';
+        },
+
+      },
+      computed: {
+
+      },
+
+    }).mount('#app');
+
+  </script>
+</body>
+
+</html>

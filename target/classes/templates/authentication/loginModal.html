@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="UTF-8" />
+  <link th:href="@{/css/icofont/googleicon.css}" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css" />
+
+  <style>
+    /*眼睛*/
+    #checkEyeforModel {
+      font-size: 22px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      right: 10px;
+      /* 調整眼睛圖示與右側的距離 */
+    }
+  </style>
+</head>
+
+<body>
+  <div id="LoginModalApp">
+    <div class="modal fade seminor-login-modal" id="LoginModal" tabindex="-1" aria-labelledby="LoginModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4 rounded-5 shadow">
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <!-- Modal Title -->
+            <h1 class="pb-3 text-center">登入</h1>
+            <div class="px-3">
+              <!-- Alert -->
+              <div class="alert alert-danger" role="alert" v-if="error">
+                無效的使用者名稱和密碼。
+              </div>
+              <div class="alert alert-success" role="alert" v-if="logout">
+                你已經登出
+              </div>
+            </div>
+            <form @submit.prevent="loginClick" class="px-3">
+              <!-- username -->
+              <div class="md-form mb-4">
+                <div class="input-group borderless">
+                  <span class="input-group-text">
+                    <i class="bi bi-envelope" @click="emailset"></i>
+                  </span>
+                  <input v-model="username" type="text" class="form-control form-control-lg" id="username"
+                    name="username" placeholder="電子信箱" required autofocus />
+                </div>
+              </div>
+              <!-- password -->
+              <div class="md-form mb-4">
+                <div class="input-group borderless">
+                  <span class="input-group-text">
+                    <i class="bi bi-lock-fill" @click="pwdset"></i>
+                  </span>
+
+                  <input v-model="password" :type="isActive ? 'password' : 'text'" class="form-control form-control-lg"
+                    id="password" name="password" placeholder="密碼" required />
+                  <i id="checkEyeforModel" :class="isActive ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                    @click="isActive=!isActive"></i>
+
+                </div>
+              </div>
+              <div class="text-end my-2">
+                <!-- <a href="/user/forgotPassword">忘記密碼</a> -->
+                <a href="#forgotPasswordModal" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">忘記密碼</a>
+              </div>
+              <div class="text-center">
+
+                還不是 Jo寶 嗎？
+                <!-- <a href="/register">註冊</a> -->
+                <a href="#RegisterModal" data-bs-toggle="modal" data-bs-target="#RegisterModal">註冊</a>
+              </div>
+            </form>
+
+            <!-- Oauth2 -->
+            <div class="d-flex justify-content-center mt-4 mb-2 px-3">
+              <hr class="flex-grow-1" />
+              <div class="px-4">使用其他帳號登入</div>
+              <hr class="flex-grow-1" />
+            </div>
+            <div class="text-center">
+              <a href="/oauth2/authorization/google" style="background-color: transparent" @click="GoogleLoginClick">
+                <button class="gsi-material-button">
+                  <div class="gsi-material-button-state"></div>
+                  <div class="gsi-material-button-content-wrapper">
+                    <div class="gsi-material-button-icon">
+                      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block">
+                        <path fill="#EA4335"
+                          d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                        </path>
+                        <path fill="#4285F4"
+                          d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                        </path>
+                        <path fill="#FBBC05"
+                          d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                        </path>
+                        <path fill="#34A853"
+                          d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                        </path>
+                        <path fill="none" d="M0 0h48v48H0z"></path>
+                      </svg>
+                    </div>
+                    <span class="gsi-material-button-contents">使用 Google 帳戶登入</span>
+                    <span style="display: none">Sign in with Google</span>
+                  </div>
+                </button>
+              </a>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer border-0">
+            <button type="button" class="btn shadow-sm rounded-pill btn-warning col " @click="loginClick"
+              data-dismiss="modal">
+              登入
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="successLoginModal2" class="modal success-modal fade">
+      <div class="modal-dialog modal-confirm modal-sm">
+        <div class="modal-content rounded-5 shadow">
+          <div class="modal-header">
+            <div class="icon-box">
+              <svg class="tick" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                <circle class="path circle" fill="none" stroke="#FFD700" stroke-width="6" stroke-miterlimit="10"
+                  cx="65.1" cy="65.1" r="62.1" />
+                <polyline class="path check" fill="none" stroke="#898121" stroke-width="6" stroke-linecap="round"
+                  stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 " />
+              </svg>
+            </div>
+            <h4 class="modal-title w-100">登入成功</h4>
+          </div>
+          <div class="modal-body">
+            <p class="text-center">歡迎回來 {{uname}}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-info shadow-sm rounded-pill col w-auto"
+              onclick="window.location.reload()">
+              重新整理
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入 Vue.js 和 Axios -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+
+  <script type="module">
+    import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.min.js";
+    createApp({
+      data() {
+        return {
+          username: '',
+          password: '',
+          error: false,
+          uname: '',
+          isActive: true,
+        }
+      },
+      methods: {
+        loginClick() {
+          if (!this.username.trim() || !this.password.trim()) {
+            this.error = true; // 顯示錯誤
+            return; // 阻止提交表單
+          }
+          const formData = new FormData();
+          formData.append("username", this.username);
+          formData.append("password", this.password);
+
+          axios.post("/login", formData)
+            .then(rs => {
+              let url = new URL(rs.request.responseURL);
+              const urlParams = url.searchParams;
+              const errorValue = urlParams.get("error");
+              if (errorValue == "true") {
+                //console.log("登入失敗");
+                this.error = true;
+              } else {
+                this.error = false;
+
+                axios.get("/api/session/getusername").
+                  then(rs => {
+                    this.uname = rs.data;
+                    $("#LoginModal").modal("hide");
+                    $("#successLoginModal2").modal("show");
+                    // $("#successSendModal").modal("show");
+                  })
+                this.uname = this.username;
+                $("#successLoginModal2").modal("show");
+              }
+            })
+            .catch(error => {
+              console.error(error);
+              this.error = true;
+            });
+        },
+        GoogleLoginClick() {
+          //console.log(window.location.href);
+          const formData = new FormData();
+          formData.append("previousUrl", window.location.href);
+          axios.post("/api/savePreviousUrl", formData)
+            .then(rs => {
+              //console.log(rs.data);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        },
+        emailset() {
+          this.username = "joinjoylin@gmail.com";
+        },
+        pwdset() {
+          this.password = "p@ssa0rd11";
+        }
+      }
+    }).mount("#LoginModalApp");
+  </script>
+</body>
+
+</html>

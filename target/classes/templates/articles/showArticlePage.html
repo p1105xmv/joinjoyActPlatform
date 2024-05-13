@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+  <head>
+    <meta charset="UTF-8" />
+    <title>文章</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <link th:href="@{/css/cards.css }" rel="stylesheet" />
+    <link th:href="@{/css/ckeditor.css }" rel="stylesheet" />
+
+    <style>
+      body {
+        background-color: rgb(255, 253, 234) !important;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        background-image: url("../img/web/jojo_bird.png");
+        background-position: right 4% bottom;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: 10%;
+      }
+
+      .rightCard {
+        width: 300px;
+        border-radius: 40px;
+      }
+
+      .fixed-side {
+        position: fixed;
+        top: 90px;
+      }
+
+      .main img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .main hr {
+        width: 95%;
+        margin: 0 auto;
+        margin-bottom: 10px;
+      }
+
+      .grayHover:hover {
+        background-color: rgb(255, 228, 50);
+        border-radius: 10px;
+      }
+
+      .cursorPointer {
+        cursor: pointer;
+      }
+
+      .articleBlock:hover {
+        background-color: rgb(255, 248, 201);
+        border-radius: 10px;
+      }
+
+      .artTitle {
+        font-weight: 550;
+        font-size: 38px;
+        margin: 10px 0 !important;
+      }
+
+      .author {
+        margin-bottom: 20px !important;
+      }
+
+      .userNickname {
+        font-size: 18px;
+      }
+
+      .artCreateTime {
+        font-size: 12px;
+        color: gray;
+      }
+
+      .ImgBtns {
+        margin-top: 60px !important;
+        display: flex;
+      }
+
+      .ImgBtns img {
+        width: 30px;
+        height: 30px;
+      }
+
+      .ImgBtns img,
+      .ImgBtns span {
+        margin-right: 10px;
+      }
+
+      .ImgBtns img:first-child,
+      .ImgBtns span:first-child {
+        margin-left: 10px;
+      }
+
+      .articleActivity {
+        margin: 10px !important;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+      }
+
+      .activityName {
+        font-size: 18px;
+        font-weight: 550;
+      }
+
+      .comment {
+        margin-bottom: 20px;
+      }
+
+      .commentTitle {
+        margin-top: 10px !important;
+        font-size: 22px;
+        font-weight: 500;
+      }
+
+      .commentInput {
+        position: fixed;
+        bottom: 0;
+        width: 65.5vw;
+        left: 9%;
+        z-index: 100;
+        background-color: white;
+        box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 10px 10px 0 0;
+      }
+
+      .commentInput textarea {
+        width: 100%;
+      }
+
+      .articleToast {
+        z-index: 11;
+        background-color: rgb(255, 215, 97) !important;
+      }
+
+      .thumbIcon {
+        font-size: 28px;
+        color: #ffcc38;
+        margin-right: 15px !important;
+      }
+
+      .flagIcon {
+        font-size: 28px;
+        color: #d10000;
+      }
+
+      .fontBold {
+        font-weight: 550;
+      }
+
+      .main {
+        background-color: white;
+        padding: 3%;
+        border-radius: 10px;
+        margin-top: 90px;
+        margin-bottom: 60px;
+      }
+
+      .toastContent {
+        color: white;
+      }
+
+      .userImg img {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        margin: 2px;
+      }
+
+      .acType {
+        background-color: #f2f2f2;
+        border-radius: 9999px;
+        padding: 10px;
+      }
+
+      .allCenter {
+        margin: 20% 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div th:replace="~{layout/articles/articlesNavbar}"></div>
+
+    <div id="app">
+      <div class="container-fluid">
+        <div class="row">
+          <template v-if="isLoading">
+            <div>Loading...</div>
+          </template>
+          <template v-else-if="article">
+            <div class="col-md-1"></div>
+            <div class="col-md-8">
+              <div class="main shadow">
+                <div class="row">
+                  <h1 class="artTitle">{{article.artTitle}}</h1>
+
+                  <div class="author">
+                    <span v-if="article.userinfo.uimgpath" class="userImg">
+                      <img :src="'..' + article.userinfo.uimgpath" />
+                    </span>
+
+                    <span v-if="!article.userinfo.uimgpath" class="userImg">
+                      <img :src="'../img/web/unloginUser.svg'" />
+                    </span>
+
+                    <span v-if="article.userinfo.unickname" class="userNickname"
+                      >{{article.userinfo.unickname}}&nbsp;</span
+                    >
+                    <span
+                      v-if="!article.userinfo.unickname"
+                      class="userNickname"
+                      >匿名&nbsp;</span
+                    >
+                    <span
+                      v-if="article.artCreateTime==article.artLastEditTime"
+                      class="artCreateTime"
+                      >{{article.artCreateTime}}&nbsp;</span
+                    >
+                    <span
+                      v-if="article.artCreateTime!=article.artLastEditTime"
+                      class="artCreateTime"
+                      >編輯於{{article.artLastEditTime}}&nbsp;</span
+                    >
+                    <button
+                      v-if="article.userinfo.userid == userinfo.userid"
+                      type="button"
+                      class="btn btn-warning"
+                      id="editButton"
+                      @click="toEdit()"
+                    >
+                      編輯
+                    </button>
+                  </div>
+                  <hr />
+
+                  <div class="ck-content" v-html="renderedHtml"></div>
+
+                  <template v-if="article.allTypes">
+                    <div class="mt-5">
+                      <template v-for="t  in article.allTypes" :key="t.id">
+                        <span class="acType ml-3">{{ t.typeName }}</span>
+                      </template>
+                    </div>
+                  </template>
+
+                  <template v-if="!article.allTypes">
+                    <div class="mt-5">
+                      <span class="acType ml-3">閒聊</span>
+                    </div>
+                  </template>
+
+                  <template v-if="article.artIsOther == '0' ">
+                    <div @click="toActivity()">
+                      <div class="row articleActivity mt-3">
+                        <div class="col-md-4">
+                          <img
+                            :src="article.activity.acImg"
+                            class="img-fluid"
+                            alt="活動圖片"
+                          />
+                        </div>
+                        <div class="col-md-8">
+                          <p class="activityName">
+                            {{ article.activity.acName }}
+                          </p>
+                          <span v-text="article.activity.acSummary"></span>
+                        </div>
+                        <br />
+                      </div>
+                    </div>
+                  </template>
+
+                  <div class="ImgBtns row">
+                    <div class="col-md-11">
+                      <i
+                        class="bi bi-hand-thumbs-up-fill thumbIcon"
+                        @click="like(1)"
+                      ></i>
+                      <span>{{likeCount}}</span>
+                      <i
+                        class="bi bi-hand-thumbs-down-fill thumbIcon"
+                        @click="like(2)"
+                      ></i>
+                      <span>{{disLikeCount}}</span>
+                    </div>
+                    <div class="col-md-1">
+                      <span v-if="userinfo">
+                        <!-- 這是登入的檢舉 有登入才會出現 -->
+                        <i
+                          class="bi bi-flag-fill flagIcon"
+                          data-toggle="modal"
+                          data-target="#reportModal"
+                        ></i>
+                      </span>
+                      <span v-if="!userinfo">
+                        <!-- 這是沒登入才出現的檢舉 會跳轉到登入頁面 -->
+                        <i
+                          class="bi bi-flag-fill flagIcon"
+                          @click="checkLogin"
+                        ></i>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div v-if="articleComments.length == 0" class="commentTitle">
+                    此文章沒有留言
+                  </div>
+                  <template
+                    v-if="articleComments && articleComments.length > 0"
+                  >
+                    <div class="commentTitle">
+                      共{{ articleComments.length }}則留言
+                    </div>
+                    <hr />
+                    <div v-for="(c, index) in articleComments" :key="c.artcId">
+                      <div>
+                        <span v-if="c.userinfo.uimgpath" class="userImg">
+                          <img :src="'..' + c.userinfo.uimgpath" />
+                        </span>
+                        <span v-if="!c.userinfo.uimgpath" class="userImg">
+                          <img :src="'../img/web/unloginUser.svg'" />
+                        </span>
+
+                        <span v-if="c.userinfo.unickname" class="userNickname"
+                          >{{c.userinfo.unickname}}&nbsp;</span
+                        >
+                        <span v-if="!c.userinfo.unickname" class="userNickname"
+                          >匿名&nbsp;</span
+                        >
+
+                        <span class="artCreateTime"
+                          >B{{ index + 1 }}·{{c.artcCreateTime}}</span
+                        >
+                      </div>
+                      <div class="comment">{{c.artcContent}}</div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <div class="commentInput">
+                <div class="row">
+                  <div class="col-md-1">
+                    <span v-if="userinfo"
+                      ><img
+                        :src="'..' + userinfo.uimgpath"
+                        style="
+                          width: 50px;
+                          height: 50px;
+                          border-radius: 50%;
+                          margin: 3px 3px 0 8px;
+                        "
+                    /></span>
+                    <span v-if="!userinfo">
+                      <img
+                        src="../img/web/unloginUser.png"
+                        style="
+                          width: 50px;
+                          height: 50px;
+                          border-radius: 50%;
+                          margin: 3px 3px 0 8px;
+                        "
+                    /></span>
+                  </div>
+                  <div class="col-md-11">
+                    <textarea
+                      class="form-control"
+                      name="commentInput"
+                      id="commentInput"
+                      placeholder="留言..."
+                      v-model="commentInput"
+                      @keydown.enter.prevent="postComment"
+                      @click="checkLogin"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                id="commentToast"
+                class="toast bottom-50 end-50 p-1 position-fixed border-0 articleToast"
+              >
+                <div class="toast-body">
+                  <div class="d-flex">
+                    <span id="toastText" class="fw-bolder toastContent"
+                      >toast content</span
+                    >
+                    <button
+                      type="button"
+                      class="btn-close me-2 m-auto"
+                      data-bs-dismiss="toast"
+                    ></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="col-md-1"></div>
+            <div class="col-md-8">
+              <div class="main shadow">
+                <div class="allCenter">
+                  <img src="../img/articleAssets/noArticle.svg" alt="" />
+                  <h2 class="fw-bolder mt-5">文章已被刪除</h2>
+                  <h4 class="mt-2">此篇文章不存在、被移除或被抓走了…</h4>
+                  <button class="btn btn-warning mt-2" @click="goHome">
+                    回討論區
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <div class="col-md-3 d-flex justify-content-center">
+            <div class="fixed-side">
+              <h4 class="fontBold">熱門活動</h4>
+              <div
+                id="card1"
+                class="carousel slide carousel-fade shadow rightCard"
+                data-bs-ride="carousel"
+              >
+                <div class="carousel-inner" id="card1-inner"></div>
+              </div>
+              <div
+                id="card2"
+                class="carousel slide mt-4 carousel-fade shadow rightCard"
+                data-bs-ride="carousel"
+              >
+                <div class="carousel-inner" id="card2-inner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 按下檢舉後的modal -->
+      <div
+        class="modal fade"
+        id="reportModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="reportModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="reportModalLabel">檢舉事由</h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <select
+                class="form-control"
+                id="reportReason"
+                @change="showTextarea($event.target.value)"
+              >
+                <option value="">請選擇檢舉事由</option>
+                <option value="洗版">洗版</option>
+                <option value="謾罵">謾罵</option>
+                <option value="限制級">限制級</option>
+                <option value="盜版">盜版</option>
+                <option value="其他">其他</option>
+              </select>
+              <textarea
+                id="otherReason"
+                class="form-control mt-2"
+                style="display: none"
+                placeholder="請輸入檢舉事由"
+              ></textarea>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                關閉
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                @click="submitReport"
+                data-dismiss="modal"
+                id="submitReportButton"
+                disabled
+              >
+                送出
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        createApp,
+        ref,
+      } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+      import { createCKEditor } from "../js/ckeditor-vue.js";
+
+      createApp({
+        data() {
+          return {
+            article: null,
+            userinfo: null,
+            articleComments: null,
+            artid: 0,
+            renderedHtml: "",
+            commentInput: "",
+            postarticleComments: null,
+            likeCount: 0,
+            disLikeCount: 0,
+            isLoading: false,
+          };
+        },
+
+        methods: {
+          test() {
+            Vue.toasted.show("hola billo");
+          },
+
+          toEdit() {
+            var url = new URL(window.location.href);
+            let artid = url.searchParams.get("id");
+            window.location.href = "/articles/editArticle?id=" + artid;
+          },
+
+          sanitizeHtml(html) {
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = html;
+            const scripts = tempDiv.getElementsByTagName("script");
+            for (let i = 0; i < scripts.length; i++) {
+              scripts[i].parentNode.removeChild(scripts[i]);
+            }
+            return tempDiv.innerHTML;
+          },
+
+          showTextarea(value) {
+            var otherReasonTextarea = document.getElementById("otherReason");
+            var submitButton = document.getElementById("submitReportButton");
+
+            if (value === "其他") {
+              otherReasonTextarea.style.display = "block";
+              if (!otherReasonTextarea.value.trim()) {
+                submitButton.disabled = true;
+              }
+            } else {
+              otherReasonTextarea.style.display = "none";
+              submitButton.disabled = false;
+            }
+          },
+
+          fetchLatestComments() {
+            $.ajax({
+              url: "/api/listArticlecomments/" + this.artid,
+              method: "GET",
+              success: (data) => {
+                this.articleComments = data;
+                // //console.log(this.articleComments);
+              },
+              error: (xhr, status, error) => {
+                console.error("Error fetching article data: ", error);
+              },
+            });
+          },
+
+          checkLogin() {
+            if (!this.userinfo) {
+              alert("請先登入");
+              $("#LoginModal").modal("show");
+            }
+          },
+
+          postComment() {
+            if (!this.userinfo) {
+              alert("請先登入");
+              $("#LoginModal").modal("show");
+              return;
+            }
+            const postData = {
+              article: this.article,
+              artcContent: this.commentInput,
+              userinfo: this.userinfo,
+            };
+            $.ajax({
+              url: "/api/addArticlecomments",
+              type: "POST",
+              data: JSON.stringify(postData),
+              contentType: "application/json",
+              success: (response) => {
+                document.getElementById("toastText").innerText = response;
+                const commentToast = new bootstrap.Toast(
+                  document.getElementById("commentToast")
+                );
+                commentToast.show();
+                this.fetchLatestComments();
+                this.commentInput = "";
+              },
+              error: function (xhr, status, error) {
+                console.error("Error adding article: ", error);
+              },
+            });
+          },
+
+          fetchArticleLikeCount() {
+            $.ajax({
+              url: `/api/countLikes/artid/${this.artid}/like/1`,
+              method: "GET",
+              success: (data) => {
+                this.likeCount = data;
+              },
+              error: (xhr, status, error) => {
+                console.error("Error fetching article like count: ", error);
+              },
+            });
+          },
+
+          fetchArticleDislikeCount() {
+            $.ajax({
+              url: `/api/countLikes/artid/${this.artid}/like/2`,
+              method: "GET",
+              success: (data) => {
+                this.disLikeCount = data;
+              },
+              error: (xhr, status, error) => {
+                console.error("Error fetching article data: ", error);
+              },
+            });
+          },
+
+          like(status) {
+            if (!this.userinfo) {
+              alert("請先登入");
+              $("#LoginModal").modal("show");
+              return;
+            }
+            const postData = {
+              userid: this.userinfo.userid,
+              artid: this.article.artid,
+              like: status,
+            };
+            $.ajax({
+              url: "/api/likeArticle",
+              type: "POST",
+              data: JSON.stringify(postData),
+              contentType: "application/json",
+              success: (response) => {
+                document.getElementById("toastText").innerText = response;
+                const commentToast = new bootstrap.Toast(
+                  document.getElementById("commentToast")
+                );
+                commentToast.show();
+                // alert(response);
+                this.fetchArticleLikeCount();
+                this.fetchArticleDislikeCount();
+              },
+              error: function (xhr, status, error) {
+                console.error("Error adding article: ", error);
+              },
+            });
+          },
+
+          submitReport() {
+            var reason = document.getElementById("reportReason").value;
+
+            if (reason === "其他") {
+              reason = document.getElementById("otherReason").value;
+            }
+            var articleUserId = this.article.userinfo.userid;
+            var sessionUserId = this.userinfo.userid;
+            var artid = this.artid;
+            //這是要送到後端的物件
+            var reportData = {
+              vrViolationtype: reason,
+              vrReporteduserid: articleUserId,
+              vrReportuserid: sessionUserId,
+              artid: this.artid,
+            };
+
+            //console.log(reportData);
+            axios
+              .post("/articles/report", reportData)
+              .then(function (response) {
+                // //console.log(response.data);
+                $("#reportModal").modal("hide");
+              })
+              .catch(function (error) {
+                console.error(error);
+              });
+
+            $("#reportModal").modal("hide");
+            alert("檢舉成功");
+          },
+
+          toActivity() {
+            window.location.href =
+              "../showActivity/activityPage/" + this.article.activity.acid;
+          },
+
+          convertAcObject(list) {
+            for (let ac of list) {
+              let acDateTime = new Date(ac.acStartDate);
+              let acDate =
+                acDateTime.getFullYear() +
+                "/" +
+                ("0" + (acDateTime.getMonth() + 1)).slice(-2) +
+                "/" +
+                ("0" + acDateTime.getDate()).slice(-2);
+              let acTime =
+                ("0" + acDateTime.getHours()).slice(-2) +
+                ":" +
+                ("0" + acDateTime.getMinutes()).slice(-2);
+              ac.date = acDate;
+              ac.time = acTime;
+              ac.alltypeids = [];
+              ac.typeNames = [];
+
+              for (let type of ac.allTypes) {
+                ac.alltypeids.push(type.alltypeid);
+                ac.typeNames.push(type.typeName);
+              }
+            }
+
+            return list;
+          },
+
+          renderActivities(activities) {
+            for (let i = 0; i < 6; i++) {
+              let ac = activities[i];
+              //console.log(ac);
+              const activeClass = i === 0 || i === 3 ? "active" : "";
+              const popActivityHtml = `
+        <div class="carousel-item ${activeClass}" data-bs-interval="3000">
+      <a style="width: 100%;" href="/showActivity/activityPage/${
+        ac.acid
+      }" class="jcard">
+              <img style="height:250px ;padding-bottom:40px" src="${
+                ac.acImg
+              }" class="jcard__image"
+                alt="" />
+
+              <div class="jcard__overlay">
+                <div class="jcard__header">
+                  <svg class="jcard__arc" xmlns="http://www.w3.org/2000/svg">
+                    <path />
+                  </svg>
+                  <div class="jcard__header-text">
+
+                    <h3 class="jcard__title mb-2">${ac.acName}</h3>
+
+                    <span class="jcard__status"></span><span class="jcard__status"><i
+                        class="bi bi-pin-map-fill mr-sm-1"></i>${
+                          ac.acCity
+                        }</span>
+                  </div>
+
+                  <div class="jcard__thumbnum">
+                    <button id="likeBtn" class="btn btn-link text-warning" @click="likeAc">
+                      <span><i class="bi bi-heart mr-sm-2"></i>${
+                        ac.favCount
+                      }</span>
+                    </button>
+                  </div>
+
+
+                </div>
+                <p class="jcard__description">
+                <div class="jcard__description_timeinfo">
+
+                  <span class="jcard__status">日期：${
+                    ac.date
+                  }</span><br><span class="jcard__status">時間：${
+                ac.time
+              }</span>
+                </div>
+                <span v-if="ac.typeNames.length>0" class="jcard__description_type">#${ac.typeNames.join(
+                  "、"
+                )}</span>
+                <div class="jcard__description_info">
+                  <template v-if="ac.priceLowest<ac.priceHighest"><span class="text-warning">${
+                    ac.priceLowest
+                  } ~
+                      ${
+                        ac.priceHighest
+                      } </span><span class="text-secondary mb-md-2"> 元</span></template>
+                  <template v-if="ac.priceLowest==ac.priceHighest && ac.priceLowest>0"><span
+                      class="text-warning">${
+                        ac.priceLowest
+                      }</span><span class="text-secondary mb-md-2">
+                      元</span></template>
+                  <template v-if="ac.priceLowest==0"><span class="text-warning mb-md-2">免費</span></template>
+                  <br>
+                  <button id="signBtn" class="btn btn-link text-secondary" @click="signAc">
+                    <span class="text-secondary text-end"><i
+                        class="bi bi-bookmark-check mr-sm-2"></i>${
+                          ac.signedCount
+                        }</span>
+                  </button>
+                </div>
+                </p>
+              </div>
+            </a>
+          </li>
+          </div>
+      `;
+              if (i < 3) {
+                $("#card1-inner").append(popActivityHtml);
+              } else {
+                $("#card2-inner").append(popActivityHtml);
+              }
+            }
+
+            const btns = `
+        <button class="carousel-control-prev" type="button" data-bs-target="#card1" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#card1" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        `;
+            const btns2 = `
+        <button class="carousel-control-prev" type="button" data-bs-target="#card2" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#card2" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        `;
+
+            $("#card1").append(btns);
+            $("#card2").append(btns2);
+          },
+
+          startCarousel() {
+            $("#card1").carousel();
+            $("#card2").carousel();
+          },
+          goHome() {
+            window.location.href = "/articles/allArticles";
+          },
+        },
+
+        mounted() {
+          this.isLoading = true;
+          $.ajax({
+            url: "/api/session/getUserinfo",
+            method: "GET",
+            success: (data) => {
+              this.userinfo = data;
+              // //console.log(this.userinfo);
+            },
+            error: (xhr, status, error) => {
+              console.error("Error fetching user data: ", error);
+            },
+          });
+
+          var url = new URL(window.location.href);
+          this.artid = url.searchParams.get("id");
+
+          $.ajax({
+            url: "/api/findOneArticles/" + this.artid,
+            method: "GET",
+            success: (data) => {
+              this.article = data;
+              //console.log("============this.article=============");
+              //console.log(this.article);
+              //console.log("============this.article=============");
+              // if (!this.article) {
+              //   alert("文章不存在");
+              //   window.location.href = "/articles/allArticles";
+              // }
+              this.renderedHtml = this.sanitizeHtml(this.article.artContent);
+              this.isLoading = false;
+            },
+            error: (xhr, status, error) => {
+              console.error("Error fetching article data: ", error);
+            },
+          });
+
+          $.ajax({
+            url: "/api/addArticleViewCount/" + this.artid,
+            method: "GET",
+            success: (data) => {
+              // //console.log(data);
+            },
+            error: (xhr, status, error) => {
+              console.error("Error fetching article data: ", error);
+            },
+          });
+
+          this.fetchLatestComments();
+          this.fetchArticleLikeCount();
+          this.fetchArticleDislikeCount();
+
+          document
+            .getElementById("otherReason")
+            .addEventListener("input", function () {
+              var submitButton = document.getElementById("submitReportButton");
+              if (!this.value.trim()) {
+                submitButton.disabled = true; // 檢查textarea不能是空才能送出
+              } else {
+                submitButton.disabled = false;
+              }
+            });
+
+          document
+            .getElementById("reportReason")
+            .addEventListener("change", function () {
+              var reason = this.value;
+              var submitButton = document.getElementById("submitReportButton");
+              var otherReason = document
+                .getElementById("otherReason")
+                .value.trim();
+
+              if (
+                reason === "" ||
+                reason === "請選擇檢舉事由" ||
+                (reason === "其他" && otherReason === "")
+              ) {
+                submitButton.disabled = true;
+              } else {
+                submitButton.disabled = false;
+              }
+            });
+
+          $.ajax({
+            url: "/api/listPopularActivities",
+            type: "GET",
+            success: (activities) => {
+              // //console.log(activities);
+              this.renderActivities(this.convertAcObject(activities));
+              this.startCarousel();
+            },
+            error: function (xhr, status, error) {
+              console.error("Fail: ", status, error);
+            },
+          });
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

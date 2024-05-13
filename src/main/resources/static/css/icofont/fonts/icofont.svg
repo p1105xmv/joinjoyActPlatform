@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+<font id="icofont" horiz-adv-x="1000" >
+<font-face font-family="IcoFont" font-weight="400" font-style="Regular" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="plus-circle" horiz-adv-x="1000" unicode="&#x13b8b;" d="M517 583c18 0 33-15 33-33l0-183 183 0c19 0 34-15 34-34 0-18-15-33-34-33l-183 0 0-183c0-19-15-34-33-34-19 0-34 15-34 34l0 183-183 0c-18 0-33 15-33 33 0 19 15 34 33 34l183 0 0 183c0 18 15 33 34 33z" />
+<glyph glyph-name="plus-circle" horiz-adv-x="1000" unicode="&#x13b8a;" d="M500 850c276 0 500-224 500-500 0-276-224-500-500-500-276 0-500 224-500 500 0 276 224 500 500 500z m0-100c-220 0-400-179-400-400 0-220 180-400 400-400 221 0 400 180 400 400 0 221-179 400-400 400z" />
+<glyph glyph-name="user" horiz-adv-x="1000" unicode="&#x13d06;" d="M499 850c277 0 501-224 501-499 0-277-224-501-501-501-275 0-499 224-499 501 0 275 224 499 499 499z m0-67c-238 0-432-194-432-432 0-240 194-432 432-432 240 0 432 192 432 432 0 238-192 432-432 432z" />
+<glyph glyph-name="user" horiz-adv-x="1000" unicode="&#x13d13;" d="M635 250c82 0 154-59 170-136-72-91-181-149-306-149-123 0-235 58-304 149 16 77 85 136 168 136l272 0z m-136 381c93 0 168-75 168-168 0-92-75-168-168-168-93 0-168 76-168 168 0 93 75 168 168 168z" />
+</font>
+</defs>
+</svg>

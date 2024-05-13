@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>售票資訊</title>
+    <link
+      rel="stylesheet"
+      href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+  </head>
+  <style>
+    body {
+      background-color: rgb(255, 252, 233) !important;
+    }
+
+    .smText {
+      font-size: 22px;
+      color: rgb(148, 148, 148);
+    }
+
+    .block {
+      background-color: white;
+      box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      padding: 50px !important;
+      width: auto;
+    }
+
+    .grayBlock {
+      background-color: #fafafa;
+      margin: 0 5px;
+      padding: 20px;
+    }
+
+    .smTitle {
+      color: gray;
+      font-size: 20px;
+    }
+
+    .bigContent {
+      font-size: 40px;
+      text-align: center;
+    }
+
+    .smContent {
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .tableBlock {
+      border: solid 1px rgb(201, 201, 201);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .tableBlock th {
+      font-size: 20px;
+      padding: 10px !important;
+    }
+
+    .tableBlock td {
+      font-size: 18px;
+      padding: 10px !important;
+    }
+
+    .backBtn {
+      background-color: white;
+      box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 10px;
+      width: auto;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .icon {
+      font-size: 24px;
+      margin-left: 5px !important;
+    }
+
+    .ticketThead {
+      background-color: rgb(255, 246, 229);
+    }
+  </style>
+
+  <body>
+    <div th:replace="~{layout/navbar}"></div>
+    <div id="app">
+      <div class="container">
+        <template v-if="activity">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="fw-bolder mt-4">售票資訊</h2>
+            </div>
+            <div class="col-auto">
+              <div class="d-flex justify-content-end">
+                <div
+                  class="backBtn mt-4 fw-bolder text-center cursorPointer"
+                  @click="goBack"
+                >
+                  返回
+                  <i class="bi bi-arrow-right icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="smText">
+            {{this.activity.acSignUpStartDate}} ~
+            {{this.activity.acSignUpEndDate}} (GMT+8)
+          </p>
+          <div class="block mt-4">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="grayBlock">
+                  <div class="smTitle">剩餘總張數</div>
+                  <div class="bigContent">{{totalTickets-signNum}}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="grayBlock">
+                  <div class="smTitle">報名成功</div>
+                  <div class="bigContent">{{signNum}}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="grayBlock">
+                  <div class="smTitle">票券收入</div>
+                  <div v-if="activity.acCostStatus==0" class="smContent my-3">
+                    此活動為免費活動
+                  </div>
+                  <div v-if="activity.acCostStatus==1" class="bigContent">
+                    NT${{totalRevenue}}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-5">
+              <div class="col tableBlock">
+                <table class="table">
+                  <thead class="ticketThead">
+                    <tr>
+                      <th scope="col">票券名稱</th>
+                      <th scope="col">報名成功/總數</th>
+                      <th scope="col">售價</th>
+                      <th scope="col">小計</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="t in activity.activityTickets" :key="t.id">
+                      <td class="fw-bolder">{{t.atName}}</td>
+                      <td>{{countSoldTickets(t.atid)}}/{{t.atQuantity}}</td>
+                      <td>NT${{t.atPrice}}</td>
+                      <td>NT${{countSoldTickets(t.atid)*t.atPrice}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </body>
+  <script type="module">
+    import {
+      createApp,
+      ref,
+    } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+
+    createApp({
+      data() {
+        return {
+          activity: null,
+          acid: 0,
+          totalTickets: 0,
+          signNum: 0,
+          totalRevenue: 0,
+          userinfo: null,
+        };
+      },
+      methods: {
+        countSoldTickets(atid) {
+          let count = 0;
+          for (let t in this.activity.acSignForm) {
+            if (
+              this.activity.acSignForm[t].atid == atid &&
+              this.activity.acSignForm[t].asfSignStatus == 2
+            )
+              count++;
+          }
+          return count;
+        },
+
+        goBack() {
+          window.history.back();
+        },
+      },
+
+      mounted() {
+        const currentUrl = window.location.href;
+        let parts = currentUrl.split("/");
+        this.acid = parts[parts.length - 1];
+
+        axios.get(`/api/activityForAcManage/${this.acid}`).then((response) => {
+          this.activity = response.data;
+          //console.log(this.activity);
+
+          $.ajax({
+            url: "/api/session/getUserinfo",
+            method: "GET",
+            async: false,
+            success: (data) => {
+              this.userinfo = data;
+              if (this.userinfo.userid != this.activity.acUserid) {
+                alert("您無權限觀看此頁面");
+                window.location.href = "/";
+              } else {
+                for (let t in this.activity.activityTickets) {
+                  this.totalTickets +=
+                    this.activity.activityTickets[t].atQuantity;
+                }
+
+                for (let t in this.activity.acSignForm) {
+                  if (this.activity.acSignForm[t].asfSignStatus == 2)
+                    this.signNum++;
+                }
+
+                for (let t in this.activity.acSignForm) {
+                  if (this.activity.acSignForm[t].asfSignStatus == 2)
+                    this.totalRevenue += this.activity.acSignForm[t].atPrice;
+                }
+              }
+            },
+            error: (xhr, status, error) => {
+              console.error("Error fetching user data: ", error);
+            },
+          });
+        });
+      },
+    }).mount("#app");
+  </script>
+</html>

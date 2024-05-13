@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+    <!-- <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" /> -->
+    <!-- <script th:src="@{/js/bootstrap.bundle.min.js}"></script> -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+    <title>報名</title>
+    <style>
+        .profile-container {
+            display: flex;
+            align-items: center;
+            margin-top: 35px;
+            margin-left: -450px;
+        }
+
+        .profile-img {
+            width: 120px;
+            /* 調整圖片大小 */
+            height: 120px;
+            border-radius: 50%;
+            /* 將圖片變成圓形 */
+            overflow: hidden;
+            /* 隱藏圖片超出部分 */
+            margin-right: 25px;
+            /* 調整圖片與暱稱之間的間距 */
+        }
+
+        .profile-img img {
+            width: 100%;
+            /* 讓圖片充滿圓形容器 */
+            height: auto;
+        }
+
+        .nickname {
+            font-size: 30px;
+            /* 調整暱稱字體大小 */
+        }
+
+        #allCard {
+            display: inline-block;
+            flex-wrap: wrap;
+            /* 當一行放不下時自動換行 */
+            margin-left: 30px;
+            margin-top: 20px;
+        }
+
+        .actCard {
+            font-size: 20px;
+            width: 320px;
+            height: 320px;
+            margin: 20px;
+            /* 調整卡片之間的間距 */
+            margin-bottom: 40px;
+        }
+
+        .noData {
+            font-size: 25px;
+            color: #7B7B7B;
+            margin-left: 100px;
+            margin-top: 30px;
+        }
+    </style>
+    <script>
+
+        // //console.log("測試", window.location.href.includes("transactionId"))
+    </script>
+
+</head>
+
+<body>
+
+    <div th:replace="~{layout/navbar}"></div>
+    <!-- <div th:replace="~{layout/navbar_simple}"></div>  -->
+
+    <!--  <div th:replace="~{layout/navbar_onlyLogo}"></div>  -->
+
+    <div class="container  mt-5">
+        <div class="box  row justify-content-around" id="signedApp">
+
+
+
+            <aside class="sign-aside col-md-4" id="sign-aside">
+
+
+                <div><img class="sign-img" :src="activityInfo.acImg" /></div>
+                <div class="sign-aside-plain b-font">{{activityInfo.acName}}</div>
+
+                <div class="sign-aside-plain text-secondary">活動時間：{{activityInfo.acDate}}</div>
+                <div class="sign-aside-plain" v-if="activityInfo.acAddress">{{activityInfo.acAddress}}</div>
+                <div class="sign-aside-plain" v-if="activityInfo.acOnline">{{activityInfo.acOnline}}</div>
+
+                <div class="sign-aside-border refund-box mt-5">
+                    <div class="fs-5 text-warning">退票規則</div>
+                    <div id="ac_refund">{{activityInfo.acRefundRules}}</div>
+                </div>
+                <div class="sign-aside-border buy-box">
+                    <div class="fs-5 text-warning">購票須知</div>
+                    <div>請注意，你需完成報名一項活動後再進行下一個活動的報名，但您一次可以報名一個多種方案。<br>
+                        您可以一次為多位同伴報名本活動，直接選擇所需要的票券與數量，並在下個步驟填入其他活動參與者的資訊，謝謝。</div>
+                </div>
+
+
+
+            </aside>
+
+            <div class="sign-content   col-md-8">
+                <nav class="nav nav-pills nav-fill row justify-content-around">
+                    <div class="col-5">
+                        <div class="text-start text-muted " aria-current="page" href="#">選擇方案</div>
+                        <button id="step1" class="j_btn-circle-new text-center disabled" aria-current="page"
+                            type="button">1</button>
+                    </div>
+                    <div class="col-5 ">
+                        <div class="text-start text-muted " aria-current="page" href="#">報名資訊</div>
+                        <button id="step2" class="j_btn-circle-new text-center  disabled" aria-current="page" href="#"
+                            type="button" disabled>2</button>
+                    </div>
+                    <div class="col-2 ">
+                        <div class="text-start text-muted " aria-current="page" href="#">報名完成</div>
+                        <button id="step3" class="btn-warning j_btn-circle-new text-center " aria-current="page"
+                            href="#" type="button" disabled>3</button>
+                    </div>
+
+
+                </nav>
+                <hr class="my-4">
+
+
+                <!-- 秀報名紀錄 -->
+
+                <div class="overflow-scroll p-3"
+                    style="height: 600px; width:100%; display:flex;justify-content: center;">
+                    <div id="allCard">
+                        <template v-for="dto in dtos" :key="dto.acid">
+                            <div class="card mb-3 =" style="width: 600px; height: 190px;">
+                                <div class="row g-0">
+                                    <div class="col-md-3 mb-2">
+                                        <a :href="`${WEBROOT}/showActivity/activityPage/${dto.acid}`"
+                                            style="color: rgb(0, 0, 0);">
+                                            <div class="card" style="width: 150px;  border: none; margin: 5px;"><img
+                                                    :src="dto.acImg" class="card-img-top" style="height: 110px;">
+                                                <div class="card-body"
+                                                    style="background-color: rgb(255, 250, 250); height: 70px;">
+                                                    <p
+                                                        style="height:60px;overflow:hidden;font-size: 12px; text-align: left; margin-top: -5px; margin-left: -5px;">
+                                                        {{limitedTitle(dto.acName)}}</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="card-body"
+                                            style="margin-left: 0px; margin-top: -7px; font-size: 12px; flex: 1 1 0%;">
+                                            <div>
+                                                <div class="row g-0 ">
+                                                    <div class="col-8">
+
+                                                        <div style="margin: 5px; display: flex;">報名序號：{{dto.asfid}}
+                                                        </div>
+                                                        <div style="margin: 5px; display: flex;">報名者：{{dto.asfName}}
+                                                        </div>
+                                                        <!-- 取消報名顯示 -->
+                                                        <div style="margin: 5px;">報名狀態：
+                                                            <span
+                                                                v-if="dto.asfSignStatus!='已取消報名'">{{dto.asfSignStatus}}</span>
+                                                            <span v-if="dto.asfSignStatus=='已取消報名'"><i
+                                                                    class="text-danger">{{dto.asfSignStatus}}</i></span>
+                                                        </div>
+                                                        <!-- 取消報名顯示 end-->
+                                                        <div style="margin: 5px;">報名方案：{{dto.atName}}</div>
+                                                        <div style="margin: 5px;">付款方式：{{dto.pmid}}</div>
+
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="card"
+                                                            style="width: 120px; float: right; margin-top: 30px;">
+                                                            <ul class="list-group list-group-flush">
+                                                                <li class="list-group-item text-center"
+                                                                    style="background-color: rgb(255, 250, 250);">票券價格
+                                                                </li>
+                                                                <li class="list-group-item"
+                                                                    style="height: 70px; line-height: 60px; text-align: center; font-size: 13px; font-family: &quot;Comic Sans MS&quot;, &quot;Comic Sans&quot;, cursive; color: rgb(79, 79, 79);">
+                                                                    NT$ {{dto.atPrice}}</li>
+
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+
+                                                    <div style="margin: 5px;">報名日期：<span>{{dto.formattedasfDate}}</span>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                    </div>
+
+                </div>
+
+                </template>
+
+
+
+
+
+
+            </div>
+
+
+
+        </div> <!--box-->
+    </div><!--container-->
+
+
+
+
+</body>
+
+<script type="module">
+    import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.min.js";
+    createApp({
+        data() {
+            return {
+                WEBROOT: WebRoot,
+                isShowAll: false,
+                acid: parseInt(window.location.href.split("/").slice(-1)),
+                activityInfo: {},
+                dtos: [],
+            }
+        }, methods: {
+            secondToDays(seconds) {
+                const secondsPerDay = 1000 * 60 * 60 * 24;
+                const days = Math.floor(seconds / secondsPerDay);
+                const remainingSeconds = seconds % secondsPerDay;
+
+                return days;
+            },
+            formattedDate(dateString) {
+                const startDate = new Date(dateString);
+                const year = startDate.getFullYear();
+                const month = String(startDate.getMonth() + 1).padStart(2, '0');
+                const day = String(startDate.getDate()).padStart(2, '0');
+                const hours = String(startDate.getHours()).padStart(2, '0');
+                const minutes = String(startDate.getMinutes()).padStart(2, '0');
+                return `${year}年${month}月${day}日 ${hours}:${minutes}`;
+            },
+            transformPmid(pmid) {
+                switch (pmid) {
+                    case 1:
+                        return "現場付款";
+                    case 2:
+                        return "匯款";
+                    case 3:
+                        return "linePay";
+                    case 4:
+                        return "綠界信用卡";
+                    case 5:
+                        return "免費活動";
+                }
+            },
+            transformStatus(status) {
+                switch (status) {
+                    case 0:
+                        return "已取消報名";
+                    case 1:
+                        return "已報名，未付費";
+                    case 2:
+                        return "已付費";
+                }
+            },
+
+            // 計算字數限制
+            limitedTitle(title) {
+                const maxLength = 20; // 最大字數限制
+                return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
+            },
+
+        }, mounted() {
+
+            //console.log("acid=", this.acid)
+            axios.post(`/signSuccess/${this.acid}`).then(response => {
+                this.dtos = response.data;
+                this.dtos.forEach(dto => {
+                    dto.formattedasfDate = this.formattedDate(dto.asfDate);
+                    dto.asfSignStatus = this.transformStatus(dto.asfSignStatus);
+                    dto.pmid = this.transformPmid(dto.pmid);
+                });
+
+                // //console.log(this.dtos);
+            })
+        }, created() {
+            axios.get(`/signActivity/${parseInt(window.location.href.split("/").slice(-1))}`)
+                .then(response => {
+
+                    this.activityInfo = response.data;
+                    let acd = new Date(this.activityInfo.acDate);
+                    this.activityInfo.acDate = acd.getFullYear() + "/" + ("0" + (acd.getMonth() + 1)).slice(-2) + "/" + ("0" + acd.getDate()).slice(-2) + "  " + ("0" + acd.getHours()).slice(-2) + ":" + ("0" + acd.getMinutes()).slice(-2);
+                    // //console.log(this.activityInfo);
+
+                    //判斷過期
+                    let today = new Date();
+                    let acSignUpEndDay = new Date(this.activityInfo.acSignUpEndDate);
+
+
+                    if (today > acSignUpEndDay) {
+                        this.isSignAvailable = false
+                    } else {
+                        this.isSignAvailable = true
+                        // //console.log("today - acSignUpEndDay", this.secondToDays(today - acSignUpEndDay))
+                        this.activityInfo.remainDays = this.secondToDays(acSignUpEndDay - today)
+                    }
+                })
+        },
+    }).mount('#signedApp')
+</script>
+
+</html>

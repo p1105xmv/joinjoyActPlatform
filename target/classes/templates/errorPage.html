@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 404</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            /* 背景颜色 */
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-top: 40px;
+        }
+
+        p {
+            font-size: 18px;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+
+        .btn-primary {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{layout/navbar}"></div>
+
+    <div class="container text-center">
+        <img src="/img/web/jojo_bird.png" class="img-fluid" style="width: 400px;">
+        <h1>Oops!</h1>
+        <p>我們迷路了，找不到您要找的頁面。請稍後再試一次，或返回主頁。</p>
+        <a href="/" class="btn btn-lg  btn-warning rounded-pill ">返回主頁</a>
+    </div>
+
+</body>
+
+</html>

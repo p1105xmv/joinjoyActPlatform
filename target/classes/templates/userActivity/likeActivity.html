@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.14/vue.esm-browser.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js" integrity="sha512-gEM2INjX66kRUIwrPiTBzAA6d48haC9kqrWZWjzrtnpCtBNxOXqXVFEeRDOeVC13pw4EOBrvlsJnNr2MXiQGvg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<link th:href="@{/css/cards.css}" rel="stylesheet" />
+
+<title>活動管理頁面</title>
+<style>
+
+.profile-container {
+        display: flex;
+        align-items: center;
+        margin-top:35px;
+        margin-left:-450px;
+    }
+
+    .profile-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-right:25px;
+    }
+
+    .profile-img img {
+        width: 100%;
+        height: auto;
+    }
+
+    .nickname {
+        font-size: 30px;
+    }
+#allCard {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left:30px;
+  margin-top:20px;
+}
+
+.actCard {
+  font-size: 20px;
+  width: 320px;
+  height: 320px;
+  margin: 20px;
+  margin-bottom:40px;
+}
+
+.jcards {
+  gap: 2em;
+  padding: 0; 
+  padding-left: 1em;
+  padding-right: 1em;
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap; /* 卡片自動換行 */
+  justify-content: flex-start; /* 使卡片從左側開始排列 */
+}
+
+.noData{
+  font-size: 25px;
+  color:#7B7B7B;
+  margin-left:300px;
+  margin-top:30px;
+}
+
+</style>
+</head>
+<body  style="background-color:#FFFFF0">
+<div th:replace="~{layout/navbar}"></div>
+<div style="display: flex;">
+<div th:replace="~{layout/users_sidebar}" style="width: 200px;position:fixed;"></div>
+
+<div style="flex-grow: 1; margin-top:0px;">
+
+<div class="profile-container">
+    <div class="profile-img">
+        <img th:if="${photoPath}" th:src="@{|${photoPath}|}"/>
+        <img th:unless="${photoPath}" th:src="@{/img/web/jojo_bird.png}"/>
+    </div>
+    <div th:if="${nickname}" class="nickname" th:text="${nickname}"></div>
+    <div th:unless="${nickname}" class="nickname" th:text="${session.userinfo.uName}"></div>
+</div>
+
+<ul class="nav nav-tabs" style="margin-top:10px;margin-left:-500px">
+  <li class="nav-item"  id="tab1" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/signed}" aria-current="page">已報名活動</a>
+  </li>
+  <li class="nav-item" id="tab2" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/joined}">已參加活動</a>
+  </li>
+  <li class="nav-item" id="tab3" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/canceled}">已取消活動</a>
+  </li>
+  <li class="nav-item" id="tab4" style="font-size:20px">
+    <a class="nav-link active" th:href="@{/users/manageActivity/like}">收藏的活動</a>
+  </li>
+  <li class="nav-item" id="tab5" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/comment}">待評論活動</a>
+  </li>
+  <li class="nav-item" id="tab6" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/followOrg}">已追蹤的主辦單位</a>
+  </li>
+</ul>
+</div>
+ </div>
+<div id="app" style="margin-left:250px;margin-top:10px;display: inline-flex;">
+ <div id="allCard">
+ 
+ 		<ul class="jcards">
+            <li v-for="activity in activities" :key="activity.acid">
+              <!--one card start-->
+              <a style="margin-bottom: 20px;" :href=`/showActivity/activityPage/${activity.acid}`
+                class="jcard shadow">
+                <img :src="activity.acImg" class="jcard__image" alt="" />
+
+                <div class="jcard__overlay">
+                  <div class="jcard__header">
+                    <svg class="jcard__arc" xmlns="http://www.w3.org/2000/svg">
+                      <path />
+                    </svg>
+                    <div class="jcard__header-text">
+
+                      <h3 class="jcard__title mb-2">{{limitedTitle(activity.acName)}}</h3>
+                      <span class="jcard__status"></span><span class="jcard__status"><i
+                          class="bi bi-pin-map-fill mr-sm-2"> </i>{{activity.acCity}}</span>
+                    </div>
+                    <div class="jcard__thumbnum">
+                      <button style="text-decoration: none;" id="likeBtn" class="btn btn-link text-warning"
+                       >
+                        <span>
+                     <!--      <i class="bi bi-heart mr-sm-2" ></i> -->
+                         <i class="bi bi-heart-fill mr-sm-2" @click="addLike(activity.acid)"></i>
+                          {{activity.FavNum}}
+                        </span>
+                      </button>
+                    </div>  
+                  </div>
+                  <div class="jcard__description_timeinfo">
+                    <span class="jcard__status">活動日期：{{activity.formattedStartDate}}</span>
+                    <p style="visibility: hidden;">隱藏空白行</p>
+                  </div>
+               </div>
+              </a>
+            </li>
+            <!--one jcard end-->
+
+          </ul>
+
+</div>
+<div class="noData" v-if="activities.length === 0">～～您目前沒有收藏的活動喔～～</div>
+</div>
+<script>
+Vue.createApp({
+      data() {
+      return { 
+      activities:[],
+      formattedStartDate: '',
+      userid: "",
+      WEBROOT: WebRoot,
+      };
+      },
+      methods: {
+      //把日期格式改為年月日
+      formatStartDate(dateString) {
+      const startDate = new Date(dateString);
+      const year = startDate.getFullYear();
+      const month = String(startDate.getMonth() + 1).padStart(2, '0');
+      const day = String(startDate.getDate()).padStart(2, '0');
+      const hours = String(startDate.getHours()).padStart(2, '0');
+      return `${year}年${month}月${day}日 ${hours}:00`;
+      },
+      //取活動的資料～(包含日期格式)
+      fetchData() {
+	  axios.get('/users/likeActivity')
+	    .then(response => {
+	      this.activities = response.data;
+	      this.activities.forEach(activity => {
+	        activity.formattedStartDate = this.formatStartDate(activity.acStartDate);
+	      });
+	
+	      // 使用 map 方法創建一個promise Array，每個promise都獲取一個活動的 FavNum
+	      const promises = this.activities.map(activity => {
+	        return axios.get(`${WebRoot}/countFavNum/${activity.acid}`)
+	          .then(response => {
+	            if (response.data !== '') {
+	              activity.FavNum = response.data;
+	              //console.log(`Activity ${activity.acid} 的收藏人數為 ${response.data}`);
+	            }
+	          })
+	          .catch(error => {
+	            console.error(`獲取活動 ${activity.acid} 的收藏人數錯誤:`, error);
+	          });
+	      });
+	
+	      // 使用 Promise.all 來等待非同步操作完成
+	      return Promise.all(promises);
+	    })
+	    .catch(error => {
+	      console.error('Error fetching data:', error);
+	    });
+	},
+      //取得userid資料
+      fetchUserData(){
+      axios.get(`${WebRoot}/api/session/getUserinfo`)
+          .then(response => {
+            if (response.data != '') {
+              this.userid = response.data.userid;
+            }
+          })
+      },
+      //計算每個活動的收藏人數
+      	
+   
+      // 收藏活動
+	  addLike(acid) {
+	  	event.preventDefault(); // 阻止點擊時直接點到活動連結
+		    let data = {
+              userid: "",
+              acid: ""
+            }
+            data.acid = acid;
+            data.userid = this.userid
+		  // 使用 Axios 發送 POST 請求到後端
+		  axios.post('/cancelAddlike',data)
+		    .then(response => {
+		      // 處理成功響應
+		      //console.log('取消收藏成功');
+		      this.activities = this.activities.filter(activity => activity.acid !== acid);
+		    })
+		    .catch(error => {
+		      // 處理錯誤
+		      console.error('收藏活動錯誤', error);
+		    });
+	  },
+      // 計算字數限制
+      limitedTitle(title) {
+        const maxLength = 22; // 最大字数限制
+        return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
+      },
+      limitedStatus(content) {
+        const maxLength = 50; // 最大字数限制
+        return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+      },
+        },
+      created() {
+      	this.fetchData();
+      	this.fetchUserData();
+      },
+      }).mount("#app");
+ </script>
+ 
+</body>
+</html>

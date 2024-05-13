@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- icon -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- vue3 -->
+  <!-- <script src="https://unpkg.com/vue@next"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+  <!-- 日期選擇器 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.21/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- flatpickr中文語言包 -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+  <!-- googleMap -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhfE-e9LqH5W7NC7xNID0waaqxMjSw-DQ" async
+    defer></script>
+
+  <!-- cropper -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <script src="https://unpkg.com/element-plus"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet" />
+  <script src="https://unpkg.com/cropperjs"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/lib/theme-chalk/index.css" />
+  <script src="https://unpkg.com/element-plus/lib/index.full.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+
+  <title>活動資訊</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #fef8f8;
+    }
+
+    .Main {
+      width: 1080px;
+      min-height: calc(100vh - 95px);
+      margin: 20px auto 26px;
+      background-color: #fff;
+      padding: 5px 0 46px;
+      box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .BasicInfoPage-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+    }
+
+    .BasicInfoPage-basicinfo-title {
+      padding-bottom: 22px;
+      font-size: 25px;
+      font-weight: 500;
+      line-height: 1.6;
+      color: #36353c;
+      font-weight: bold;
+    }
+
+    .ImageUploadBase-module-container {
+      position: relative;
+      background-color: #f5f5f5;
+      width: 100%;
+      border: 2px solid #d4d4d4;
+      height: 0;
+      overflow: hidden;
+      position: relative;
+      width: 100%;
+      padding-bottom: 50%;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: auto;
+      transition: transform 0.8s ease;
+    }
+
+    .image-preview img:hover {
+      transform: scale(1.05);
+      transition: transform 0.8s ease;
+    }
+
+    .UploadCover-uploader-button {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 28px;
+      cursor: pointer;
+      border: none;
+      border-radius: 48px;
+      background-color: #f0c330;
+      color: #000000;
+      font-size: 18px;
+      font-weight: 500;
+      transition: all 0.2s;
+      box-shadow: 0 6px 12px 4px rgba(0, 0, 0, 0.2);
+      outline: none;
+      white-space: pre-line;
+      z-index: 10;
+    }
+
+    .UploadCover-uploader-button:hover {
+      filter: brightness(1.1);
+      /* 提高亮度，>1變亮，<1變暗 */
+    }
+
+    .UploadCover-uploader-button:hover+.image-preview img {
+      transform: scale(1.05);
+      transition: transform 0.8s ease;
+    }
+
+    .UploadCover-icon {
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
+      margin: 0 6px 2px 0;
+      --icon-size: 24px;
+      --icon-color: inherit;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      display: inline-block;
+      flex-shrink: 0;
+      font-size: var(--icon-size);
+      color: var(--icon-color);
+      fill: currentColor;
+    }
+
+    .BasicInfoPage-basicinfo {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 772px;
+    }
+
+    .BasicInfoPage-basicinfo-inner {
+      padding: 40px 26px 50px;
+    }
+
+    .Field-field {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+
+    .Field-contact-field {
+      display: flex;
+      width: 100%;
+      margin-bottom: 25px;
+      align-items: center;
+    }
+
+    .Input-input {
+      padding: 8px 13px 10px;
+      font-size: 14px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      border: none;
+      width: 100%;
+      background: #f1f1f1;
+    }
+
+    .Input-contact-input::-webkit-inner-spin-button,
+    .Input-contact-input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .Input-contact-input {
+      padding: 8px 13px 10px;
+      font-size: 14px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      border: none;
+      width: 40%;
+      background: #f1f1f1;
+    }
+
+    .Field-field-inner {
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .Field-label {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.71;
+      color: #282828;
+      padding-bottom: 10px;
+    }
+
+    .RadioButtons-box {
+      margin-top: 10px;
+    }
+
+    .Field-required {
+      color: #d84a49;
+      padding-left: 3px;
+    }
+
+    .Select-select {
+      width: 100%;
+      padding: 14px 18px 14px 24px;
+      background: #f1f1f1 url("/img/icon/chevron-down.svg") top 18px right 22px no-repeat;
+      background-size: 18px 18px;
+      border: 0;
+      border-radius: 0;
+      font-size: 16px;
+      color: #282828;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+
+    .Select-dateSelect {
+      width: 100% !important;
+      padding: 14px 18px 14px 24px !important;
+      background: #f1f1f1 url("/img/icon/chevron-down.svg") top 18px right 22px no-repeat !important;
+      background-size: 18px 18px !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      font-size: 16px !important;
+      color: #282828 !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+    }
+
+    .Select-dateSelect:focus {
+      border-radius: 3px !important;
+      outline: 2px solid #282828 !important;
+      box-shadow: none !important;
+    }
+
+    .Types-checkbox-label {
+      margin-left: 5px;
+      cursor: pointer;
+      font-size: 17px;
+    }
+
+    .Types-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .BasicInfoPage-date-select-inner {
+      display: flex;
+    }
+
+    .Datepicker-container {
+      width: 50%;
+    }
+
+    .SelectTime-Container {
+      width: 25%;
+      margin-left: 10px;
+    }
+
+    .RelatedLinkInput-word-count {
+      float: right;
+      font-size: 11px;
+      color: #a9a9a9;
+      margin-bottom: 5px;
+    }
+
+    /* .SelectCity-Container {
+			display: flex;
+			width: auto;
+			margin-bottom: 20px;
+		} */
+
+    .title-span {
+      font-size: 16px;
+      margin: 10px;
+    }
+
+    .SelectCity-inner {
+      margin-left: 5px;
+      width: 20%;
+    }
+
+    .Field-tip {
+      color: #a9a9a9;
+    }
+
+    .PagerButtons-button-container {
+      border-top: 1px solid #a9a9a9;
+      margin: 10px 0px;
+      padding: 10px 0px;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .PagerButton-button {
+      width: 200px;
+      height: 50px;
+      cursor: not-allowed;
+      font-size: 16px;
+      background-color: rgb(255, 196, 0);
+      border: none;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+
+    .PagerButton-button:hover {
+      /* 調整亮度 */
+      filter: brightness(0.9);
+    }
+
+    .form-control {
+      height: auto;
+    }
+
+    .error-form-control {
+      outline: red 1px solid !important;
+      cursor: pointer !important;
+    }
+
+    /* error class */
+    .error-border {
+      outline: 1px solid red;
+    }
+
+    .error-message {
+      color: red;
+      margin: 5px;
+    }
+
+    .BasicInfoPage-nextPage-btn-label {
+      font-size: 16px;
+    }
+
+    /* ---------------------cropper----------------------- */
+    .cropper-bg {
+      background-image: none !important;
+    }
+
+    .default-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 5px solid #ffffff;
+      box-shadow: 0 0 8px #999;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    /* 用于剪裁完成后的图像 */
+    .cropped-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 5px solid #ffffff;
+      box-shadow: 0 0 8px #999;
+      object-fit: cover;
+    }
+
+    .cropped-image {
+      width: 100px;
+      /* 設置圖片固定寬度 */
+      height: 100px;
+      /* 設置圖片固定高度 */
+      object-fit: cover;
+      /* 如果圖片比例不是1:1，這將幫助圖片以適當的方式填充容器 */
+    }
+
+    .cropper-view-box,
+    .cropper-face {
+      border-radius: 50%;
+    }
+
+    .modal-lg .modal-content {
+      max-width: 750px;
+      /* 或者您希望的任何尺寸 */
+      max-height: 750px;
+      /* 或者您希望的任何尺寸 */
+    }
+
+    .custom-cropper .cropper-view-box,
+    .custom-cropper .cropper-face {
+      border-radius: 0;
+      /* 移除圓角效果 */
+    }
+
+    .cropper-container {
+      width: auto !important;
+    }
+
+    .cropped-image2 {
+      width: 1080px;
+      /* 預覽圖片的寬度 */
+      height: 540px;
+      /* 預覽圖片的高度 */
+      object-fit: cover;
+      /* 保持圖片的比例 */
+      /* 可以添加其他需要的樣式 */
+    }
+
+    .default-image2 {
+      width: 1080px;
+      height: 540px;
+      border-radius: 5px;
+      border: 5px solid #ffffff;
+      box-shadow: 0 0 8px #999;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    /* ---------------------cropper----------------------- */
+  </style>
+</head>
+
+<body>
+  <div th:replace="~{layout/navbar}"></div>
+  <div id="app">
+    <template v-if="loadingFinish">
+      <div>
+        <main class="Main">
+          <div class="BasicInfoPage-container">
+            <p class="BasicInfoPage-basicinfo-title">建立活動資訊！</p>
+            <div class="ImageUploadBase-module-container" :class="{'error-border': acImgFieldError && formTried}">
+              <div class="">
+                <input type="file" id="imageUpload" @change="handleFileChange" style="display: none" accept="image/*" />
+                <label for="imageUpload" class="UploadCover-uploader-button"
+                  @click="clickUpload2">上傳圖片，1080x540pixel，檔案小於5MB
+                </label>
+                <div class="image-preview">
+                  <img :src="activity.acImg" />
+                </div>
+              </div>
+            </div>
+            <div v-if="acImgFieldError && formTried" class="error-message">
+              必填
+            </div>
+            <!-- Cropper Modal -->
+            <div class="modal fade" id="cropperModal2" tabindex="-1" aria-labelledby="cropperModal2Label"
+              aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="cropperModal2Label">
+                      裁剪圖片
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="custom-cropper">
+                    <img ref="modalImage2" class="custom-cropper" style="max-width: 100%" />
+                  </div>
+                  <div class="modal-footer">
+                    <input type="range" id="zoomRange2" value="0" min="0" max="800" />
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="cancelCrop2">
+                      取消
+                    </button>
+                    <button type="button" class="btn btn-primary" @click="confirmCrop2">
+                      確認剪裁
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="BasicInfoPage-basicinfo">
+              <div class="BasicInfoPage-basicinfo-inner">
+                <div class="Field-field">
+                  <div class="Field-label">
+                    活動形式<span class="Field-required">*</span>
+                  </div>
+
+                  <select class="Select-select" v-model="activity.acPlaceStatus"
+                    :class="{'error-border': acPlaceStatusFieldError && formTried}" @change="initAddress()">
+                    <option value="null" disabled selected>請選擇</option>
+                    <option :value="status-1" v-for="status in 2">
+                      {{(status-1)==0?'線上活動':'線下活動'}}
+                    </option>
+                  </select>
+                  <div v-if="acPlaceStatusFieldError && formTried" class="error-message">
+                    必填
+                  </div>
+                </div>
+                <!-- <div class="Field-field" v-if="activity.acPlaceStatus==1">
+								<div class="Field-label">
+									安心活動標章<span class="Field-required">*</span>
+								</div>
+								<span class="RadioButtons-text">若活動現場提供以下措施，將在活動頁面顯示安心活動標章，讓消費者報名更安心，提升活動報名率！
+									<br />1. 提供酒精消毒手部<br />2. 量測體溫和戴口罩<br />3. 禁止體溫超過37.5度者入場
+								</span>
+								<div class="RadioButtons-box" display="none" v-for="safeStatus in 2">
+
+									<input type="radio" name="Condition-radio" class="RadioButtons-radio"
+										:class="{'error-border': acSafeStatusFieldError && formTried}"
+										:value="safeStatus-1" v-model="activity.acSafeStatus"
+										:id="'safeStatus'+safeStatus" @change="checkSafeField" /> <label
+										class="RadioButtons-normal" :for="'safeStatus'+safeStatus">
+										<span
+											class="RadioButtons-text">{{(safeStatus-1)==0?'活動符合上述條件（於活動頁面顯示安心標章）':'不完全符合條件'}}
+										</span>
+									</label> </br>
+								</div>
+
+								<div v-if="activity.acPlaceStatus==1 && acSafeStatusFieldError && formTried"
+									class="error-message">必填</div>
+							</div> -->
+                <div class="Field-field" v-if="activity.acPlaceStatus==0">
+                  <div class="Field-label">
+                    直播連結<span class="Field-required">*</span>
+                  </div>
+
+                  <input type="text" class="Input-input" :class="{'error-border': acOnlineFieldError && formTried}"
+                    placeholder="請輸入直播影片連結" value="" v-model="activity.acOnline" @input="checkOnlineField" />
+                  <div v-if="activity.acPlaceStatus==0 && acOnlineFieldError && formTried" class="error-message">
+                    必填
+                  </div>
+                </div>
+                <div v-if="activity.allTypes!=null" class="Field-field">
+                  <div class="Field-label">
+                    活動主題<span class="Field-required">*</span>
+                  </div>
+                  <span>(最多選擇3項)</span>
+
+                  <div v-for="type in activity.totalTypes" :key="type.alltypeid">
+                    <div class="RadioButtons-box">
+                      <input type="checkbox" class="Types-checkbox" :value="type" :id="'type-' +type.alltypeid"
+                        v-model="activity.allTypes"
+                        :disabled="isCkeckBoxLimitExceeded && !activity.allTypes.some(item => item.alltypeid === type.alltypeid)"
+                        @change="handleCheckChange();checkAllTypesField();" />
+                      <label class="Types-checkbox-label" :for="'type-' +type.alltypeid">{{type.typeName}}
+                      </label>
+                    </div>
+                  </div>
+
+                  <div v-if="allTypesFieldError && formTried" class="error-message">
+                    必填
+                  </div>
+                </div>
+                <div class="Field-field">
+                  <div class="Field-label">
+                    主辦單位名稱<span class="Field-required">*</span>
+                  </div>
+                  <select class="Select-select" :class="{'error-border': organizerFieldError && formTried}"
+                    v-model="activity.organizer" @change="checkOrganizerField">
+                    <option :value="organizer" v-for="organizer in activity.organizers" :key="organizer.oid">
+                      {{organizer.oname}}
+                    </option>
+                  </select>
+                  <div v-if="organizerFieldError && formTried" class="error-message">
+                    必填
+                  </div>
+                </div>
+                <div class="Field-field">
+                  <div class="Field-label">
+                    活動名稱<span class="Field-required">*</span>
+                  </div>
+                  <input type="text" class="Input-input" :class="{'error-border': acNameFieldError && formTried}"
+                    required maxlength="100" step="1" value="" v-model="activity.acName" @input="checkNameField" />
+                  <div v-if="acNameFieldError && formTried" class="error-message">
+                    必填
+                  </div>
+                </div>
+
+                <div class="Field-field">
+                  <div class="Field-label">
+                    活動時間<span class="Field-required">*</span>
+                  </div>
+                  <div class="">
+                    <div class="">
+                      <div class="Field-field">
+                        <span class="Field-tip">開始時間</span>
+                        <div class="BasicInfoPage-date-select-inner">
+                          <div class="Datepicker-container">
+                            <input type="text" id="datepickerStart" class="form-control Select-dateSelect"
+                              :class="{'error-form-control': startDateFieldError && formTried}" v-model="startDate"
+                              @input="checkStartDateField" />
+                          </div>
+                          <div class="SelectTime-Container">
+                            <select class="Select-select" :class="{'error-border': startHourFieldError && formTried}"
+                              v-model="startHour" @change="checkStartHourField">
+                              <option value="null" disabled selected>
+                                時
+                              </option>
+                              <option v-for="i in 25" :value="i <= 10 ? '0' + (i-1) : (i-1)">
+                                {{ i <= 10 ? '0' + (i-1) : (i-1)}} </option>
+                            </select>
+                          </div>
+                          <div class="SelectTime-Container">
+                            <select class="Select-select" :class="{'error-border': startMinFieldError && formTried}"
+                              v-model="startMin" @change="checkStartMinField">
+                              <option value="null" disabled selected>
+                                分
+                              </option>
+                              <option v-for="i in options" :value="i">
+                                {{i}}
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+                        <div v-if="(startDateFieldError || startHourFieldError || startMinFieldError) && formTried"
+                          class="error-message">
+                          必填
+                        </div>
+                      </div>
+                    </div>
+                    <div class="">
+                      <div class="Field-field">
+                        <span class="Field-tip">結束時間</span>
+                        <div class="BasicInfoPage-date-select-inner">
+                          <div class="Datepicker-container">
+                            <input type="text" id="datepickerEnd" class="form-control Select-dateSelect"
+                              :class="{'error-form-control': endDateFieldError && formTried}" v-model="endDate"
+                              @input="checkEndDateField" />
+                          </div>
+                          <div class="SelectTime-Container">
+                            <select class="Select-select" :class="{'error-border': endHourFieldError && formTried}"
+                              v-model="endHour" @change="checkEndHourField">
+                              <option value="null" disabled selected>
+                                時
+                              </option>
+                              <option v-for="i in 25" :value="i <= 10 ? '0' + (i-1) : (i-1)">
+                                {{ i <= 10 ? '0' + (i-1) : (i-1)}} </option>
+                            </select>
+                          </div>
+                          <div class="SelectTime-Container">
+                            <select class="Select-select" :class="{'error-border': endMinFieldError && formTried}"
+                              v-model="endMin" @change="checkEndMinField">
+                              <option value="null" disabled selected>
+                                分
+                              </option>
+                              <option v-for="i in options" :value="i">
+                                {{i}}
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+                        <div v-if="(endDateFieldError || endHourFieldError || endMinFieldError) && formTried"
+                          class="error-message">
+                          必填
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="Field-field">
+                  <div class="Field-label">
+                    聯絡資訊<span class="Field-required">*</span>
+                  </div>
+                  <div class="Field-field-inner">
+                    <span class="title-span">行動電話：</span>
+                    <input type="text" class="Input-contact-input"
+                      :class="{'error-border': acPhoneFieldError && formTried}" placeholder="ex. 0976443912"
+                      maxlength="10" v-model="activity.acPhone" @input="checkPhoneField();handleInput(event);" />
+                  </div>
+                  <div v-if="acPhoneFieldError && formTried" class="error-message">
+                    {{checkPhoneNumber()}}
+                  </div>
+                  <div class="Field-field-inner">
+                    <span class="title-span">E-mail：</span>
+                    <input type="text" class="Input-contact-input"
+                      :class="{'error-border': acEmailFieldError && formTried}" placeholder="ex. jacky1376@gmail.com"
+                      v-model="activity.acEmail" @input="checkEmailField" />
+                  </div>
+                  <div v-if="acEmailFieldError && formTried" class="error-message">
+                    必填
+                  </div>
+                </div>
+                <div class="Field-field">
+                  <div class="Field-label">相關連結</div>
+                  <span class="Field-tip">官網或社群連結<br /></span>
+                  <input class="Input-input" placeholder="顯示名稱：如官網、官方粉絲團" value="" v-model="activity.acLinkName"
+                    @input="limitInput" />
+
+                  <div class="RelatedLinkInput-word-count">
+                    {{currentLength}} / 20
+                  </div>
+
+                  <input type="text" class="Input-input" placeholder="網址：https://www.google.com.tw/" maxlength="500"
+                    step="1" value="" v-model="activity.acLinkUrl" />
+                </div>
+
+                <div class="Field-field" v-if="activity.acPlaceStatus!=0">
+                  <div class="Field-label">
+                    活動地點<span class="Field-required">*</span>
+                  </div>
+                  <div class="Field-contact-field">
+                    <span class="title-span">台灣</span>
+                    <div class="SelectCity-inner">
+                      <select class="Select-select" :class="{'error-border': acCityFieldError && formTried}"
+                        v-model="activity.acCity" @change="checkCityField">
+                        <option value="null" disabled selected>城市</option>
+                        <option :value="city.cityName" v-for="city in activity.citys" :key="city.addCityid">
+                          {{city.cityName}}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div v-if="acCityFieldError && formTried" class="error-message">
+                    必填
+                  </div>
+                  <div class="Field-field">
+                    <span class="Field-tip">
+                      詳細地址（鄉鎮市區、道路、街名、巷弄號、樓層）</span>
+                    <input type="text" class="Input-input" :class="{'error-border': acAddressFieldError && formTried}"
+                      maxlength="500" required="" placeholder="例如：大安區仁愛路三段160號3樓" step="1" value=""
+                      v-model="activity.acAddress" @input="checkAddressField" />
+
+                    <div v-if="acAddressFieldError && formTried" class="error-message">
+                      必填
+                    </div>
+                  </div>
+                  <div class="Field-field">
+                    <span class="Field-tip"> 補充說明</span>
+                    <input type="text" class="Input-input" maxlength="500" placeholder="" step="1" value=""
+                      v-model="activity.acAddNote" />
+                  </div>
+                </div>
+                <div class="Field-field" v-if="activity.acPlaceStatus!=0">
+                  <div id="map" style="height: 400px; width: 100%"></div>
+                </div>
+              </div>
+              <div class="PagerButtons-button-container">
+                <button class="PagerButton-button"
+                  :style="{'color':optionStatus==1?'#000':'#fff','background-color':optionStatus==1?'#ffc400':'#16cbf8'}"
+                  @click="goBack(optionStatus)">
+                  {{optionStatus==1?"返回上一步":"返回活動管理"}}
+                </button>
+                <button class="PagerButton-button"
+                  :style="{'color':optionStatus==1?'#000':'#fff','background-color':optionStatus==1?'#ffc400':'#16cbf8'}"
+                  @click="trySubmit" :disabled="isButtonDisabled">
+                  <span v-if="insertLoading" class="spinner-border" :style="{'color':optionStatus==1?'#000':'#fff'}"
+                    role="status" aria-hidden="true"></span>
+                  <span v-if="!insertLoading"
+                    class="BasicInfoPage-nextPage-btn-label">{{optionStatus==1?"下一步":"儲存設定"}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </template>
+  </div>
+  <script type="module">
+    Vue.createApp({
+      data() {
+        return {
+          activity: [],
+          //日期選擇器
+          weekDays: ["日", "一", "二", "三", "四", "五", "六"],
+          startDate: null,
+          startHour: null,
+          startMin: null,
+          endDate: null,
+          endHour: null,
+          endMin: null,
+          endDatePicker: null,
+          //googleMap
+          currentAddress: null,
+          markers: [],
+          //CheckBox限制3項
+          isCkeckBoxLimitExceeded: false,
+          //必填欄位狀態
+          acImgFieldError: false,
+          acPlaceStatusFieldError: false,
+          acSafeStatusFieldError: false,
+          acOnlineFieldError: false,
+          allTypesFieldError: false,
+          organizerFieldError: false,
+          acNameFieldError: false,
+          startDateFieldError: false,
+          startHourFieldError: false,
+          startMinFieldError: false,
+          endDateFieldError: false,
+          endHourFieldError: false,
+          endMinFieldError: false,
+          acPhoneFieldError: false,
+          acEmailFieldError: false,
+          acCityFieldError: false,
+          acAddressFieldError: false,
+          // 是否提交過
+          formTried: true,
+          //下一步按鈕狀態
+          isButtonDisabled: false,
+          //loading狀態
+          insertLoading: false,
+          //新建或編輯狀態
+          optionStatus: null,
+          //是否載入完成
+          loadingFinish: true,
+          //cropper
+          cropper2: null,
+          cropperVisible2: false,
+        };
+      },
+
+      mounted() {
+        //取得頁面路徑
+        const path = window.location.pathname;
+        const segments = path.split("/");
+        //從最後一個索引值獲取 optionStatus
+        this.optionStatus = segments[segments.length - 1];
+
+        axios
+          .get("/createAc/getAcBasicInfo")
+          .then((response) => {
+            //console.log(response.data);
+            this.activity = response.data;
+            if (
+              response.data.acAddress != null &&
+              response.data.acCity != null
+            )
+              this.currentAddress =
+                "台灣" + response.data.acCity + response.data.acAddress;
+            if (response.data.allTypes == null) response.data.allTypes = [];
+            if (response.data.acStartDate != null)
+              this.setStartDate(response.data.acStartDate);
+            if (response.data.acEndDate != null)
+              this.setEndDate(response.data.acEndDate);
+
+            // 初始化日期選擇器
+            this.initFlatpickr();
+            // 初始化地圖
+            this.initMap();
+            this.geocodeAddress(this.currentAddress);
+            this.handleCheckChange();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+        this.$nextTick(() => {
+          const zoomRange = document.getElementById("zoomRange");
+          zoomRange.addEventListener("input", this.adjustCropBox);
+          // 設置初始剪裁框尺寸和位置
+          this.originalCropBoxData = {
+            //   left: 50, 
+            //   top: 50,
+            width: 533.333,
+            height: 266.667,
+          };
+          const zoomRange2 = document.getElementById("zoomRange2");
+          zoomRange2.addEventListener("input", this.adjustCropBox2);
+        });
+      },
+      methods: {
+        initMap() {
+          const zoomLevel = this.currentAddress ? 15 : 8;
+
+          this.map = new google.maps.Map(document.getElementById("map"), {
+            zoom: zoomLevel, // 可以調整地圖的初始縮放比例
+            center: { lat: -34.397, lng: 150.644 }, // 默認中心點，會根據地址更改
+          });
+        },
+        geocodeAddress(address) {
+          const geocoder = new google.maps.Geocoder();
+          this.markers.forEach((marker) => marker.setMap(null));
+          this.markers.forEach((marker) => marker.setVisible(false));
+          this.markers = []; // 清空原有的 marker
+          this.initMap();
+          geocoder.geocode({ address: address }, (results, status) => {
+            if (status === "OK") {
+              this.map.setCenter(results[0].geometry.location);
+              const marker = new google.maps.Marker({
+                map: this.map,
+                position: results[0].geometry.location,
+              });
+
+              this.map.setZoom(this.currentAddress ? 15 : 8);
+              this.markers.push(marker);
+            }
+            // else {
+            //     alert('Geocode was not successful for the following reason: ' + status);
+            // }
+          });
+        },
+        handleFileChange(event) {
+          //console.log("in handleFileChange");
+          const file = event.target.files[0];
+          if (file) {
+            if (file.size > 5242880) {
+              alert("檔案大小必須小於5MB!!");
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = new Image();
+              img.onload = () => {
+                if (img.width < 1080 || img.height < 540) {
+                  alert("圖片高度至少是1080，寬度至少是540");
+                  return;
+                }
+                this.openCropperModal2(file);
+                //   this.activity.acImg = e.target.result;
+              };
+              img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+          setTimeout(() => {
+            this.checkImgField();
+          }, 100);
+        },
+        //------------------cropper------------------
+        clickUpload2() {
+          this.cropperVisible2 = false; // 隱藏剪裁框
+          const imageUpload = document.getElementById("imageUpload");
+          imageUpload.value = null; // 重置文件輸入，再次選擇相同文件時能夠觸發 change 事件
+        },
+
+        confirmCrop2() {
+          // 取得剪裁後的圖片數據，並指定尺寸
+          const croppedCanvas = this.cropper2.getCroppedCanvas({
+            width: 1080, // 指定剪裁後圖片的寬度
+            height: 540, // 指定剪裁後圖片的高度
+          });
+          this.activity.acImg = croppedCanvas.toDataURL();
+          // this.croppedImageUrl2 = croppedCanvas.toDataURL();
+          this.cropper2.destroy();
+          this.cropper2 = null;
+          this.cropperVisible2 = false; // 隱藏剪裁框
+
+          $("#cropperModal2").modal("hide");
+          this.checkImgField();
+        },
+        cancelCrop2() {
+          $("#cropperModal2").modal("hide");
+        },
+        openCropperModal2(file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.$refs.modalImage2.src = e.target.result;
+            this.$refs.modalImage2.style.width = "100%"; // 重置圖片寬度
+
+            this.$nextTick(() => {
+              if (this.cropper2) {
+                this.cropper2.destroy();
+              }
+              this.cropper2 = new Cropper(this.$refs.modalImage2, {
+                aspectRatio: 2 / 1,
+                viewMode: 1,
+                autoCropArea: 1,
+                background: false,
+                dragMode: "none", // 禁用鼠標拖曳
+                cropBoxResizable: false, // 禁止調整剪裁框大小
+                minContainerWidth: 748, // 最小容器寬度
+                minContainerHeight: 400, // 最小容器高度
+                maxCropBoxWidth: 350,
+                maxCropBoxHeight: 350,
+                minCanvasWidth: 350, // 最小畫布寬度
+                minCanvasHeight: 350, // 最小畫布高度
+              });
+              // 顯示 modal 框
+              $("#cropperModal2").modal("show");
+            });
+          };
+          reader.readAsDataURL(file);
+        },
+        adjustCropBox2() {
+          const rangeValue = document.getElementById("zoomRange2").value;
+          if (this.cropper2) {
+            // 計算新的剪裁框尺寸
+            const scale = rangeValue / 200;
+            const originalWidth = 300;
+            const originalHeight = 100;
+
+            const newWidth = this.originalCropBoxData.width * scale;
+            const newHeight = this.originalCropBoxData.height * scale;
+            // 設置新的剪裁框尺寸
+            this.cropper2.setCropBoxData({
+              width: newWidth,
+              height: newHeight,
+            });
+          }
+        },
+        //------------------cropper------------------
+        initFlatpickr() {
+          const Mandarin = {
+            weekdays: {
+              shorthand: ["日", "一", "二", "三", "四", "五", "六"], // 星期的簡寫
+              longhand: [
+                "星期日",
+                "星期一",
+                "星期二",
+                "星期三",
+                "星期四",
+                "星期五",
+                "星期六",
+              ], // 完整星期
+            },
+            months: {
+              shorthand: [
+                "1月",
+                "2月",
+                "3月",
+                "4月",
+                "5月",
+                "6月",
+                "7月",
+                "8月",
+                "9月",
+                "10月",
+                "11月",
+                "12月",
+              ],
+              longhand: [
+                "一月",
+                "二月",
+                "三月",
+                "四月",
+                "五月",
+                "六月",
+                "七月",
+                "八月",
+                "九月",
+                "十月",
+                "十一月",
+                "十二月",
+              ],
+            },
+          };
+          // 開始日期選擇器
+          flatpickr("#datepickerStart", {
+            enableTime: false,
+            dateFormat: "Y / m / d (D)",
+            locale: Mandarin,
+            defaultDate: this.startDate,
+            minDate: "today",
+            onReady: function (selectedDates, dateStr, instance) {
+              instance.input.placeholder = "日期";
+            },
+            onChange: (selectedDates) => {
+              this.startDate = selectedDates[0]
+                ? flatpickr.formatDate(selectedDates[0], "Y/m/d(D)") // 格式化的日期包括星期
+                : null;
+            },
+          });
+          // 結束日期選擇器
+          this.endDatePicker = flatpickr("#datepickerEnd", {
+            enableTime: false,
+            dateFormat: "Y / m / d (D)",
+            locale: Mandarin,
+            defaultDate: this.endDate,
+            minDate: this.StartDate ? this.StartDate : "today",
+            onReady: function (selectedDates, dateStr, instance) {
+              instance.input.placeholder = "日期";
+            },
+            onChange: (selectedDates) => {
+              this.endDate = selectedDates[0]
+                ? flatpickr.formatDate(selectedDates[0], "Y/m/d(D)") // 格式化的日期包括星期
+                : null;
+            },
+          });
+        },
+        setStartDate(acStartDate) {
+          //設定開始日期
+          const StartDate = new Date(acStartDate);
+          this.startDate =
+            StartDate.getFullYear() +
+            " / " +
+            (StartDate.getMonth() + 1 < 10
+              ? "0" + (StartDate.getMonth() + 1)
+              : StartDate.getMonth() + 1) +
+            " / " +
+            (StartDate.getDate() < 10
+              ? "0" + StartDate.getDate()
+              : StartDate.getDate()) +
+            " (" +
+            this.weekDays[StartDate.getDay()] +
+            ")";
+          this.startHour =
+            StartDate.getHours() < 10
+              ? `0${StartDate.getHours()}`
+              : StartDate.getHours();
+          this.startMin =
+            StartDate.getMinutes() < 10
+              ? `0${StartDate.getMinutes()}`
+              : StartDate.getMinutes();
+        },
+        setEndDate(acEndDate) {
+          //設定結束日期
+          const EndDate = new Date(acEndDate);
+          this.endDate =
+            EndDate.getFullYear() +
+            " / " +
+            (EndDate.getMonth() + 1 < 10
+              ? "0" + (EndDate.getMonth() + 1)
+              : EndDate.getMonth() + 1) +
+            " / " +
+            (EndDate.getDate() < 10
+              ? "0" + EndDate.getDate()
+              : EndDate.getDate()) +
+            " (" +
+            this.weekDays[EndDate.getDay()] +
+            ")";
+          this.endHour =
+            EndDate.getHours() < 10
+              ? `0${EndDate.getHours()}`
+              : EndDate.getHours();
+          this.endMin =
+            EndDate.getMinutes() < 10
+              ? `0${EndDate.getMinutes()}`
+              : EndDate.getMinutes();
+        },
+        handleCheckChange() {
+          this.isCkeckBoxLimitExceeded = this.activity.allTypes.length >= 3;
+          //console.log(this.isCkeckBoxLimitExceeded);
+        },
+        limitInput() {
+          if (
+            this.activity.acLinkName != null &&
+            this.activity.acLinkName.length > 20
+          ) {
+            this.activity.acLinkName = this.activity.acLinkName.slice(0, 20);
+          }
+        },
+        resetSafeStatus() {
+          this.activity.acSafeStatus = null;
+        },
+
+        resetOnline() {
+          this.activity.acOnline = null;
+        },
+        //防止複製貼上非數字
+        handleInput(event) {
+          // 移除非數字字符
+          event.target.value = event.target.value.replace(/\D/g, "");
+          this.activity.acPhone = event.target.value;
+        },
+        //檢查必填欄位
+        checkImgField() {
+          if (this.formTried == true)
+            this.acImgFieldError = this.activity.acImg == null;
+        },
+        initAddress() {
+          if (this.activity.acPlaceStatus == 1) {
+            this.initMap();
+            this.geocodeAddress(this.currentAddress);
+            this.checkPlaceField();
+          } else {
+            this.activity.acCity = null;
+            this.activity.acAddress = null;
+            this.activity.acAddNote = null;
+            this.currentAddress = null;
+          }
+        },
+        checkPlaceField() {
+          //console.log(this.activity.acPlaceStatus);
+          if (this.formTried == true) {
+            this.acPlaceStatusFieldError =
+              this.activity.acPlaceStatus == null;
+          }
+        },
+        checkSafeField() {
+          if (this.formTried == true)
+            this.acSafeStatusFieldError = this.activity.acSafeStatus == null;
+        },
+        checkOnlineField() {
+          if (this.formTried == true)
+            this.acOnlineFieldError =
+              this.activity.acOnline != null
+                ? this.activity.acOnline.trim().length === 0
+                : true;
+        },
+        checkNameField() {
+          if (this.formTried == true)
+            this.acNameFieldError =
+              this.activity.acName != null
+                ? this.activity.acName.trim().length === 0
+                : true;
+        },
+        checkAllTypesField() {
+          if (this.formTried == true)
+            this.allTypesFieldError = !(this.activity.allTypes.length > 0);
+        },
+        checkOrganizerField() {
+          if (this.formTried == true)
+            this.organizerFieldError = this.activity.organizer == null;
+        },
+        checkStartDateField() {
+          if (this.formTried == true)
+            this.startDateFieldError =
+              this.startDate != null
+                ? this.startDate.trim().length === 0
+                : true;
+        },
+        checkStartHourField() {
+          if (this.formTried == true)
+            this.startHourFieldError = this.startHour == null;
+        },
+        checkStartMinField() {
+          if (this.formTried == true)
+            this.startMinFieldError = this.startMin == null;
+        },
+        checkEndDateField() {
+          if (this.formTried == true)
+            this.endDateFieldError =
+              this.endDate != null ? this.endDate.trim().length === 0 : true;
+        },
+        checkEndHourField() {
+          if (this.formTried == true)
+            this.endHourFieldError = this.endHour == null;
+        },
+        checkEndMinField() {
+          if (this.formTried == true)
+            this.endMinFieldError = this.endMin == null;
+        },
+        checkCityField() {
+          if (this.formTried == true)
+            this.acCityFieldError = this.activity.acCity == null;
+        },
+        checkAddressField() {
+          if (this.formTried == true)
+            this.acAddressFieldError =
+              this.activity.acAddress != null
+                ? this.activity.acAddress.trim().length === 0
+                : true;
+        },
+        checkPhoneField() {
+          if (this.formTried == true)
+            this.acPhoneFieldError =
+              this.activity.acPhone != null
+                ? this.activity.acPhone.trim().length < 10
+                : true;
+        },
+        checkEmailField() {
+          if (this.formTried == true)
+            this.acEmailFieldError =
+              this.activity.acEmail != null
+                ? this.activity.acEmail.trim().length === 0
+                : true;
+        },
+        checkPhoneNumber() {
+          if (this.activity.acPhone) {
+            if (this.activity.acPhone.trim().length < 10) {
+              return "請輸入正確號碼";
+            } else return "";
+          } else return "必填";
+        },
+        //點擊下一步按鈕
+        trySubmit() {
+          this.formTried = true; // 更改是否點擊過的狀態
+          // 檢查是否需要更改"必填"狀態
+          this.checkImgField();
+          this.checkPlaceField();
+          // this.checkSafeField();
+          this.checkOnlineField();
+          this.checkNameField();
+          this.checkAllTypesField();
+          this.checkOrganizerField();
+          this.checkStartDateField();
+          this.checkStartHourField();
+          this.checkStartMinField();
+          this.checkEndDateField();
+          this.checkEndHourField();
+          this.checkEndMinField();
+          this.checkCityField();
+          this.checkAddressField();
+          this.checkPhoneField();
+          this.checkEmailField();
+          let isAllValid = this.isPlaceValid && this.isOthersValid;
+          this.$nextTick(() => {
+            this.scrollToFirstError();
+          });
+          if (isAllValid) {
+            if (this.activity.acOnline == "") {
+              this.activity.acOnline = null;
+            }
+            let StartDate = new Date(
+              this.startDate
+                .replace(/\s*\(.\)\s*/, "")
+                .replace(/\s*\/\s*/g, "-") +
+              " " +
+              this.startHour +
+              ":" +
+              this.startMin +
+              ":00"
+            );
+            this.activity.acStartDate = StartDate;
+            let EndDate = new Date(
+              this.endDate
+                .replace(/\s*\(.\)\s*/, "")
+                .replace(/\s*\/\s*/g, "-") +
+              " " +
+              this.endHour +
+              ":" +
+              this.endMin +
+              ":00"
+            );
+            this.activity.acEndDate = EndDate;
+            //console.log(this.activity.acStartDate);
+            //console.log(this.activity.acEndDate);
+            this.isButtonDisabled = true; //取消按鈕功能
+            this.insertLoading = true; //讀取動畫啟動
+            this.nextPage();
+          }
+        },
+        scrollToFirstError() {
+          // 優先順序是 .error-form-control、.error-border
+          const selectors = [".error-border", ".error-form-control"];
+          let targetElement = null;
+
+          for (const selector of selectors) {
+            targetElement = document.querySelector(selector);
+            if (targetElement) {
+              // 找到第一個匹配的元素，跳出迴圈
+              break;
+            }
+          }
+
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        },
+        nextPage() {
+          //console.log(this.activity);
+          axios
+            .post("/createAc/addAcBasicInfo", this.activity)
+            .then((response) => {
+              window.location.href = `/createAc/activityIntro/${this.optionStatus}`;
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              this.isButtonDisabled = false;
+              this.insertLoading = false;
+            });
+        },
+        goBack(optionStatus) {
+          window.location.href =
+            optionStatus == 1
+              ? `/createAc/chooseOrganizer/${this.optionStatus}`
+              : `/organizerBiz/OrganizerAcManage/${this.activity.acid}`;
+        },
+      },
+
+      computed: {
+        //分鐘選項，每5分鐘間隔
+        options() {
+          const options = [];
+          for (let i = 0; i <= 55; i += 5) {
+            options.push(i < 10 ? "0" + i : i.toString());
+          }
+          return options;
+        },
+        //相關連結字數
+        currentLength() {
+          return this.activity.acLinkName != null
+            ? this.activity.acLinkName.length
+            : 0;
+        },
+        isPlaceValid() {
+          //檢查PlaceStatus欄位是否有值
+          //console.log("in isPlaceValid");
+          //console.log(this.activity.acPlaceStatus);
+          // //console.log(this.activity.acSafeStatus);
+          // if ((this.activity.acPlaceStatus == 1 && this.activity.acSafeStatus != null)) {
+          // 	return true;
+          // } else if ((this.activity.acPlaceStatus == 0 && this.activity.acOnline)) {
+          // 	return this.activity.acOnline.trim().length > 0;
+          // } else {
+          // 	return false;
+          // }
+          if (this.activity.acPlaceStatus == 1) {
+            return true;
+          } else if (
+            this.activity.acPlaceStatus == 0 &&
+            this.activity.acOnline
+          ) {
+            return this.activity.acOnline.trim().length > 0;
+          } else {
+            return false;
+          }
+        },
+        isOthersValid() {
+          //檢查必填欄位是否有值
+          if (
+            this.activity.acImg &&
+            this.activity.allTypes &&
+            this.activity.organizer &&
+            this.activity.acName &&
+            this.startDate &&
+            this.startHour &&
+            this.startMin &&
+            this.endDate &&
+            this.endHour &&
+            this.endMin &&
+            this.activity.acCity &&
+            this.activity.acAddress &&
+            this.activity.acPhone &&
+            this.activity.acEmail
+          ) {
+            if (
+              this.activity.allTypes.length > 0 &&
+              this.activity.acName.trim().length > 0 &&
+              this.activity.acAddress.trim().length > 0
+            ) {
+              return true;
+            }
+            return false;
+          }
+          return false;
+        },
+        
+      },
+      watch: {
+        "activity.acPlaceStatus"(newValue) {
+          if (newValue == 1) {
+            this.activity.acOnline = ""; // 當活動為線下，清空線上活動字段
+          } else if (newValue == 0) {
+            this.activity.acSafeStatus = null; //當活動為線上時，清空安心活動狀態
+          }
+        },
+        //監控開始日期欄位
+        startDate(newStartDate) {
+          if (this.endDatePicker) {
+            // 更新結束日期選擇器的最小日期
+            this.endDatePicker.set("minDate", newStartDate || "today");
+
+            // 如果结束日期小於開始日期，則清除结束日期
+            if (newStartDate && this.endDate && newStartDate > this.endDate) {
+              this.endDate = null;
+              this.endDatePicker.clear();
+            }
+          }
+        },
+        //監控acCity
+        "activity.acCity"(newCity) {
+          if (newCity && this.activity.acAddress)
+            this.currentAddress = "台灣" + newCity + this.activity.acAddress;
+        },
+        //監控acAddress
+        "activity.acAddress"(newAddress) {
+          if (newAddress && this.activity.acCity)
+            this.currentAddress = "台灣" + this.activity.acCity + newAddress;
+        },
+        //監控完整地點欄位
+        currentAddress(newAddress) {
+          this.geocodeAddress(newAddress);
+        },
+      },
+    }).mount("#app");
+  </script>
+</body>
+
+</html>

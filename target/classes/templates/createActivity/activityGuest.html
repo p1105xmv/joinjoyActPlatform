@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- vue3 -->
+  <!-- <script src="https://unpkg.com/vue@next"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+
+  <!--Cropper -->
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+
+  <title>活動嘉賓</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #fef8f8;
+    }
+
+    .Main {
+      width: 1080px;
+      min-height: calc(100vh - 95px);
+      margin: 20px auto 26px;
+      background-color: #fff;
+      padding: 5px 0 46px;
+      box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    div {
+      display: block;
+      unicode-bidi: isolate;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .GuestPage-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+    }
+
+    .GuestPage-inner {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 72%;
+    }
+
+    .GuestPage-title {
+      color: #36353c;
+      font-size: 25px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 34px;
+    }
+
+    .GuestPage-guests {
+      display: flex;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      padding: 15px 21px 35px;
+      min-height: 30vh;
+    }
+
+    .GuestPage-guest-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-direction: column;
+      width: 25%;
+      z-index: 1;
+    }
+
+    .GuestPage-guest-inner {
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .GuestPage-guest {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .GuestPage-guest-Img {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      width: 150px;
+      height: 150px;
+      color: #d7d7d7;
+      border-radius: 50%;
+      background-color: #f6f6f6;
+      cursor: pointer;
+      box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+    }
+
+    .GuestPage-guest-Img:hover {
+      filter: brightness(0.9);
+    }
+
+    .GuestPage-guest-Img img {
+      max-height: 100%;
+      max-width: 100%;
+    }
+
+    .GuestPage-add-guest-name {
+      word-break: break-word;
+      text-align: center;
+      color: #36353c;
+      font-size: 18px;
+      margin-top: 15px;
+      margin-bottom: 0;
+      padding: 0 5px 0 0;
+      letter-spacing: 0;
+    }
+
+    .GuestPage-guest-text {
+      width: 100%;
+      text-align: center;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 4px 10px 0px;
+      margin-bottom: 0;
+      font-size: 16px;
+      letter-spacing: 1px;
+      color: #9c9c9f;
+    }
+
+    .PagerButtons-button-container {
+      border-top: 1px solid #a9a9a9;
+      margin: 10px 0px;
+      padding: 10px 0px;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+
+    .PagerButton-button {
+      width: 200px;
+      height: 50px;
+      cursor: not-allowed;
+      font-size: 16px;
+      background-color: rgb(255, 196, 0);
+      border: none;
+      border-radius: 5px;
+      transition: all .3s;
+    }
+
+    .PagerButton-button:hover {
+      /* 調整亮度 */
+      filter: brightness(0.9);
+    }
+
+    .Modal-modal {
+      position: fixed;
+      z-index: 10000;
+      top: 0;
+      left: 0;
+      display: flex;
+      height: 100%;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .Modal-closeable-area {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    .Modal-container {
+      position: relative;
+    }
+
+    .GuestPage-guest-modal {
+      display: flex;
+      flex-direction: column;
+      width: 540px;
+      max-height: 80vh;
+      border-radius: 4px;
+      background-color: #fff;
+      overflow-y: auto;
+    }
+
+    .GuestPage-guest-modal-fields-container {
+      padding: 42px 38px 30px;
+    }
+
+    .AvatarUploader-uploader-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 10px;
+    }
+
+    .AvatarUploader-uploder-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      background-color: #f1f1f1;
+      border-radius: 50%;
+      box-shadow: 0px 0px 20px #ccc;
+    }
+
+    .AvatarUploader-uploader-img {
+      max-width: 100%;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .AvatarUploader-uploader-button {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      right: 0;
+      bottom: 0;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: none;
+      box-shadow: 1px 2px 20px #ccc;
+      cursor: pointer;
+      color: #cacaca;
+      background-color: #fff;
+      transition: color 0.2s;
+    }
+
+    .AvatorUploader-uploade-btn-icon {
+      max-width: 60%;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .Field-field {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+
+    .Field-label {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.71;
+      color: #282828;
+      padding-bottom: 10px;
+    }
+
+    .GuestPage-field-label {
+      font-size: 16px;
+      line-height: 1.5;
+      color: #656a72;
+    }
+
+    .Field-required {
+      color: #d84a49;
+      padding-left: 3px;
+    }
+
+    .Input-input {
+      width: 100%;
+      flex: 1 1;
+      border: 0;
+      padding: 16px 24px;
+      background-color: #f1f1f1;
+      position: relative;
+      font-size: 16px;
+      border-radius: 0;
+    }
+
+    .TextArea-textarea {
+      resize: none;
+      width: 100%;
+      min-height: 156px;
+      background-color: #f1f1f1;
+      font-size: 16px;
+      line-height: 24px;
+      color: #282828;
+      border: 0;
+      padding: 14px 24px;
+      box-sizing: border-box;
+      border-radius: 0;
+    }
+
+    .Field-label.Field-with-tip {
+      padding-bottom: 1px;
+    }
+
+    .Field-tip {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.71;
+      color: #a0a0a0;
+      padding-bottom: 10px;
+      white-space: pre-line;
+    }
+
+    .GuestPage-guest-modal-buttons-container {
+      display: flex;
+    }
+
+    .GuestPage-modal-button {
+      border: none;
+      flex: 1 1;
+      height: 60px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+      background-color: #42a6f2;
+    }
+
+    .GuestPage-modal-button.GuestPage-delete {
+      background-color: #dd1f36;
+    }
+
+    .Modal-d0850369-close-btn,
+    .Modal-da33ea3e-close-btn-black-circle {
+      position: absolute;
+      right: -17px;
+      top: -17px;
+      cursor: pointer;
+    }
+
+    .GuestPage-insert-btn-label {
+      font-size: 20px;
+    }
+
+    .BasicInfoPage-nextPage-btn-label {
+      font-size: 16px;
+    }
+
+    /* error class */
+    .error-border {
+      outline: 1px solid red;
+    }
+
+    /* error message class */
+    .error-message {
+      color: red;
+      margin: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div th:replace="~{layout/navbar}"></div>
+  <div id="app">
+    <template v-if="loadingFinish">
+      <div>
+        <main class="Main">
+          <div class="GuestPage-container">
+            <div class="GuestPage-inner">
+              <p class="GuestPage-title">嘉賓介紹</p>
+              <div class="GuestPage-guests">
+                <div class="GuestPage-guest-container" draggable="false">
+                  <div class="GuestPage-guest-inner">
+                    <div class="GuestPage-guest">
+                      <div class="GuestPage-guest-Img" @click="openNewGuestModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="black"
+                          class="bi bi-plus-lg" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd"
+                            d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
+                        </svg>
+                      </div>
+                      <p class="GuestPage-add-guest-name">新增嘉賓</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="GuestPage-guest-container" draggable="true" v-for="guest in reflashGuests"
+                  :key="guest.guestid">
+                  <div class="GuestPage-guest-inner">
+                    <div class="GuestPage-guest">
+                      <div class="GuestPage-guest-Img" @click="openModal(guest)">
+                        <template v-if="guest.guestImage==null">
+                          <img src="/img/web/jojo_bird.png" />
+                        </template>
+                        <template v-if="guest.guestImage!=null">
+                          <img :src="guest.guestImage" />
+                        </template>
+                      </div>
+
+                      <p class="GuestPage-add-guest-name">
+                        {{guest.guestName}}
+                      </p>
+                      <p class="GuestPage-guest-text">
+                        {{guest.guestJobTitle}}
+                      </p>
+                      <p class="GuestPage-guest-text">{{guest.guestCompany}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="PagerButtons-button-container">
+                <button class="PagerButton-button"
+                  :style="{'color':optionStatus==1?'#000':'#fff','background-color':optionStatus==1?'#ffc400':'#16cbf8'}"
+                  @click="goBack(optionStatus)">{{optionStatus==1?"返回上一步":"返回活動管理"}}</button>
+                <button class="PagerButton-button"
+                  :style="{'color':optionStatus==1?'#000':'#fff','background-color':optionStatus==1?'#ffc400':'#16cbf8'}"
+                  @click="nextPage" :disabled="isCreateBtnDisabled">
+                  <span class="BasicInfoPage-nextPage-btn-label">{{optionStatus==1?"下一步":"儲存設定"}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <div v-if="showModal" class="Modal-modal Modal-shadow">
+        <div class="Modal-closeable-area" @click="showModal = false"></div>
+        <div class="Modal-container">
+          <div class="GuestPage-guest-modal">
+            <div class="GuestPage-guest-modal-fields-container">
+              <div>
+                <div class="AvatarUploader-uploader-wrapper">
+                  <div class="AvatarUploader-uploder-container" :class="{'error-border': guestImageFieldError}">
+                    <img class="AvatarUploader-uploader-img" v-if="currentGuest.guestImage==null"
+                      src="https://static.accupass.com/frontend/image/eventedit/organizer/organizer_avatar_placeholder.svg"
+                      alt="" />
+                    <img ref="image" class="AvatarUploader-uploader-img" v-if="currentGuest.guestImage!=null"
+                      :src="currentGuest.guestImage" alt="" />
+                    <input type="file" ref="fileInput" id="fileInput" accept="image/*" style="display: none"
+                      @change="handleFileChange" />
+                    <button class="AvatarUploader-uploader-button" @click="triggerFileInput">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 24 24"
+                        class="AvatorUploader-uploade-btn-icon" style="--icon-size: 32px">
+                        <path fill="#000" fill-rule="evenodd"
+                          d="M17.984 7h2.766A2.252 2.252 0 0 1 23 9.25v9a2.252 2.252 0 0 1-2.25 2.25H4.25A2.252 2.252 0 0 1 2 18.25V9.253a2.252 2.252 0 0 1 2.25-2.25h.188v-.375a.75.75 0 0 1 .75-.75h1.125a.75.75 0 0 1 .75.75v.375c.153 0 .3-.121.404-.235l1.215-1.921c.02-.03.041-.06.065-.087.42-.49.987-.76 1.597-.76h4.312c.61 0 1.177.27 1.597.76a.727.727 0 0 1 .064.087l1.216 1.919c.136.143.31.234.451.234ZM10 16.742a4.5 4.5 0 1 0 5-7.483 4.5 4.5 0 0 0-5 7.483ZM15.5 13a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                          clip-rule="evenodd"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="Field-field">
+                <div class="Field-label GuestPage-field-label">
+                  嘉賓姓名<span class="Field-required">*</span>
+                </div>
+                <input type="text" class="Input-input" :class="{'error-border': guestNameFieldError}"
+                  placeholder="填寫嘉賓名稱" maxlength="1000" step="1" value="" v-model="currentGuest.guestName"
+                  @input="checkGuestNameField" />
+                <div v-if="guestNameFieldError" class="error-message">必填</div>
+              </div>
+              <div class="Field-field">
+                <div class="Field-label GuestPage-field-label">
+                  職稱
+                </div>
+                <input type="text" class="Input-input" :class="{'error-border': guestJobTitleFieldError}"
+                  placeholder="填寫嘉賓職稱" maxlength="1000" step="1" value="" v-model="currentGuest.guestJobTitle"
+                   />
+                <div v-if="guestJobTitleFieldError" class="error-message">必填</div>
+              </div>
+              <div class="Field-field">
+                <div class="Field-label GuestPage-field-label">
+                  公司名稱
+                </div>
+                <input type="text" class="Input-input" :class="{'error-border': guestCompanyFieldError}"
+                  placeholder="填寫嘉賓公司名稱" maxlength="1000" step="1" value="" v-model="currentGuest.guestCompany"
+                   />
+                <div v-if="guestCompanyFieldError" class="error-message">必填</div>
+              </div>
+              <div class="Field-field">
+                <div class="Field-label GuestPage-field-label">
+                  嘉賓簡介
+                </div>
+                <textarea class="TextArea-textarea" placeholder="填寫嘉賓簡介" v-model="currentGuest.guestIntro"></textarea>
+              </div>
+              <div class="Field-field">
+                <div class="Field-label Field-with-tip GuestPage-field-label">
+                  嘉賓網址
+                </div>
+                <span class="Field-tip">可以加上嘉賓的 Facebook、Instagram、Twitter 等</span><input type="text"
+                  class="Input-input" placeholder="填寫嘉賓網址" maxlength="1000" step="1" value=""
+                  v-model="currentGuest.guestLink" />
+              </div>
+            </div>
+            <div class="GuestPage-guest-modal-buttons-container">
+              <button class="GuestPage-modal-button GuestPage-confirm" data-bs-dismiss="null" @click="saveGuest"
+                :disabled="isCreateBtnDisabled" v-if="createStatus">
+                <span v-if="insertLoading" class="spinner-border " role="status" aria-hidden="true"></span>
+                <span class="GuestPage-insert-btn-label" v-if="!insertLoading">新增嘉賓</span>
+              </button>
+              <button class="GuestPage-modal-button GuestPage-delete" @click="deleteGuest"
+                v-if="createStatus == false ">
+                刪除
+              </button>
+              <button class="GuestPage-modal-button GuestPage-confirm" @click="saveGuest" v-if="createStatus == false "
+                :disabled="isCreateBtnDisabled">
+                <span v-if="insertLoading" class="spinner-border " role="status" aria-hidden="true"></span>
+                <span v-if="!insertLoading"> 儲存</span>
+
+              </button>
+            </div>
+          </div>
+          <a class="Modal-d0850369-close-btn" @click="showModal = false"><img
+              src="https://static.accupass.com/frontend/image/common/icon_close_black_circle.svg" alt="Close" /></a>
+        </div>
+      </div>
+    </template>
+  </div>
+</body>
+<script>
+  Vue.createApp({
+    data() {
+      return {
+        guests: [],
+        acid: null,
+        //是否顯示modal視窗
+        showModal: false,
+        //目前操作的嘉賓
+        currentGuest: null,
+        //點擊新增嘉賓狀態
+        createStatus: false,
+        //Cropper實例
+        cropper: null,
+        //檢查必填欄位
+        guestImageFieldError: false,
+        guestNameFieldError: false,
+        guestJobTitleFieldError: false,
+        guestCompanyFieldError: false,
+        //loading狀態
+        insertLoading: false,
+        //新增嘉賓/儲存按鈕狀態
+        isCreateBtnDisabled: false,
+        //新建或編輯狀態
+        optionStatus: null,
+        //是否載入完成
+        loadingFinish: true,
+      };
+    },
+    mounted() {
+      //取得頁面路徑
+      const path = window.location.pathname;
+      const segments = path.split("/");
+      //從最後一個索引值獲取 optionStatus
+      this.optionStatus = segments[segments.length - 1];
+      axios
+        .get("/createAc/getAcGuests")
+        .then((response) => {
+          this.guests = response.data.activityGuestDTOs;
+          this.acid = response.data.acid;
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    },
+    methods: {
+      openNewGuestModal() {
+        // 設定currentGuest初始化
+        this.createStatus = true;
+        this.currentGuest = {
+          activity: null,
+          guestName: null,
+          guestJobTitle: null,
+          guestCompany: null,
+          guestIntro: null,
+          guestLink: null,
+          guestImage: null,
+        };
+        this.showModal = true; // 顯示視窗
+      },
+      openModal(guest) {
+        this.insertLoading = false;
+        this.currentGuest = { ...guest }; // 設定目前嘉賓
+        this.showModal = true; // 顯示視窗
+        this.createStatus = guest.guestid ? false : true;
+      },
+
+      saveGuest() {
+        //檢查欄位
+        this.checkGuestNameField();
+        this.ckeckGuestImageField();
+        if (!this.guestNameFieldError &&  !this.guestImageFieldError) {
+          this.isCreateBtnDisabled = true;
+          //讀取動畫啟動
+          this.insertLoading = true;
+          axios
+            .post("/createAc/saveAcGuest", this.currentGuest)
+            .then((response) => {
+              if (!this.currentGuest.guestid) {
+                // setTimeout(() => {   
+                this.currentGuest = null;
+                this.showModal = false; // 關閉視窗
+                this.createStatus = false;
+                this.insertLoading = false;
+                this.isCreateBtnDisabled = false;
+                this.guests.push(response.data);
+                // }, 4000)
+              } else {
+                // setTimeout(() => {
+                  this.showModal = false;
+                  this.insertLoading = false;
+                  let matchingGuest = this.guests.find((guest) => guest.guestid === this.currentGuest.guestid)
+                  matchingGuest.guestImage = this.currentGuest.guestImage;
+                  matchingGuest.guestName = this.currentGuest.guestName;
+                  matchingGuest.guestJobTitle = this.currentGuest.guestJobTitle;
+                  matchingGuest.guestCompany = this.currentGuest.guestCompany;
+                  matchingGuest.guestIntro = this.currentGuest.guestIntro;
+                  matchingGuest.guestLink = this.currentGuest.guestLink;
+                  // this.currentGuest = null;
+                  this.isCreateBtnDisabled = false;
+                // }, 4000)
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              this.isCreateBtnDisabled = false;
+              this.insertLoading = false;
+            });
+        } else {
+          //使用 $nextTick 確保在 DOM 更新後執行
+          this.$nextTick(() => {
+            this.scrollToFirstError();
+          });
+        }
+      },
+      deleteGuest() {
+        axios
+          .delete("/createAc/deleteAcGuest", {
+            params: { guestid: this.currentGuest.guestid },
+          })
+          .then((response) => {
+            this.guests.splice(this.guests.findIndex(g => g.guestid === this.currentGuest.guestid), 1);
+            this.currentGuest = null;
+            this.showModal = false; // 關閉視窗
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+        this.showModal = false; // 關閉視窗
+      },
+      triggerFileInput() {
+        // 觸發上傳檔案
+        this.$refs.fileInput.click();
+      },
+      handleFileChange(event) {
+        const file = event.target.files[0];
+        if (!file) {
+          return;
+        }
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          this.currentGuest.guestImage = e.target.result;
+        };
+
+      },
+      ckeckGuestImageField() {
+        // 檢查嘉賓照片
+        this.guestImageFieldError = this.currentGuest.guestImage == null;
+      },
+      checkGuestNameField() {
+        // 檢查嘉賓名稱
+        this.guestNameFieldError = this.currentGuest.guestName ? this.currentGuest.guestName.trim().length == 0 : true;
+      },
+      checkGuestJobTitleField() {
+        // 檢查嘉賓職稱
+        this.guestJobTitleFieldError = this.currentGuest.guestJobTitle ? this.currentGuest.guestJobTitle.trim().length == 0 : true;
+      },
+      checkGuestCompanyField() {
+        // 檢查嘉賓公司
+        this.guestCompanyFieldError = this.currentGuest.guestCompany ? this.currentGuest.guestCompany.trim().length == 0 : true;
+      },
+
+      //畫面滾動
+      scrollToFirstError() {
+        const firstErrorElement = document.querySelector('.error-border');
+        if (firstErrorElement) {
+          firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+
+      nextPage() {
+        window.location.href = `/createAc/activityTicket/${this.optionStatus}`;
+      },
+      goBack(optionStatus) {
+        window.location.href = optionStatus == 1 ? `/createAc/activityIntro/${this.optionStatus}` : `/organizerBiz/OrganizerAcManage/${this.acid}`;
+      },
+    },
+    computed: {
+      reflashGuests() {
+        return this.guests;
+      },
+    },
+    watch: {
+      showModal(status) {
+        if (!status) {
+          this.guestImageFieldError = false;
+          this.guestNameFieldError = false;
+          this.guestJobTitleFieldError = false;
+          this.guestCompanyFieldError = false;
+        }
+      }
+    },
+  }).mount("#app");
+</script>
+
+</html>

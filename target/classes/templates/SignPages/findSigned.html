@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        .profile-container {
+            display: flex;
+            align-items: center;
+            margin-top: 35px;
+            margin-left: -450px;
+        }
+
+        .profile-img {
+            width: 120px;
+            /* 調整圖片大小 */
+            height: 120px;
+            border-radius: 50%;
+            /* 將圖片變成圓形*/
+            overflow: hidden;
+            /* 隱藏圖片超出部分 */
+            margin-right: 25px;
+            /* 調整圖片與暱稱之間的間距 */
+        }
+
+        .profile-img img {
+            width: 100%;
+            /* 讓圖片充滿圓形容器 */
+            height: auto;
+        }
+
+        .nickname {
+            font-size: 30px;
+            /* 調整暱稱字體大小 */
+        }
+
+        #allCard {
+            display: inline-block;
+            flex-wrap: wrap;
+            /* 當一行放不下時自動換行 */
+            margin-left: 30px;
+            margin-top: 20px;
+        }
+
+        .actCard {
+            font-size: 20px;
+            width: 320px;
+            height: 320px;
+            margin: 20px;
+            /* 調整卡片之間的間距 */
+            margin-bottom: 40px;
+        }
+
+        .noData {
+            font-size: 25px;
+            color: #7B7B7B;
+            margin-left: 100px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="findSignedApp">
+
+        <!-- modal -->
+        <div class="modal fade seminor-login-modal" id="searchSigned" tabindex="-1" aria-labelledby="searchSignedTitle"
+            aria-modal="true" role="dialog" data-bs-backdrop="static">
+
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content rounded-5 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="searchSignedTitle">
+                            查詢報名紀錄
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="fs-5 text-warning mb-2"><span><a id="aEmail" @click.prevent="searchByMail"
+                                    style="text-decoration: none;" href="" class="text-warning fs-5">使用Email查詢</a>
+                            </span>｜<span>
+                                <a id="aPhone" @click.prevent="searchByPhone" style="text-decoration: none;" href=""
+                                    class="text-secondary">使用電話號碼查詢</a></span>
+                        </div>
+                        <div class="md-form mb-2">
+                            <template v-if="!isEmail">
+                        </div>
+
+                        <div class="input-group"><span class="input-group-text"><i
+                                    class="bi bi-telephone-fill"></i></span><select v-model="c_code"
+                                class="form-select-md validate " style="width: 100px;  border: 1px solid #ced4da;">
+                                <option value="+886">台灣 +886</option>
+                                <option value="+86">中國 +86</option>
+                                <option value="+852">香港 +852</option>
+                                <option value="+60">馬來西亞 +60</option>
+                                <option value="+853">澳門 +853</option>
+                                <option value="+81">日本 +81</option>
+                                <option value="+82">韓國 +82</option>
+                                <option value="+63">菲律賓 +63</option>
+                                <option value="+65">新加坡 +65</option>
+                                <option value="+1">美國 +1</option>
+                                <option value="+0">其他 +0</option>
+                            </select><input v-model="phone" type="tel" id="phoneNumber"
+                                class="form-control form-control-md" placeholder="手機">
+                        </div>
+                        </template>
+                        <template v-if="isEmail">
+                            <div class="col-12">
+
+                                <input v-model="email" type="email" class="form-control" placeholder="請輸入Email"
+                                    required />
+                            </div>
+                        </template>
+                        <div class="mt-2"><span class="mt-2"></span></div>
+                    </div>
+
+                </div>
+                <template v-if="isErr">
+                    <div class="modal-footer row justify-content-around">
+
+                        <i class="text-danger">查無報名紀錄，請確認輸入資訊與報名資訊相符。</i>
+                    </div>
+                </template>
+                <!-- 秀報名紀錄 -->
+                <template v-if="isShowResponse==true">
+                    <div class="overflow-scroll p-3" style="height: 400px;">
+                        <div id="allCard">
+                            <template v-for="dto in dtos" :key="dto.acid">
+                                <div class="card mb-3 =" style="width: 450px; height: 190px; margin: -20px;">
+                                    <div class="row g-0">
+                                        <div class="col-md-3">
+                                            <a :href="`${WEBROOT}/showActivity/activityPage/${dto.acid}`"
+                                                style="color: rgb(0, 0, 0);">
+                                                <div class="card" style="width: 120px;  border: none; margin: 5px;"><img
+                                                        :src="dto.acImg" class="card-img-top" style="height: 110px;">
+                                                    <div class="card-body"
+                                                        style="background-color: rgb(255, 250, 250); height: 70px;">
+                                                        <p
+                                                            style="height:60px;overflow:hidden;font-size: 12px; text-align: left; margin-top: -5px; margin-left: -5px;">
+                                                            {{limitedTitle(dto.acName)}}</p>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card-body"
+                                                style="margin-left: 0px; margin-top: -7px; font-size: 12px; flex: 1 1 0%;">
+                                                <div>
+                                                    <div style="margin: 5px; display: flex;">報名序號：{{dto.asfid}}</div>
+                                                    <div style="margin: 5px;">報名日期：{{dto.formattedasfDate}}
+
+                                                    </div>
+                                                    <!-- 取消報名顯示 -->
+                                                    <div style="margin: 5px;">報名狀態：
+                                                        <span
+                                                            v-if="dto.asfSignStatus!='已取消報名'">{{dto.asfSignStatus}}</span>
+                                                        <span v-if="dto.asfSignStatus=='已取消報名'"><i
+                                                                class="text-danger">{{dto.asfSignStatus}}</i></span>
+                                                    </div>
+                                                    <!-- 取消報名顯示 end-->
+                                                    <div style="margin: 5px;">報名方案：{{dto.atName}}</div>
+                                                    <div style="margin: 5px;">付款方式：{{dto.pmid}}</div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card"
+                                                style="width: 120px; float: right; margin-top: 15px;margin-right: 5px;">
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item text-center"
+                                                        style="background-color: rgb(255, 250, 250);">票券資訊</li>
+                                                    <li class="list-group-item"
+                                                        style="height: 70px; line-height: 60px; text-align: center;font-size:13px; font-family: &quot;Comic Sans MS&quot;, &quot;Comic Sans&quot;, cursive; color: rgb(79, 79, 79);">
+                                                        NT$ {{dto.atPrice}}</li>
+                                                    <!-- 取消報名按鈕 -->
+                                                    <template v-if="dto.asfSignStatus!='已取消報名'">
+                                                        <li class="list-group-item"
+                                                            style="text-align: center; font-size: 15px;">
+
+                                                            <button :id="`asf${asfid}cancelBtn`"
+                                                                @click.prevent="cancelSign(dto.asfid)" type="button"
+                                                                class="btn btn-outline-warning">取消報名</button>
+                                                    </template>
+
+                                                    <!-- 取消報名按鈕end -->
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+
+                        </div>
+
+                    </div>
+                </template>
+                <div class="modal-footer row justify-content-center">
+
+                    <button @click.prevent="submitSearch()" type="button" id="submitBtn"
+                        class="btn shadow-sm rounded-pill btn-warning col-5 w-50">{{btnText}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal end-->
+
+    </div>
+
+
+
+</body>
+
+<script type="module">
+    Vue.createApp({
+        data() {
+            return {
+                WEBROOT: WebRoot,
+                c_code: "+886",
+                phone: "",
+                email: "",
+                isEmail: true,
+                btnText: "使用Email查詢",
+                isErr: false,
+                reqData: {},
+                respData: [],
+                isShowResponse: false,
+                // show signed
+                activities: [],
+                dtos: [],
+                // 取消報名需要
+                delData: {},
+
+
+            };
+        },
+        methods: {
+            searchByPhone() {
+                this.isEmail = false;
+                this.btnText = "使用電話號碼查詢"
+                document.getElementById("aPhone").classList.add("fs-5");
+                document.getElementById("aPhone").classList.add("text-warning");
+                document.getElementById("aEmail").classList.remove("fs-5");
+                document.getElementById("aEmail").classList.add("text-secondary");
+                document.getElementById("aEmail").classList.remove("text-warning");
+            },
+            searchByMail() {
+                this.isEmail = true;
+                this.btnText = "使用Email查詢";
+                document.getElementById("aEmail").classList.add("fs-5");
+                document.getElementById("aEmail").classList.add("text-warning");
+                document.getElementById("aPhone").classList.remove("fs-5");
+                document.getElementById("aPhone").classList.add("text-secondary");
+                document.getElementById("aPhone").classList.remove("text-warning");
+            },
+            submitSearch() {
+
+                if (this.isEmail) {
+                    this.reqData.asfEmail = this.email;
+                    this.reqData.asfTel = null
+                } else {
+                    this.reqData.asfTel = this.c_code + "-" + this.phone
+                    this.reqData.asfEmail = null
+                }
+                if (this.reqData.asfEmail != null || this.reqData.asfTel != null) {
+
+                    axios.post(`${WebRoot}/search`, this.reqData)
+                        .then(response => {
+
+                            this.dtos = response.data;
+                            this.dtos.forEach(dto => {
+                                dto.formattedasfDate = this.formattedDate(dto.asfDate);
+                                dto.asfSignStatus = this.transformStatus(dto.asfSignStatus);
+                                dto.pmid = this.transformPmid(dto.pmid);
+                            });
+
+                            this.isShowResponse = true;
+                            //console.log(this.dtos);
+                        }).catch(err => {
+                            this.isErr = true;
+                        })
+                } else {
+                    this.isErr = true
+                }
+
+            },
+
+            // 取消報名方法
+            cancelSign(asfid) {
+                this.delData = {};
+                this.delData.asfid = asfid;
+                axios.post(`${WebRoot}/cancelSign`, this.delData)
+                    .then(response => {
+                        //console.log(response.data);
+
+                        for (let dto of this.dtos) {
+                            if (dto.asfid == asfid) {
+                                dto.asfSignStatus = this.transformStatus(response.data.asfSignStatus);
+                            }
+                        }
+                    })
+                document.getElementById(`asf${asfid}cancelBtn`).disabled = true;
+
+            },
+
+            //把日期格式改為年月日
+            formattedDate(dateString) {
+                const startDate = new Date(dateString);
+                const year = startDate.getFullYear();
+                const month = String(startDate.getMonth() + 1).padStart(2, '0');
+                const day = String(startDate.getDate()).padStart(2, '0');
+                const hours = String(startDate.getHours()).padStart(2, '0');
+                const minutes = String(startDate.getMinutes()).padStart(2, '0');
+                return `${year}年${month}月${day}日 ${hours}:${minutes}`;
+            },
+            transformPmid(pmid) {
+                switch (pmid) {
+                    case 1:
+                        return "現場付款";
+                    case 2:
+                        return "匯款";
+                    case 3:
+                        return "linePay";
+                    case 4:
+                        return "綠界信用卡";
+                    case 5:
+                        return "免費活動";
+                }
+            },
+            transformStatus(status) {
+                switch (status) {
+                    case 0:
+                        return "已取消報名";
+                    case 1:
+                        return "已報名，未付費";
+                    case 2:
+                        return "已付費";
+                }
+            },
+
+            // 計算字數限制
+            limitedTitle(title) {
+                const maxLength = 20; // 最大字數限制
+                return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
+            },
+
+
+
+        },
+    }).mount("#findSignedApp");
+</script>
+
+</html>

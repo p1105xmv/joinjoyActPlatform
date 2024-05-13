@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .failure-modal {
+            font-family: 'Varela Round', sans-serif;
+        }
+
+        .failure-modal .modal-confirm {
+            color: #636363;
+            width: 325px;
+            font-size: 14px;
+        }
+
+        .failure-modal .modal-confirm .modal-content {
+            padding: 20px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .failure-modal .modal-confirm .modal-header {
+            border-bottom: none;
+            position: relative;
+        }
+
+        .failure-modal .modal-confirm h4 {
+            text-align: center;
+            font-size: 26px;
+            margin: 30px 0 -15px;
+        }
+
+        .failure-modal .modal-confirm .form-control,
+        .failure-modal .modal-confirm .btn {
+            min-height: 40px;
+            border-radius: 3px;
+        }
+
+        .failure-modal .modal-confirm .close {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .failure-modal .modal-confirm .modal-footer {
+            border: none;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .failure-modal .modal-confirm .icon-box {
+            color: #fff;
+            position: absolute;
+            margin: 0 auto;
+            left: 0;
+            right: 0;
+            top: -70px;
+            width: 95px;
+            height: 95px;
+            border-radius: 50%;
+            z-index: 9;
+            background: #fff;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .failure-modal .modal-confirm .icon-box i {
+            font-size: 58px;
+            position: relative;
+            top: 3px;
+        }
+
+        .failure-modal .modal-confirm.modal-dialog {
+            margin-top: 80px;
+        }
+
+        .failure-modal .modal-confirm .btn {
+            color: #fff;
+            border-radius: 4px;
+            background: #FFA500;
+            text-decoration: none;
+            transition: all 0.4s;
+            line-height: normal;
+            border: none;
+        }
+
+        .failure-modal .modal-confirm .btn:hover,
+        .failure-modal .modal-confirm .btn:focus {
+            background: #FF6347;
+            outline: none;
+        }
+
+        .failure-modal .trigger-btn {
+            display: inline-block;
+            margin: 100px auto;
+        }
+
+        .failure-modal #exclamation svg {
+            width: 100px;
+            display: block;
+            margin: 0;
+        }
+
+        .failure-modal .path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 0;
+        }
+
+        .failure-modal .path.circle {
+            -webkit-animation: dash .9s ease-in-out;
+            animation: dash .9s ease-in-out;
+        }
+
+        .failure-modal .path.line {
+            stroke-dashoffset: 1000;
+            -webkit-animation: dash .9s .35s ease-in-out forwards;
+            animation: dash .9s .35s ease-in-out forwards;
+        }
+
+        .failure-modal .path.exclamation {
+            stroke-dashoffset: -100;
+            -webkit-animation: dash-exclamation .9s .35s ease-in-out forwards;
+            animation: dash-exclamation .9s .35s ease-in-out forwards;
+        }
+
+        .failure-modal p {
+            text-align: center;
+            margin: 20px 0 60px;
+            font-size: 1.25em;
+        }
+
+        .failure-modal .success {
+            color: #ffffff;
+        }
+
+        .failure-modal .error {
+            color: #D06079;
+        }
+
+        @-webkit-keyframes dash {
+            0% {
+                stroke-dashoffset: 1000;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes dash {
+            0% {
+                stroke-dashoffset: 1000;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @-webkit-keyframes dash-exclamation {
+            0% {
+                stroke-dashoffset: -100;
+            }
+
+            100% {
+                stroke-dashoffset: 900;
+            }
+        }
+
+        @-webkit-keyframes dash {
+            0% {
+                stroke-dashoffset: 1000;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes dash {
+            0% {
+                stroke-dashoffset: 1000;
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @-webkit-keyframes dash-exclamation {
+            0% {
+                stroke-dashoffset: -100;
+            }
+
+            100% {
+                stroke-dashoffset: 900;
+            }
+        }
+
+        @keyframes dash-exclamation {
+            0% {
+                stroke-dashoffset: -100;
+            }
+
+            100% {
+                stroke-dashoffset: 900;
+            }
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <!-- Login -->
+
+
+</body>
+
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+  <head>
+    <meta charset="UTF-8" />
+    <title>編輯文章</title>
+    <style>
+      body {
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        background-image: url("../img/web/jojo_bird.png");
+        background-position: right 4% bottom;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: 10%;
+      }
+
+      .aCard {
+        padding: 10px;
+        box-shadow: 0px 6px 8px 0px rgba(0, 0, 0, 0.3);
+        background-color: white;
+        border-radius: 10px;
+      }
+
+      .fixed-side {
+        margin-top: 90px;
+      }
+
+      .main {
+        background-color: white;
+        padding: 3%;
+        border-radius: 10px;
+        margin-top: 90px;
+        margin-bottom: 30px;
+      }
+
+      .grayHover:hover {
+        background-color: rgb(255, 228, 50);
+        border-radius: 10px;
+      }
+
+      .cursorPointer {
+        cursor: pointer;
+      }
+
+      .articleBlock:hover {
+        background-color: rgb(255, 248, 201);
+        border-radius: 10px;
+      }
+
+      .artTitle {
+        font-weight: 550;
+        margin-top: 5px;
+      }
+
+      .form-check-input {
+        zoom: 150%;
+      }
+
+      .form-check-label {
+        font-size: 25px;
+      }
+
+      .radioBlock {
+        margin: 10px;
+      }
+
+      .ck-editor__editable[role="textbox"] {
+        min-height: 500px;
+      }
+
+      .alertTitle {
+        font-weight: bolder;
+        color: red;
+      }
+
+      .selectedActivity {
+        margin: 10px !important;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+      }
+
+      .agreeBox {
+        zoom: 120%;
+        font-size: 16px;
+      }
+
+      .activityName {
+        font-size: 18px;
+        font-weight: 550;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/super-build/ckeditor.js"></script>
+  </head>
+
+  <body style="background-color: rgb(255, 253, 234)">
+    <div th:replace="~{layout/articles/articlesNavbar}"></div>
+    <div id="app">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-1"></div>
+          <div class="col-md-8">
+            <div class="main shadow">
+              <form id="editorForm" action="#" method="post">
+                <h1 style="color: rgb(177, 126, 96)">編輯文章</h1>
+
+                <div class="radioBlock">
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="artIsOther"
+                      id="inlineRadio1"
+                      value="0"
+                      v-model="isOther"
+                      checked
+                    />
+                    <label class="form-check-label" for="inlineRadio1"
+                      >活動心得</label
+                    >
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="artIsOther"
+                      id="inlineRadio2"
+                      value="1"
+                      v-model="isOther"
+                    />
+                    <label class="form-check-label" for="inlineRadio2"
+                      >閒聊</label
+                    >
+                  </div>
+                </div>
+
+                <!-- Button trigger modal -->
+                <button
+                  type="button"
+                  class="btn btn-outline-warning"
+                  data-bs-toggle="modal"
+                  data-bs-target="#activityModal"
+                  v-if="isOther === '0' "
+                >
+                  選擇活動
+                </button>
+
+                <template v-if="isOther === '0' && selectedActivity!== null ">
+                  <div>
+                    <div class="row selectedActivity">
+                      <div class="col-md-4">
+                        <img
+                          :src="selectedActivity.acImg"
+                          class="img-fluid"
+                          alt="活動圖片"
+                        />
+                      </div>
+                      <div class="col-md-8">
+                        <p class="activityName">
+                          {{ selectedActivity.acName }}
+                        </p>
+                      </div>
+                      <br />
+                    </div>
+                  </div>
+                </template>
+
+                <!-- Modal -->
+                <div
+                  class="modal fade"
+                  id="activityModal"
+                  tabindex="-1"
+                  aria-labelledby="activityModalLabel"
+                  aria-hidden="true"
+                  v-if="isOther === '0' "
+                >
+                  <div
+                    class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                  >
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="activityModalLabel">
+                          參加過的活動
+                        </h5>
+                        <button
+                          type="button"
+                          class="btn-close"
+                          data-bs-dismiss="modal"
+                          aria-label="Close"
+                        ></button>
+                      </div>
+                      <div class="modal-body">
+                        <div
+                          v-for="activity in activitys"
+                          :key="activity.acid"
+                          @click="saveAndCloseModal(activity.acid)"
+                        >
+                          <div class="row mb-1">
+                            <div
+                              class="col-md-4 d-flex justify-content-center"
+                              style="height: 70px"
+                            >
+                              <img
+                                :src="activity.acImg"
+                                class="img-fluid h-100"
+                                alt="活動圖片"
+                              />
+                            </div>
+                            <div class="col-md-8">
+                              <p>{{ activity.acName }}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <br />
+                <br />
+                <h5>文章標題:</h5>
+                <input
+                  id="artTitle"
+                  v-model="artTitle"
+                  type="text"
+                  class="form-control"
+                  name="artTitle"
+                  value=""
+                  placeholder="請輸入文章標題⋯"
+                /><br />
+
+                <h5>文章內容:</h5>
+                <textarea
+                  class="form-control editor articleArea"
+                  id="editor"
+                  name="artContent"
+                ></textarea>
+                <br />
+
+                <div>
+                  <label for="agree" class="agreeBox">
+                    <input type="checkbox" id="agree" v-model="agree" />
+                    我已閱讀並同意遵守發文須知
+                  </label>
+                </div>
+
+                <div
+                  class="btnGroup d-flex justify-content-end"
+                  style="gap: 10px"
+                >
+                  <button
+                    type="button"
+                    @click="cancelForm()"
+                    class="btn btn-outline-primary"
+                  >
+                    取消
+                  </button>
+                  <button
+                    v-if="artStatus==0"
+                    type="button"
+                    @click="submitArticle(0,0)"
+                    class="btn btn-primary"
+                  >
+                    儲存草稿
+                  </button>
+                  <button
+                    v-if="artStatus==0"
+                    type="button"
+                    @click="submitArticle(1,1)"
+                    class="btn btn-primary"
+                  >
+                    發表文章
+                  </button>
+                  <button
+                    v-if="artStatus==1"
+                    type="button"
+                    @click="submitArticle(1,2)"
+                    class="btn btn-primary"
+                  >
+                    修改文章
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-md-3 d-flex justify-content-center">
+            <div class="fixed-side">
+              <div class="aCard">
+                <h4 class="alertTitle">發文須知</h4>
+                <p>
+                  歡迎您在我們的平台上發表文章！為了確保我們社群的良好秩序和用戶體驗，請您遵守以下發文須知：
+                </p>
+                <ol>
+                  <li>
+                    尊重他人：請確保您的文章內容不含有任何侮辱、誹謗、歧視或攻擊性言論。我們鼓勵建設性的討論和積極的交流。
+                  </li>
+                  <li>
+                    原創內容：請確保您發布的內容是您自己的原創作品，或者您擁有適當的授權和許可來分享該內容。請勿發布未經授權的、侵犯他人版權的內容。
+                  </li>
+                  <li>
+                    遵守法律法規：請確保您的文章內容符合當地法律法規，並且不含有任何非法內容或違法行為。
+                  </li>
+                  <li>
+                    尊重隱私：請勿發布涉及他人隱私的內容，包括但不限於個人身份信息、私人通訊、地址等。
+                  </li>
+                  <li>
+                    避免廣告和垃圾信息：請勿發布任何形式的廣告、垃圾信息或未經請求的推廣內容。我們歡迎您分享有價值的信息和內容，但請確保它們與社群的興趣和主題相關。
+                  </li>
+                  <li>
+                    尊重版權：請勿發布任何侵犯他人知識產權的內容，包括但不限於未經授權轉載的文章、圖片、視頻等。
+                  </li>
+                  <li>
+                    合理格式：請確保您的文章格式清晰、易讀，並且包含適當的段落和排版。
+                  </li>
+                  <li>
+                    友善交流：請尊重其他用戶的意見和觀點，進行友善、理性的交流和討論。避免使用攻擊性言論或不當語言。
+                  </li>
+                  <li>
+                    合理標籤：請為您的文章選擇合適的標籤，以便其他用戶更容易找到並閱讀您的內容。
+                  </li>
+                  <li>
+                    自我監管：請您自覺遵守以上規定，並積極參與維護社群的和諧氛圍。如有違反，我們將保留刪除不合適內容的權利，並可能對違規用戶採取相應措施。
+                  </li>
+                </ol>
+                <p>感謝您的理解和配合！祝您在我們的平台上愉快地分享和交流。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        createApp,
+        ref,
+      } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+      import { createCKEditor } from "../js/ckeditor-vue.js";
+
+      createApp({
+        data() {
+          return {
+            activitys: null,
+            userinfo: null,
+            isOther: "0",
+            selectedActivity: null,
+            artTitle: "",
+            agree: false,
+            artid: 0,
+            article: null,
+            artContent: null,
+            artStatus: 0,
+          };
+        },
+        methods: {
+          submitArticle(status, type) {
+            var editorContent = window.editor.getData();
+            document.getElementById("editor").value = editorContent;
+
+            var formData = new FormData(document.getElementById("editorForm"));
+            formData.append("artViewCount", this.article.artViewCount);
+            formData.append("artid", this.article.artid);
+
+            const now = new Date();
+
+            const year = now.getFullYear();
+            const month = ("0" + (now.getMonth() + 1)).slice(-2);
+            const day = ("0" + now.getDate()).slice(-2);
+            const hours = ("0" + now.getHours()).slice(-2);
+            const minutes = ("0" + now.getMinutes()).slice(-2);
+            const formattedNowDate = `${year}年${month}月${day}日 ${hours}:${minutes}`;
+
+            if (type == 0) {
+              formData.append("artStatus", status);
+              formData.append("artCreateTime", this.article.artCreateTime);
+              formData.append("artLastEditTime", this.article.artLastEditTime);
+            } else if (type == 1) {
+              formData.append("artStatus", status);
+              formData.append("artCreateTime", formattedNowDate);
+              formData.append("artLastEditTime", formattedNowDate);
+            } else {
+              formData.append("artStatus", status);
+              formData.append("artCreateTime", this.article.artCreateTime);
+              formData.append("artLastEditTime", formattedNowDate);
+            }
+            if (this.artTitle.trim() === "") {
+              alert("文章標題不能為空");
+              return;
+            }
+            if (this.isOther === "0" && this.selectedActivity == null) {
+              alert("請選擇活動");
+              return;
+            }
+            if (editorContent == "") {
+              alert("請輸入內容");
+              return;
+            }
+            if (this.agree == false) {
+              alert("請同意遵守發文須知");
+              return;
+            }
+            if (this.selectedActivity !== null) {
+              formData.append("activity", this.selectedActivity.acid);
+            }
+
+            $.ajax({
+              url: "/api/editArticle",
+              type: "POST",
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                alert(response);
+                window.location.href = "/articles/myArticles";
+              },
+              error: function (xhr, status, error) {
+                console.error("Error adding article: ", error);
+              },
+            });
+          },
+
+          saveAndCloseModal(activityId) {
+            this.selectedActivity = this.activitys.find(
+              (activity) => activity.acid === activityId
+            );
+
+            $("#activityModal").modal("hide");
+          },
+
+          cancelForm() {
+            if (confirm("確定要不保留文章離開?")) {
+              window.location.href = "/articles/allArticles";
+            }
+          },
+        },
+        mounted() {
+          createCKEditor();
+
+          var url = new URL(window.location.href);
+          this.artid = url.searchParams.get("id");
+
+          $.ajax({
+            url: "/api/session/getUserinfo",
+            method: "GET",
+            success: (data) => {
+              this.userinfo = data;
+
+              $.ajax({
+                url: "/api/listActivitysByUser/" + this.userinfo.userid,
+                method: "GET",
+                success: (data) => {
+                  this.activitys = data;
+                },
+                error: (xhr, status, error) => {
+                  console.error("Error fetching activitys data: ", error);
+                },
+              });
+
+              $.ajax({
+                url: "/api/findOneArticles/" + this.artid,
+                method: "GET",
+                success: (data) => {
+                  this.article = data;
+                  if (this.userinfo.userid != this.article.userinfo.userid) {
+                    alert("你沒有權限編輯此文章");
+                    window.location.href = "/articles/allArticles";
+                  } else {
+                    this.artTitle = this.article.artTitle;
+                    this.selectedActivity = this.article.activity;
+                    this.artContent = this.article.artContent;
+                    this.artStatus = this.article.artStatus;
+                    window.editor.setData(this.artContent);
+                    //console.log(this.article.artid);
+                    //console.log(this.article);
+                  }
+                },
+                error: (xhr, status, error) => {
+                  console.error("Error fetching article data: ", error);
+                },
+              });
+            },
+            error: (xhr, status, error) => {
+              console.error("Error fetching user data: ", error);
+            },
+          });
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

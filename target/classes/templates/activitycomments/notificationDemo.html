@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .notification-icon {
+        min-width: 40px;
+      }
+
+      .notification-content {
+        flex: 1;
+      }
+
+      .notification-text {
+        font-weight: bold;
+      }
+
+      .notification-time {
+        font-size: 0.8em;
+      }
+    </style>
+    <title>notificationdemo SSE測試~</title>
+  </head>
+
+  <body>
+      <span
+      id="userId"
+      th:text="${session.userinfo?.userid}"
+      style="display: none"
+    ></span>
+  
+    <div id="app">
+      <!--單純測試用   -->
+      <ul class="list-group">
+        <li
+          v-for="notification in notifications"
+          class="list-group-item d-flex align-items-center"
+        >
+          <div class="notification-icon mr-3">
+            <!-- 這裡可以放圖標或者其他標記 -->
+            <span class="badge badge-primary"
+              >{{ notification.ntfType[0] }}</span
+            >
+          </div>
+          <div class="notification-content">
+            <div
+              :style="{ color: notification.ntfReadStatus===0 ? 'grey' : 'black', fontWeight: notification.ntfReadStatus===0 ? 'normal' : 'bold' }"
+              class="notification-text"
+            >
+              {{ notification.ntfContent }}
+            </div>
+
+            <div class="notification-time text-muted small">
+              {{ notification.ntfTime }}
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <script>
+    let userId = document.getElementById("userId").innerText;
+
+      Vue.createApp({
+        data() {
+          return {
+            notifications: [],
+          };
+        },
+        mounted() {
+          const eventSource = new EventSource("/api/notifications-stream/"+userId); // 1暫時是userid
+          eventSource.onmessage = (event) => {
+            const newNotifications = JSON.parse(event.data);
+            this.notifications.push(...newNotifications); // unshift是從最後面插入push是從前面
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

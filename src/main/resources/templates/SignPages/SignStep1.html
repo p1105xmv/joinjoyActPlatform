@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+    <!-- <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" /> -->
+    <!-- <script th:src="@{/js/bootstrap.bundle.min.js}"></script> -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+    <title>報名</title>
+
+
+</head>
+
+<body>
+
+    <div th:replace="~{layout/navbar}"></div>
+    <div class="container mt-5 jjmainbody">
+
+        <div class="box  row justify-content-around" id="app">
+            <!-- 活動資訊側欄 start -->
+            <template v-if="isShowAll">
+                <aside class="sign-aside col-md-4" id="sign-aside">
+
+
+                    <div><img class="sign-img" :src="activityInfo.acImg" /></div>
+                    <div class="sign-aside-plain b-font">{{activityInfo.acName}}</div>
+                    <div v-if="isSignAvailable==true" class="sign-aside-plain text-secondary">
+                        <i style="font-size: 0.8em;">距離報名截止還有
+                            <span class="text-warning">{{activityInfo.remainDays}}</span> 天</i>
+                    </div>
+                    <div class="sign-aside-plain text-secondary">活動時間：{{activityInfo.acDate}}</div>
+                    <div class="sign-aside-plain" v-if="activityInfo.acAddress">{{activityInfo.acAddress}}</div>
+                    <div class="sign-aside-plain" v-if="activityInfo.acOnline">{{activityInfo.acOnline}}</div>
+
+                    <div class="sign-aside-border refund-box mt-5">
+                        <div class="fs-5 text-warning">退票規則</div>
+                        <div id="ac_refund">{{activityInfo.acRefundRules}}</div>
+                    </div>
+                    <div class="sign-aside-border buy-box">
+                        <div class="fs-5 text-warning">購票須知</div>
+                        <div>請注意，你需完成報名一項活動後再進行下一個活動的報名，但您一次可以報名一個多種方案。<br>
+                            您可以一次為多位同伴報名本活動，直接選擇所需要的票券與數量，並在下個步驟填入其他活動參與者的資訊，謝謝。</div>
+                    </div>
+
+
+
+                </aside>
+                <!-- 活動資訊側欄 end -->
+
+                <!-- 票券右欄start -->
+                <div class="sign-content   col-md-8">
+
+                    <nav class="nav nav-pills nav-fill row justify-content-around">
+                        <div class="col-5">
+                            <div class="text-start text-muted " aria-current="page" href="#" @click="toP1">選擇方案</div>
+                            <button id="step1" class="btn-warning j_btn-circle-new text-center " aria-current="page"
+                                @click="toP1" type="button">1</button>
+                        </div>
+                        <div class="col-5 ">
+                            <div class="text-start text-muted " aria-current="page" href="#" @click="toP2">報名資訊</div>
+                            <button id="step2" class="j_btn-circle-new text-center " aria-current="page" @click="toP2"
+                                type="button" disabled>2</button>
+                        </div>
+                        <div class="col-2 ">
+                            <div class="text-start text-muted " aria-current="page" href="#">報名完成</div>
+                            <button id="step3" class="j_btn-circle-new text-center " aria-current="page" href="#"
+                                @click="toP3" type="button" disabled>3</button>
+                        </div>
+
+
+                    </nav>
+                    <hr class="my-4">
+                    <!-- 上排按鈕-->
+                    <!-- step1 start-->
+                    <div class="ticket-area" v-show="nowStep==1">
+
+                        <h4 v-if="isSignAvailable">請選擇方案</h4>
+                        <h4 v-if="!isSignAvailable" class="text-danger text-center"><i>已截止報名</i></h4>
+                        <template v-for="t in activityInfo.acTickets">
+
+                            <div class="text-end">
+
+                                <span class="fs-6" v-if="availableTNumMap[t.atid]<100"><i>剩餘 <span class="text-warning">
+                                            {{availableTNumMap[t.atid]}}</span>
+                                        張票券</i></span>
+                            </div>
+                            <div class="bd-callout bd-callout-warning row bg-light  ml-1">
+
+
+                                <!-- <img class="ticket-img col-sm-3" v-if="t.atImg" :src="t.atImg" /> -->
+                                <!-- <img class="ticket-img col-sm-3" v-if="!t.atImg" th:src="@{/img/web/jojo_bird.png}" />  -->
+
+
+                                <div class="col-sm-10">
+
+                                    <div class="col">
+
+                                        <img class="ticket-img align-self-start " v-if="t.atImg" :src="t.atImg" />
+                                        <!-- <img class="ticket-img align-self-start " v-if="!t.atImg" th:src="@{/img/web/jojo_bird.png}" /> -->
+                                        <span class="align-self-start fw-bolder fs-4">{{t.atName}} </span>
+                                        <br>
+                                        <span class="align-self-start  text-secondary fs-5">NT$ {{t.atPrice}}
+                                            <span class="text-warning fs-5"
+                                                v-if="tNums.length>1 && (tNums.find((one)=>one.atid==t.atid)).atNum>0">
+                                                x
+                                                {{(tNums.find((one)=>one.atid==t.atid)).atNum}}</span>
+                                        </span>
+
+                                        <div class="align-self-start fs-6">{{t.atIntro}}</div>
+                                        <!-- <div class="align-self-end row-1" ><a href="#">more info</a></div> -->
+                                        <div class="align-self-end  text-muted fs-6"><br>票券說明｜{{t.atDirection}}</div>
+                                    </div>
+
+
+                                </div>
+
+                                <div v-if="isSignAvailable"
+                                    class="justify-content-around align-self-center col-sm-1 offset-sm-1">
+                                    <button @click="addTicket(t.atid,t.atPrice,t.atName)"
+                                        class="j_btn-circle-new btn-warning row  mb-4 align-self-end">+</button>
+                                    <button @click="minusTicket(t.atid,t.atPrice)"
+                                        class="j_btn-circle-new btn-warning row align-self-end">-</button>
+                                </div>
+
+
+
+                            </div>
+                        </template>
+                        <div>
+                            <p class="text-center text-muted">已選擇 <span class="text-warning">{{tickets.length}}</span>
+                                張票券，共
+                                <span class="text-warning">{{totalPrice}}</span> 元
+                            </p>
+                            <div class="d-grid gap-2 col-6 mx-auto">
+                                <button class="btn btn-warning" type="button" @click="toP2"
+                                    v-show="tickets.length>0">確認方案</button>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- step1 end-->
+
+                    <!-- step2 start-->
+
+                    <div class="row g-5" v-show="nowStep==2">
+
+                        <div class="col-md-12">
+                            <h4 class="mb-3">報名資訊</h4>
+                            <div class="text-muted text-start fs-6">
+                                報名資料將用於主辦單位安排活動，活動票券相關資訊將寄至訂購人信箱，如需修改電郵地址請至<a th:href=@{/userHome}>帳號管理</a>
+                            </div>
+                            <div v-show="tickets.length>1" class="form-check ml-1">
+                                <input @click="useDiffInfo" type="checkbox" class="form-check-input" id="save-info"
+                                    checked="true">
+                                勾選後，所有票券均會帶入相同資訊
+                            </div>
+                            <div style="max-height: 600px; overflow-x: none;" class="overflow-auto p-3">
+
+
+                                <div v-for="t in tNums" :key="t.atid" class="mb-3">
+
+                                    <template v-if="!sameInfochecked">
+                                        <hr class="my-4">
+                                        <div class="text-warning fs-5" v-if="t.atNum>0">方案｜{{t.atName}}</div>
+                                    </template>
+
+                                    <template v-for="i in tickets.length">
+                                        <div v-if="tickets[i-1].atid==t.atid">
+                                            <!-- <form :id="`form${i}`"> -->
+                                            <div class="row g-3">
+                                                <div v-if="!sameInfochecked" class="col-sm-12 text-secondary">
+                                                    <hr class="my-4" />
+                                                    <b>第 <span class="text-warning">{{i}} </span> 位報名者：</b>
+                                                    <input class="ml-1" name="clear" :id="i" type="checkbox"
+                                                        @change="clearInfo(i-1)" />清空現有資料
+
+                                                </div>
+                                                <div v-if="sameInfochecked && i==1" class="col-sm-12 text-secondary">
+                                                    <hr class="my-4" />
+                                                    <b>報名者資料：</b>
+                                                    <input class="ml-1" name="clear" :id="i" type="checkbox"
+                                                        @change="clearInfo(i-1)" />清空現有資料
+                                                </div>
+                                            </div>
+
+
+                                            <template v-if="sameInfochecked && i==1">
+                                                <!-- 填寫資訊start -->
+
+                                                <div class="row g-3">
+                                                    <div class="col-sm-6">
+                                                        <label for="asfName" class="form-label">姓名</label>
+                                                        <input v-model="reqDatas[i-1].asfName" type="text"
+                                                            class="form-control" required lang="zh-TW" />
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <label for="gender" class="form-label">性別</label>
+                                                        <div class="row">
+                                                            <div class="col-sm-4 offset-md-1">
+                                                                <input class="form-check-input"
+                                                                    v-model="reqDatas[i-1].asfGender" name="gender"
+                                                                    type="radio" value="m" />
+                                                                男
+                                                            </div>
+                                                            <div class="col-sm-4">
+                                                                <input class="form-check-input"
+                                                                    v-model="reqDatas[i-1].asfGender" name="gender"
+                                                                    type="radio" value="f" />
+                                                                女
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                        <label for="asfBirthday" class="form-label">生日</label>
+                                                        <input id="bd" v-model="reqDatas[i-1].asfBirthday" type="date"
+                                                            class="form-control" placeholder="" required />
+                                                    </div>
+
+                                                    <div class="col-12">
+                                                        <label for="email" class="form-label">Email</label>
+                                                        <input v-model="reqDatas[i-1].asfEmail" type="email"
+                                                            class="form-control" placeholder="you@example.com" required
+                                                            lang="en" />
+                                                    </div>
+                                                    <div class="col-12" v-show="false">
+                                                        <label for="tel" class="form-label">不顯示</label>
+                                                        <input v-model="reqDatas[i-1].asfTel" type="text"
+                                                            max-length="10" class="form-control"
+                                                            placeholder="09123456789" />
+                                                    </div>
+                                                    <div class="md-form mb-2">
+                                                        <label for="tel" class="form-label">電話號碼</label>
+                                                        <br />
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i
+                                                                    class="bi bi-telephone-fill"></i></span><select
+                                                                v-model="reqDatas[i-1].c_code"
+                                                                class="form-select-md validate "
+                                                                style="width: 100px;  border: 1px solid #ced4da;"
+                                                                value="+886">
+                                                                <option value="+886">台灣 +886</option>
+                                                                <option value="+86">中國 +86</option>
+                                                                <option value="+852">香港 +852</option>
+                                                                <option value="+60">馬來西亞 +60</option>
+                                                                <option value="+853">澳門 +853</option>
+                                                                <option value="+81">日本 +81</option>
+                                                                <option value="+82">韓國 +82</option>
+                                                                <option value="+63">菲律賓 +63</option>
+                                                                <option value="+65">新加坡 +65</option>
+                                                                <option value="+1">美國 +1</option>
+                                                                <option value="+0">其他 +0</option>
+                                                            </select><input v-model="reqDatas[i-1].phone" type="tel"
+                                                                id="phoneNumber" class="form-control form-control-md"
+                                                                placeholder="手機" lang="en" required maxlength="9">
+                                                        </div>
+
+                                                        <div class="mt-2"><span class="mt-2"></span></div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label for="city" class="form-label">居住縣市</label>
+                                                        <select class="form-select" name="city"
+                                                            @change="changeCity(i-1)" required
+                                                            v-model="reqDatas[i-1].asfCity">
+                                                            <option value="">請選擇縣市</option>
+                                                            <option v-for="c in cityOptions" :value="c.cityName"
+                                                                :key="c.addCityId">
+                                                                {{c.cityName}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label for="area" class="form-label">居住區域</label>
+                                                        <select class="form-select" name="area" required
+                                                            v-model="reqDatas[i-1].asfArea" @mousedown="getArea(i-1)">
+                                                            <option value="">請選擇區域</option>
+                                                            <option v-for="a in nowAreas[i-1]" :key="a.addAreaId"
+                                                                :value="a.areaName">
+                                                                {{a.areaName}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <!-- 填寫資訊end-->
+
+
+                                            </template>
+                                            <template : v-else-if="!sameInfochecked">
+                                                <div class="row g-3">
+                                                    <div class="col-sm-6">
+                                                        <label for="asfName" class="form-label">姓名</label>
+                                                        <input v-model="reqDatas[i-1].asfName" type="text"
+                                                            class="form-control" required lang="zh-TW" />
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <label for="gender" class="form-label">性別</label>
+                                                        <div class="row">
+                                                            <div class="col-sm-4 offset-md-1">
+                                                                <input class="form-check-input"
+                                                                    v-model="reqDatas[i-1].asfGender" name="gender"
+                                                                    type="radio" value="m" />
+                                                                男
+                                                            </div>
+                                                            <div class="col-sm-4">
+                                                                <input class="form-check-input"
+                                                                    v-model="reqDatas[i-1].asfGender" name="gender"
+                                                                    type="radio" value="f" />
+                                                                女
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                        <label for="asfBirthday" class="form-label">生日</label>
+                                                        <input id="bd" v-model="reqDatas[i-1].asfBirthday" type="date"
+                                                            class="form-control" placeholder="" required />
+                                                    </div>
+
+                                                    <div class="col-12">
+                                                        <label for="email" class="form-label">Email</label>
+                                                        <input v-model="reqDatas[i-1].asfEmail" type="email"
+                                                            class="form-control" placeholder="you@example.com" required
+                                                            lang="en" />
+                                                    </div>
+                                                    <div class="col-12" v-show="false">
+                                                        <label for="tel" class="form-label">不顯示</label>
+                                                        <input v-model="reqDatas[i-1].asfTel" type="text"
+                                                            max-length="10" class="form-control"
+                                                            placeholder="09123456789" />
+                                                    </div>
+                                                    <div class="md-form mb-2">
+                                                        <label for="tel" class="form-label">電話號碼</label>
+                                                        <br />
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i
+                                                                    class="bi bi-telephone-fill"></i></span><select
+                                                                v-model="reqDatas[i-1].c_code"
+                                                                class="form-select-md validate "
+                                                                style="width: 100px;  border: 1px solid #ced4da;"
+                                                                value="+886">
+                                                                <option value="+886">台灣 +886</option>
+                                                                <option value="+86">中國 +86</option>
+                                                                <option value="+852">香港 +852</option>
+                                                                <option value="+60">馬來西亞 +60</option>
+                                                                <option value="+853">澳門 +853</option>
+                                                                <option value="+81">日本 +81</option>
+                                                                <option value="+82">韓國 +82</option>
+                                                                <option value="+63">菲律賓 +63</option>
+                                                                <option value="+65">新加坡 +65</option>
+                                                                <option value="+1">美國 +1</option>
+                                                                <option value="+0">其他 +0</option>
+                                                            </select><input v-model="reqDatas[i-1].phone" type="tel"
+                                                                id="phoneNumber" class="form-control form-control-md"
+                                                                placeholder="手機" lang="en" required maxlength="9">
+                                                        </div>
+
+                                                        <div class="mt-2"><span class="mt-2"></span></div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label for="city" class="form-label">居住縣市</label>
+                                                        <select class="form-select" name="city"
+                                                            @change="changeCity(i-1)" required
+                                                            v-model="reqDatas[i-1].asfCity">
+                                                            <option value="">請選擇縣市</option>
+                                                            <option v-for="c in cityOptions" :value="c.cityName"
+                                                                :key="c.addCityId">
+                                                                {{c.cityName}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label for="area" class="form-label">居住區域</label>
+                                                        <select class="form-select" name="area" required
+                                                            v-model="reqDatas[i-1].asfArea" @mousedown="getArea(i-1)">
+                                                            <option value="">請選擇區域</option>
+                                                            <option v-for="a in nowAreas[i-1]" :key="a.addAreaId"
+                                                                :value="a.areaName">
+                                                                {{a.areaName}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- 填寫資訊end-->
+                                                </div><!--row g-3-->
+                                            </template>
+                                        </div>
+
+                                </div>
+
+                                <!-- </form> -->
+            </template>
+        </div>
+
+
+
+
+
+    </div><!--over flow end-->
+
+    </div>
+    <!--結帳區 start -->
+    <div>
+        <!-- 付款開始 -->
+
+        <div class="mt-5" v-if="totalPrice>0">
+            <hr class="my-4 mt-5">
+            <h4 class="mb-3">付款方式</h4>
+
+            <div class="my-3 row">
+                <template v-for="p of payItems">
+                    <div class="form-check col">
+                        <input style="margin: 10px" name="pay" type="radio" v-model="pmid" :value="p.payMethod.pmid" />
+                        <label class="form-check-label" for="pay">{{p.payMethod.pmName}}</label>
+                    </div>
+                </template>
+                <hr class="my-4" />
+            </div>
+        </div>
+        <template v-if="linepayFailMsg!=''">
+            <div class="text-center mb-1">
+                {{linepayFailMsg}}
+            </div>
+        </template>
+        <!-- 付款結束 -->
+
+        <div class="text-center mb-1">已訂購{{tickets.length}}張票券，共{{totalPrice}}元</div>
+
+        <div class="row mx-auto align-self-center mb-5">
+            <button id="submitInfo" disabled class="btn btn-warning" type="button" @click="toP3">送出報名</button>
+
+        </div>
+    </div>
+    <!--結帳區 end -->
+    </div>
+    <!-- step2 end-->
+
+
+
+
+    </div>
+
+
+    </template>
+    </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+    <script type="module">
+        import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.min.js";
+
+        createApp({
+            data() {
+                return {
+                    WEBROOT: WebRoot,
+                    isShowAll: false,
+                    host: "window.location.host",
+                    acid: parseInt(window.location.href.split("/").slice(-1)),
+                    activityInfo: {},
+                    availableTNumMap: {},
+                    isSignNumAvailable: true,//控制報名按鈕
+                    payItems: [],
+                    pmid: "",
+                    cityOptions: [],
+                    nowAreas: [],
+                    reqDatas: [],
+                    tickets: [],
+                    tNums: [{
+                        atid: "",
+                        atName: "",
+                        atNum: 0
+                    }],
+                    nowStep: 1,
+                    nowTicketInfo: 1,
+                    sameInfochecked: false,
+                    isSignAvailable: true,
+                    user: {},
+                    linepayFailMsg: "",
+
+                };
+            },
+            methods: {
+                //加一張票
+                addTicket(t, tPrice, tName) {
+                    //票券數量
+                    this.availableTNumMap[t]--;
+
+                    // //console.log(event.target.classList)
+                    if (this.availableTNumMap[t] <= 0) {
+                        event.target.disabled = true
+
+                        return;
+                    }
+
+                    let ticket = { atid: "", atPrice: 0, atName: "" };
+                    ticket.atid = t;
+                    ticket.atPrice = tPrice;
+                    ticket.atName = tName;
+                    this.tickets.push(ticket);
+                    let reqData = {
+                        asfName: "",
+                        asfEmail: "",
+                        asfTel: "",
+                        asfGender: "",
+                        asfBirthday: "1990-01-01",
+                        asfCity: "",
+                        asfArea: "",
+                        acid: parseInt(window.location.href.split("/").slice(-1)),
+                        atid: "",
+                        pmid: "",
+                        c_code: "+886",
+                        phone: ""
+                    };
+                    reqData.atid = t;
+                    this.reqDatas.push(reqData);
+                    //判斷有登入->後端直接將報名資訊帶入user
+                    if (this.activityInfo.asfName != null) {
+                        let bd = new Date(this.activityInfo.asfBirthday);
+                        this.reqDatas[0].asfName = this.activityInfo.asfName;
+                        this.reqDatas[0].asfEmail = this.activityInfo.asfEmail;
+                        this.reqDatas[0].phone = this.splitTel(this.activityInfo.asfTel);
+                        this.reqDatas[0].asfTel = this.reqDatas[0].c_code + "-" + this.reqDatas[0].phone;
+                        this.reqDatas[0].asfGender = this.activityInfo.asfGender == null ? "" : this.activityInfo.asfGender.toLowerCase();
+                        this.reqDatas[0].asfBirthday = bd.getFullYear() + "-" + ("0" + (bd.getMonth() + 1)).slice(-2) + "-" + ("0" + bd.getDate()).slice(-2);
+                        this.reqDatas[0].asfCity = this.activityInfo.asfCity;
+                        this.reqDatas[0].asfArea = this.activityInfo.asfArea;
+
+
+                    }
+
+                    this.changetNums();
+
+                },
+                //減一張票
+                minusTicket(t) {
+                    const originalNum = this.availableTNumMap[t];
+                    this.availableTNumMap[t]++;
+
+                    // //console.log("originalNum", originalNum)
+                    if (originalNum >= this.availableTNumMap[t]) {
+                        event.target.disabled = true;
+                        return;
+                    } else {
+                        event.target.disabled = false;
+                    }
+                    for (let i = 0; i < this.tickets.length; i++) {
+                        if (this.tickets[i].atid == t) {
+                            this.tickets.splice(i, 1);
+                        }
+                        if (this.reqDatas[i].atid == t) {
+                            this.reqDatas.splice(i, 1);
+                        }
+                    }
+
+                    this.changetNums();
+
+                },
+                changetNums() {
+                    this.tNums = [];
+
+                    for (let t of this.activityInfo.acTickets) {
+                        let tNum = {
+                            atid: "",
+                            atName: "",
+                            atNum: 0,
+                        }
+                        tNum.atid = t.atid;
+                        tNum.atName = t.atName;
+                        tNum.atNum = this.tickets.filter((one) => one.atid == t.atid).length;
+                        this.tNums.push(tNum);
+
+
+
+                    }
+                    this.tickets = this.tickets.sort((a, b) => a.atid - b.atid);
+                    return this.tNums;
+
+                },
+
+                //所有報名使用同資訊
+                useDiffInfo() {
+
+                    if (!document.getElementById("save-info").checked) {//使用不同資訊
+                        this.sameInfochecked = false;
+                        // //console.log("nowAreasArray",this.nowAreas);
+                        for (let i = 1; i < this.reqDatas.length; i++) {
+                            this.reqDatas[i].asfName = this.reqDatas[0].asfName;
+                            this.reqDatas[i].asfGender = this.reqDatas[0].asfGender;
+                            this.reqDatas[i].asfBirthday = this.reqDatas[0].asfBirthday;
+                            this.reqDatas[i].asfEmail = this.reqDatas[0].asfEmail;
+                            // this.reqDatas[i].asfTel = this.reqDatas[0].asfTel;
+                            this.reqDatas[i].c_code = this.reqDatas[0].c_code
+                            this.reqDatas[i].phone = this.reqDatas[0].phone
+                            this.reqDatas[i].asfTel = this.reqDatas[0].c_code + "-" + this.reqDatas[0].phone;
+                            this.reqDatas[i].asfCity = this.reqDatas[0].asfCity;
+                            this.reqDatas[i].asfArea = this.reqDatas[0].asfArea;
+                            this.nowAreas[i] = this.nowAreas[0];
+                        }
+
+                    } else {
+                        this.sameInfochecked = true;
+                        for (let reqData of this.reqDatas) {//使用相同資訊
+                            reqData.asfName = this.reqDatas[0].asfName;
+                            reqData.asfGender = this.reqDatas[0].asfGender;
+                            reqData.asfBirthday = this.reqDatas[0].asfBirthday;
+                            reqData.asfEmail = this.reqDatas[0].asfEmail;
+                            // reqData.asfTel = this.reqDatas[0].asfTel;
+                            // reqData.phone = this.splitTel(this.reqDatas[0].asfTel);
+                            reqData.c_code = this.reqDatas[0].c_code
+                            reqData.phone = this.reqDatas[0].phone
+                            reqData.asfTel = this.reqDatas[0].c_code + "-" + this.reqDatas[0].phone;
+                            reqData.asfCity = this.reqDatas[0].asfCity;
+                            reqData.asfArea = this.reqDatas[0].asfArea;
+
+                        }
+                    }
+
+                    if (this.pmid == 5) {
+                        for (let reqData of this.reqDatas) {
+                            reqData.pmid = this.pmid;
+                        }
+                    }
+
+                },
+
+                clearInfo(index) {
+                    let clearList = document.getElementsByName("clear");
+                    // //console.log(index,clearList[index].checked);
+                    this.reqDatas[index].asfName = "";
+                    this.reqDatas[index].asfGender = "";
+                    this.reqDatas[index].asfBirthday = "1990-01-01";
+                    this.reqDatas[index].asfEmail = "";
+                    this.reqDatas[index].asfTel = "";
+                    this.reqDatas[index].phone = "";
+                    this.reqDatas[index].asfCity = "";
+                    this.reqDatas[index].asfArea = "";
+
+                },
+
+                toP1() {
+
+                    this.nowStep = 1;
+                    document.getElementById("step1").classList.add("btn-warning");
+                    if (this.reqDatas.length > 0) {
+                        document.getElementById("step2").classList.remove("btn-warning");
+                    }
+
+                },
+
+                //按下確認方案/回到p2
+                toP2() {
+                    this.getPayMethods();
+                    this.nowStep = 2;
+                    this.sameInfochecked = true;
+                    this.useDiffInfo();
+                    this.allPrice = this.totalPrice;
+
+                    if (this.totalPrice == 0) {
+                        this.pmid = 5;
+                    }
+                    for (let i = 0; i < this.reqDatas.length; i++) {
+                        this.nowAreas.push({});
+                        this.getArea(i);
+                    }
+
+
+                    if (this.tickets.length > 0) {
+                        document.getElementById("step2").removeAttribute("disabled");
+                    }
+                    document.getElementById("step2").classList.add("btn-warning");
+                    document.getElementById("step1").classList.remove("btn-warning");
+
+
+                },
+
+
+
+                //按下報名
+                toP3() {
+                    document.getElementById("step1").classList.remove("btn-warning");
+                    document.getElementById("step2").classList.remove("btn-warning");
+
+                    this.callsaveSignApi();
+                    // //console.log(this.reqDatas);
+                    if (this.pmid == 3) {
+                        axios.post('/payByLinepay', this.reqDatas)
+                            .then(response => {
+                                // //console.log(response.data);
+                                let rd = response.data;
+                                //console.log(rd);
+                                if (rd.returnCode == "0000") {
+                                    this.linepayRequest(rd);
+                                }
+                            })
+                    } else if (this.pmid == 1) {
+                        window.open(this.WEBROOT + '/signSuccess/' + this.acid, '_self');
+                    } else if (this.pmid == 4) {
+                        //console.log("nowpayByEC")
+                        axios.post('/payByEcpay', this.reqDatas)
+                            .then(response => {
+                                if (response.data == "gotoEcpay")
+                                    window.open('/ecpay', '_self');
+                                // setTimeout(() => {
+                                //     window.open(this.WEBROOT + '/signSuccess/' + this.acid, '_self');
+                                // }, 30000)
+                                // axios.get('/ecpay').then(response => {
+                                //     //console.log(response.data);
+                                // })
+
+
+                            })
+
+                    } else if (this.pmid == 5) {
+                        window.open(this.WEBROOT + '/signSuccess/' + this.acid, '_self');
+                    }
+
+
+
+
+                },
+
+                callsaveSignApi() {
+
+                    axios.post('/saveSignInfo', this.reqDatas)
+                        .then(response => {
+                            // //console.log('axios:', response.data);
+                            let storageData = response.data;
+                            localStorage.setItem('signedLists', JSON.stringify(storageData));
+                        }).catch(error => {
+                            console.error(error);
+                        });
+                },
+
+
+                //拿到付款方式，並隱藏＆顯示區塊
+                getPayMethods() {
+                    axios.get(`/showPayment/${this.acid}`)
+                        .then(response => {
+                            // //console.log('axios:',response.data)
+                            this.payItems = response.data;
+
+                        })
+
+                },
+                changeCity(index) {
+                    let selArea = document.getElementsByName("area");
+                    selArea[index].value = ""
+                    this.reqDatas[index].asfArea = selArea[index].value;
+                    this.nowAreas[index] = {};
+                },
+
+                //選擇縣市後取得區域
+                getArea(index) {
+
+                    let selCity = document.getElementsByName("city");
+
+                    if (this.reqDatas.length > 0 && selCity[index]) { // 檢查selCity[index]是否存在
+
+                        if (selCity[index].selectedIndex > 0) {
+                            let sIndex = selCity[index].selectedIndex;
+                            this.nowAreas[index] = this.cityOptions[sIndex - 1].areas;
+                        }
+                    }
+                },
+                secondToDays(seconds) {
+                    const secondsPerDay = 1000 * 60 * 60 * 24;
+                    const days = Math.floor(seconds / secondsPerDay);
+                    const remainingSeconds = seconds % secondsPerDay;
+
+                    return days;
+                },
+
+
+                //付款方式
+                linepayRequest(rd) {
+                    window.open(rd.info.paymentUrl.web, "_self");
+                },
+                //處理電話號碼(後)
+                splitTel(asftel) {
+                    let splitArray = asftel.split("-");
+                    return splitArray[splitArray.length - 1];
+                    ////console.log("電話後碼", splitArray[splitArray.length - 1]);
+                }
+
+
+
+            },
+            mounted() {
+
+                axios.get('/showCitys')
+                    .then(response => {
+                        this.cityOptions = response.data;
+
+                    }),
+                    this.isShowAll = true;
+
+
+            },
+            created() {
+                axios.get(`/signActivity/${parseInt(window.location.href.split("/").slice(-1))}`)
+                    .then(response => {
+
+                        this.activityInfo = response.data;
+                        let acd = new Date(this.activityInfo.acDate);
+                        this.activityInfo.acDate = acd.getFullYear() + "/" + ("0" + (acd.getMonth() + 1)).slice(-2) + "/" + ("0" + acd.getDate()).slice(-2) + "  " + ("0" + acd.getHours()).slice(-2) + ":" + ("0" + acd.getMinutes()).slice(-2);
+                        //console.log(this.activityInfo);
+
+                        //判斷過期
+                        let today = new Date();
+                        let acSignUpEndDay = new Date(this.activityInfo.acSignUpEndDate);
+
+
+                        if (today > acSignUpEndDay) {
+                            this.isSignAvailable = false
+                        } else {
+                            this.isSignAvailable = true
+                            // //console.log("today - acSignUpEndDay", this.secondToDays(today - acSignUpEndDay))
+                            this.activityInfo.remainDays = this.secondToDays(acSignUpEndDay - today)
+                        }
+                    }),
+
+                    axios.get(`/showAvailabletickets/${parseInt(window.location.href.split("/").slice(-1))}`)
+                        .then(
+                            response => {
+                                this.availableTNumMap = response.data;
+                                //console.log(this.availableTNumMap);
+                            }
+                        )
+
+                this.isShowAll = false;
+            },
+            computed: {
+                //計算總票價
+                totalPrice() {
+                    return this.tickets.reduce((sum, t) => (sum += t.atPrice), 0);
+                },
+            },
+            watch: {
+                pmid: {
+                    handler(oldValue, newValue) {
+                        for (let r of this.reqDatas) {
+                            r.pmid = this.pmid
+                        }
+
+                        return this.reqDatas;
+                    },
+                    deep: true
+                },
+
+
+                // 改reqDatas
+                reqDatas: {
+                    handler(oldValue, newValue) {
+                        let anyEmpty = false;
+                        if (this.sameInfochecked == true && this.reqDatas.length > 1) {
+                            for (let reqData of this.reqDatas) {
+                                reqData.asfName = this.reqDatas[0].asfName;
+                                reqData.asfGender = this.reqDatas[0].asfGender;
+                                reqData.asfBirthday = this.reqDatas[0].asfBirthday;
+                                reqData.asfEmail = this.reqDatas[0].asfEmail;
+                                //reqData.asfTel = this.reqDatas[0].asfTel;
+                                reqData.phone = this.reqDatas[0].phone;
+                                reqData.asfTel = this.reqDatas[0].c_code + "-" + this.reqDatas[0].phone;
+                                reqData.asfCity = this.reqDatas[0].asfCity;
+                                reqData.asfArea = this.reqDatas[0].asfArea;
+
+                            }
+                        } else {
+                            for (let reqData of this.reqDatas) {
+
+                                reqData.asfTel = reqData.c_code + "-" + reqData.phone;
+
+                            }
+                        }
+
+                        for (let r of this.reqDatas) {
+                            let isEmpty = true;
+
+                            if (r.asfName == "" || r.asfGender == "" || r.asfBirthday == "" || r.asfEmail == "" || r.phone == "" || r.asfCity == "" || r.asfArea == "") {
+                                isEmpty = true;
+                                anyEmpty = isEmpty;
+
+
+                            } else {
+                                isEmpty = false;
+                            }
+                        }
+
+                        if (!anyEmpty && this.pmid > 0) {
+                            document.getElementById("submitInfo").removeAttribute("disabled");
+                        } else {
+                            document.getElementById("submitInfo").setAttribute("disabled", true);
+                        }
+
+                        return this.reqDatas;
+                    },
+                    deep: true
+
+                },
+            }
+
+
+        }).mount("#app");
+
+
+    </script>
+
+</body>
+
+</html>

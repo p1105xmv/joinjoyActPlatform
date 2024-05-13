@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+<meta charset="UTF-8">
+<title>首頁</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</head>
+<body>
+<div th:replace="~{layout/navbar}"></div>
+<div class="container">
+REG666!@@#R# 😍
+<br>
+<img th:src="@{/img/web/jojo_bird.png}" >
+<div id="freeActivities" th:replace="~{indexPageElements/FreeActivities}"></div>
+
+
+</div>
+
+ <script>
+        $.ajax({
+            url: '/joinjoy/free',
+            method: 'GET',
+            success: function(response) {
+                $('#freeActivities').html(response);
+            },
+            error: function() {
+                $('#freeActivities').html('Error retrieving data for Free');
+            }
+        });
+
+        
+    </script>
+
+</body>
+</html>

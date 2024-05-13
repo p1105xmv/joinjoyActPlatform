@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+</head>
+
+<body>
+  <!-- Button trigger modal
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        Launch static backdrop modal
+    </button> -->
+
+  <div class="modal fade" id="oauth2Rigister" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="width:400px;">
+      <div class="modal-content rounded-5 shadow">
+        <div class="modal-header border-0 my-auto">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <h4 class="text-center">註冊會員</h5>
+          <div class="modal-body px-4">
+            <!-- username -->
+            <div class="form-group mb-2">
+              <div class="alert alert-danger" role="alert" v-if="errorstatus">
+                {{errormsg}}
+              </div>
+              <label for="uAccountEmail" class="sr-only">電子信箱：</label>
+              <!-- <v-error-message name="userEmail">請填寫ＥＭＡＩＬ</v-error-message> -->
+              <!-- email -->
+              <div class="md-form mb-2">
+                <div class="input-group borderless">
+                  <span class="input-group-text">
+                    <i class="bi bi-envelope"></i>
+                  </span>
+                  <input v-model="email" type="text" class="form-control"
+                    :class="{'is-invalid': emailCheckno},{'invalid': emailCheckok}" name="username" placeholder="電子信箱"
+                    autofocus />
+                  <button class="btn btn-warning shadow-sm" @click="sendEmailVolidCode">寄送驗證碼</button>
+                </div>
+                <div class="mt-2">
+                  <span v-text="emailMessage"
+                    :class="[{'text-danger': emailCheckno},{'text-success': emailCheckok},'mt-2']">
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- emailvolidcode -->
+            <div class="md-form mb-2">
+              <div class="input-group borderless">
+                <span class="input-group-text">
+                  <i class="bi bi-pencil-square"></i>
+                </span>
+                <input v-model="voildcode" type="text" class="form-control" placeholder="驗證碼" />
+              </div>
+              <div class="mt-2">
+                <span v-text="emailvolidcodemsg"
+                  :class="[{'text-danger': emailvolidcodeno},{'text-success': emailvolidcodeok},{'text-warning': emailvolidloading}]">
+                </span>
+                <div v-if="emailvolidloading" class="spinner-border spinner-border-sm text-warning mx-2 " role="status">
+                  <span class="visually-hidden"> Loading...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- TellPhone -->
+            <div class="md-form mb-2">
+              <div class="input-group borderless">
+                <span class="input-group-text">
+                  <i class="bi bi-telephone-fill"></i>
+                </span>
+                <select v-model="selected" class="form-select">
+                  <option v-for="pcode in phonecodes" :value="pcode.value">
+                    {{pcode.text}}
+                  </option>
+                </select>
+                <input v-model="phonenumber" type="tel" class="form-control"
+                  :class="{'is-invalid': phonenumberCheckno},{'invalid': phonenumberCheckok}" placeholder="手機" />
+              </div>
+              <div class="mt-2">
+                <span v-text="phonenumberMessage"
+                  :class="[{'text-danger': phonenumberCheckno},{'text-success': phonenumberCheckok},'mt-2']">
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- footer -->
+          <!-- Modal Footer -->
+          <div class="modal-footer border-0 px-4">
+            <button type="button" class="btn shadow-sm rounded-pill btn-warning col" @click="registerClick()">
+              送出
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+  <script type="module">
+    import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.min.js";
+    createApp({
+      // components: {
+      //   VForm: VeeValidate.Form,
+      //   VField: VeeValidate.Field,
+      //   VErrorMessage: VeeValidate.ErrorMessage,
+      // },
+      data() {
+        return {
+          showModal: "true",
+          email: "",
+          selected: "+886",
+          phonecodes: [
+            { value: "+886", text: "台灣 +886" },
+            { value: "+86", text: "中國 +86" },
+            { value: "+852", text: "香港 +852" },
+            { value: "+60", text: "馬來西亞 +60" },
+            { value: "+853", text: "澳門 +853" },
+            { value: "+81", text: "日本 +81" },
+            { value: "+82", text: "韓國 +82" },
+            { value: "+63", text: "菲律賓 +63" },
+            { value: "+65", text: "新加坡 +65" },
+            { value: "+1", text: "美國 +1" },
+            { value: "+0", text: "其他 +0" }
+          ],
+          phonenumber: "",
+          valid: false,
+          emailCheckok: false,
+          emailCheckno: false,
+          emailMessage: "",
+          emailvolidloading: false,
+          isEmailExist: false,
+          errormsg: "",
+          errorstatus: false,
+          emailvolidcodeno: false,
+          emailvolidcodeok: false,
+        }
+      },
+      methods: {
+        registerClick() {
+          let uTel = this.selected + "-" + this.phonenumber;
+          let uAccountEmail = this.email;
+
+          const raw = JSON.stringify({
+            uAccountEmail: uAccountEmail,
+            uTel: uTel,
+            uidCode: this.voildcode,
+          });
+
+          axios.post("/registerOAuth2", raw, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }).then((rs) => rs.data)
+            .then((data) => {
+              $("#oauth2Rigister").modal("hide");
+              history.replaceState({}, document.title, window.location.pathname);
+              $("#successRegisterModal").modal("show");
+            })
+            .catch((error) => {
+              this.errorstatus = true;
+              this.errormsg = error.response.data;
+            });
+        },
+        sendEmailVolidCode() {
+          if (!this.emailCheckok || !this.email.trim()) {
+            //console.log("阻止提交表單，驗證碼");
+            return; // 阻止提交表單
+          }
+
+          const formdata = new FormData();
+          formdata.append("email", this.email);
+
+          axios.post("/api/checkEmail", formdata)
+            .then((rs) => {
+              this.emailvolidloading = true;
+              this.emailvolidcodeok = false;
+              this.emailvolidcodeno = false;
+              this.emailvolidcodemsg = "驗證碼正在寄送，請稍待片刻";
+              return axios.post("/api/sentEmailVolidCode", formdata);
+            })
+            .then(rs => {
+              let volidCount = rs.data.volidCount;
+              this.emailvolidcodemsg = `驗證碼已發送至您的信箱，請查收。您已進行 ${volidCount} 次驗證。` + "請注意，最多發送 3 次。";
+              this.emailvolidcodeok = true;
+              this.emailvolidcodeno = false;
+              this.emailvolidloading = false;
+            })
+            .catch((error) => {
+              this.emailvolidcodemsg = "已存在信箱，請重新輸入信箱";
+              this.emailvolidcodeok = false;
+              this.emailvolidcodeno = true;
+              this.emailvolidloading = false;
+            });
+        }
+      },
+      mounted() {
+        axios.get("/api/session/checkOauth2Status")
+          .then((rs) => (rs.data))
+          .then((data) => {
+            if (data == "login") {
+              $("#successLoginModal").modal("show");
+            }
+            if (data == "register") {
+              axios.get("/api/session/getEmail")
+                .then((rs) => rs.data)
+                .then((userEmail) => {
+                  this.email = userEmail;
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                });
+
+              new bootstrap.Modal(document.querySelector("#oauth2Rigister")).show();
+            }
+          })
+      },
+      // // 检查URL参数，決定顯示狀態
+      // const urlParams = new URLSearchParams(window.location.search);
+      // const oauth2LoginSuccess = urlParams.get("oauth2LoginSuccess");
+
+      // if (oauth2LoginSuccess === "false") {
+      //   // 需要註冊
+      //   //console.log("帳號需要注冊喔～");
+
+      //   axios.get("/api/session/getEmail")
+      //     .then((rs) => rs.data)
+      //     .then((userEmail) => {
+      //       this.email = userEmail;
+      //     })
+      //     .catch((error) => {
+      //       console.error("Error:", error);
+      //     });
+
+      //   new bootstrap.Modal(document.querySelector("#oauth2Rigister")).show();
+      // } else if (oauth2LoginSuccess === "true") {
+      //   // 登入成功
+      //   history.replaceState({}, document.title, window.location.pathname);
+      //   $("#successLoginModal").modal("show");
+      //   //console.log("登入成功喔~");
+      // }
+      watch: {
+        email(newValue, oldValue) {
+          let re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+          let isValidEmail = re.test(newValue);
+          if (!newValue.trim()) {
+            this.emailCheckno = true;
+            this.emailCheckok = false;
+            this.emailMessage = "必填";
+          } else if (isValidEmail) {
+            this.emailCheckok = true;
+            this.emailCheckno = false;
+            this.emailMessage = "格式符合";
+          } else {
+            this.emailCheckok = false;
+            this.emailCheckno = true;
+            this.emailMessage = "信箱格式錯誤";
+          }
+        },
+        phonenumber(newValue, oldValue) {
+          let re = /^\d{7,20}$/;
+          let isValidphone = re.test(newValue);
+          if (!newValue.trim()) {
+            this.phonenumberCheckok = false;
+            this.phonenumberCheckno = true;
+            this.phonenumberMessage = "必填";
+          } else if (isValidphone) {
+            this.phonenumberCheckok = true;
+            this.phonenumberCheckno = false;
+            this.phonenumberMessage = "格式符合";
+          } else {
+            this.phonenumberCheckok = false;
+            this.phonenumberCheckno = true;
+            this.phonenumberMessage = "電話號碼為7~20字的數字";
+          }
+        },
+      }
+    }).mount("#oauth2Rigister");
+  </script>
+</body>
+
+</html>

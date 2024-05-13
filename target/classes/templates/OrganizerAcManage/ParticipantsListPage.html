@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>參加名單</title>
+    <link
+      rel="stylesheet"
+      href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+
+    <style>
+      body {
+        background-color: rgb(255, 252, 233) !important;
+      }
+
+      .backBtn {
+        background-color: white;
+        box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 10px;
+        width: auto;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .block {
+        background-color: white;
+        box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        padding: 25px !important;
+        width: auto;
+      }
+
+      .btnFont {
+        font-size: 20px;
+      }
+
+      .icon {
+        font-size: 24px;
+        margin-left: 5px !important;
+      }
+
+      .inputWidth {
+        width: 400px !important;
+      }
+
+      .ticketThead {
+        background-color: rgb(255, 246, 229);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div th:replace="~{layout/navbar}"></div>
+    <div id="app">
+      <div class="container">
+        <template v-if="activity">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="fw-bolder mt-4">參加名單 - {{activity.acName}}</h2>
+            </div>
+            <div class="col-auto">
+              <div class="d-flex justify-content-end">
+                <div class="backBtn mt-4 fw-bolder text-center" @click="goBack">
+                  返回
+                  <i class="bi bi-arrow-right icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="block mt-4">
+            <div class="row align-items-center">
+              <div class="col">
+                <div class="input-group mb-3 inputWidth">
+                  <input
+                    id="search"
+                    type="text"
+                    class="form-control"
+                    placeholder="票種/姓名/電話/Email"
+                    aria-label="Recipient's username"
+                    aria-describedby="button-addon2"
+                    @keydown.enter="changeList(4)"
+                  />
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    id="button-addon2"
+                    @click="changeList(4)"
+                  >
+                    <i class="bi bi-search"></i>
+                  </button>
+                  <button
+                    v-if="type==4"
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    id="button-addon2"
+                    @click="changeList(2)"
+                  >
+                    清除搜尋結果
+                  </button>
+                </div>
+              </div>
+              <div class="col-auto">
+                <div class="d-flex justify-content-end">
+                  <button
+                    type="button"
+                    class="btn btn-warning"
+                    @click="downloadAcSignForm(activity, $event)"
+                  >
+                    下載名單
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="type!=4"
+              class="btn-group"
+              role="group"
+              aria-label="Basic radio toggle button group"
+            >
+              <input
+                type="radio"
+                class="btn-check"
+                name="btnradio"
+                id="btnradio1"
+                autocomplete="off"
+                checked
+              />
+              <label
+                class="btn btn-outline-primary"
+                for="btnradio1"
+                @click="changeList(2)"
+                >有效票/已付款</label
+              >
+
+              <input
+                type="radio"
+                class="btn-check"
+                name="btnradio"
+                id="btnradio2"
+                autocomplete="off"
+              />
+              <label
+                class="btn btn-outline-primary"
+                for="btnradio2"
+                @click="changeList(1)"
+                >未付款</label
+              >
+
+              <input
+                type="radio"
+                class="btn-check"
+                name="btnradio"
+                id="btnradio3"
+                autocomplete="off"
+              />
+              <label
+                class="btn btn-outline-primary"
+                for="btnradio3"
+                @click="changeList(0)"
+                >已取消</label
+              >
+            </div>
+
+            <div v-if="type!=4" class="row mt-4">
+              <div class="col tableBlock">
+                <table class="table">
+                  <thead class="ticketThead">
+                    <tr>
+                      <th scope="col">參加人姓名</th>
+                      <th scope="col">參加人性別</th>
+                      <th scope="col">參加人Email</th>
+                      <th scope="col">參加人電話</th>
+                      <th scope="col">票種</th>
+                      <th scope="col">價錢</th>
+                      <th scope="col">建立時間</th>
+                      <th scope="col">付費日期</th>
+                    </tr>
+                  </thead>
+
+                  <tbody v-if="type === 0">
+                    <tr v-for="asf in cancelList" :key="asf.id">
+                      <td class="fw-bolder">{{ asf.asfName }}</td>
+                      <td>{{ gender(asf.asfGender) }}</td>
+                      <td>{{ asf.asfEmail }}</td>
+                      <td>{{ asf.asfTel }}</td>
+                      <td>{{ asf.atName }}</td>
+                      <td>{{ asf.atPrice }}</td>
+                      <td>{{ asf.asfDate }}</td>
+                      <td>{{ asf.asfPaidDate }}</td>
+                    </tr>
+                  </tbody>
+                  <tbody v-else-if="type === 1">
+                    <tr v-for="asf in unpaidList" :key="asf.id">
+                      <td class="fw-bolder">{{ asf.asfName }}</td>
+                      <td>{{ gender(asf.asfGender) }}</td>
+                      <td>{{ asf.asfEmail }}</td>
+                      <td>{{ asf.asfTel }}</td>
+                      <td>{{ asf.atName }}</td>
+                      <td>{{ asf.atPrice }}</td>
+                      <td>{{ asf.asfDate }}</td>
+                      <td>{{ asf.asfPaidDate }}</td>
+                    </tr>
+                  </tbody>
+                  <tbody v-else-if="type === 2">
+                    <tr v-for="asf in signupSuccessList" :key="asf.id">
+                      <td class="fw-bolder">{{ asf.asfName }}</td>
+                      <td>{{ gender(asf.asfGender) }}</td>
+                      <td>{{ asf.asfEmail }}</td>
+                      <td>{{ asf.asfTel }}</td>
+                      <td>{{ asf.atName }}</td>
+                      <td>{{ asf.atPrice }}</td>
+                      <td>{{ asf.asfDate }}</td>
+                      <td>{{ asf.asfPaidDate }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div v-if="type==4" class="row mt-3">
+              <div class="col tableBlock">
+                <h4 class="fw-bolder">有效票/已付款</h4>
+                <table class="table mt-3">
+                  <thead class="ticketThead">
+                    <tr>
+                      <th scope="col">參加人姓名</th>
+                      <th scope="col">參加人性別</th>
+                      <th scope="col">參加人Email</th>
+                      <th scope="col">參加人電話</th>
+                      <th scope="col">票種</th>
+                      <th scope="col">價錢</th>
+                      <th scope="col">建立時間</th>
+                      <th scope="col">付費日期</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-for="asf in searchList" :key="asf.id">
+                      <template v-if="asf.asfSignStatus==2">
+                        <td class="fw-bolder">{{ asf.asfName }}</td>
+                        <td>{{ gender(asf.asfGender) }}</td>
+                        <td>{{ asf.asfEmail }}</td>
+                        <td>{{ asf.asfTel }}</td>
+                        <td>{{ asf.atName }}</td>
+                        <td>{{ asf.atPrice }}</td>
+                        <td>{{ asf.asfDate }}</td>
+                        <td>{{ asf.asfPaidDate }}</td>
+                      </template>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h4 class="fw-bolder mt-4">未付款</h4>
+                <table class="table mt-3">
+                  <thead class="ticketThead">
+                    <tr>
+                      <th scope="col">參加人姓名</th>
+                      <th scope="col">參加人性別</th>
+                      <th scope="col">參加人Email</th>
+                      <th scope="col">參加人電話</th>
+                      <th scope="col">票種</th>
+                      <th scope="col">價錢</th>
+                      <th scope="col">建立時間</th>
+                      <th scope="col">付費日期</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-for="asf in searchList" :key="asf.id">
+                      <template v-if="asf.asfSignStatus==1">
+                        <td class="fw-bolder">{{ asf.asfName }}</td>
+                        <td>{{ gender(asf.asfGender) }}</td>
+                        <td>{{ asf.asfEmail }}</td>
+                        <td>{{ asf.asfTel }}</td>
+                        <td>{{ asf.atName }}</td>
+                        <td>{{ asf.atPrice }}</td>
+                        <td>{{ asf.asfDate }}</td>
+                        <td>{{ asf.asfPaidDate }}</td>
+                      </template>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h4 class="fw-bolder mt-4">已取消</h4>
+                <table class="table mt-3">
+                  <thead class="ticketThead">
+                    <tr>
+                      <th scope="col">參加人姓名</th>
+                      <th scope="col">參加人性別</th>
+                      <th scope="col">參加人Email</th>
+                      <th scope="col">參加人電話</th>
+                      <th scope="col">票種</th>
+                      <th scope="col">價錢</th>
+                      <th scope="col">建立時間</th>
+                      <th scope="col">付費日期</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-for="asf in searchList" :key="asf.id">
+                      <template v-if="asf.asfSignStatus==0">
+                        <td class="fw-bolder">{{ asf.asfName }}</td>
+                        <td>{{ gender(asf.asfGender) }}</td>
+                        <td>{{ asf.asfEmail }}</td>
+                        <td>{{ asf.asfTel }}</td>
+                        <td>{{ asf.atName }}</td>
+                        <td>{{ asf.atPrice }}</td>
+                        <td>{{ asf.asfDate }}</td>
+                        <td>{{ asf.asfPaidDate }}</td>
+                      </template>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="modal fade"
+            id="downloadAcSignFormModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="modalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalLabel">名單已產生</h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">請於15分鐘內下載最新活動名冊</div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-warning"
+                    @click="downloadSignForm(selectedActivity)"
+                  >
+                    下載
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <script type="module">
+      import {
+        createApp,
+        ref,
+      } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+
+      createApp({
+        data() {
+          return {
+            activity: null,
+            dlActivity: null,
+            acid: 0,
+            signupSuccessList: [],
+            unpaidList: [],
+            cancelList: [],
+            type: 2,
+            searchList: [],
+            userinfo: null,
+          };
+        },
+        mounted() {
+          const currentUrl = window.location.href;
+          let parts = currentUrl.split("/");
+          this.acid = parts[parts.length - 1];
+
+          axios
+            .get(`/api/activityForAcManage/${this.acid}`)
+            .then((response) => {
+              this.activity = response.data;
+              //console.log(this.activity);
+
+              $.ajax({
+                url: "/api/session/getUserinfo",
+                method: "GET",
+                success: (data) => {
+                  this.userinfo = data;
+                  if (this.userinfo.userid != this.activity.acUserid) {
+                    alert("您無權限觀看此頁面");
+                    window.location.href = "/";
+                    return;
+                  }
+                },
+              });
+
+              for (let t in this.activity.acSignForm) {
+                if (this.activity.acSignForm[t].asfSignStatus == 0) {
+                  this.cancelList.push(this.activity.acSignForm[t]);
+                }
+                if (this.activity.acSignForm[t].asfSignStatus == 1) {
+                  this.unpaidList.push(this.activity.acSignForm[t]);
+                }
+                if (this.activity.acSignForm[t].asfSignStatus == 2) {
+                  this.signupSuccessList.push(this.activity.acSignForm[t]);
+                }
+              }
+            });
+
+          axios.get(`/api/getActivity/${this.acid}`).then((response) => {
+            this.dlActivity = response.data;
+          });
+        },
+        methods: {
+          goBack() {
+            // window.location.href = `/organizerBiz/OrganizerAcManage/${this.acid}`;
+            window.history.back();
+          },
+
+          changeList(type) {
+            this.type = type;
+            if (type == 4) {
+              this.searchList = [];
+              let searchValue = $("#search").val();
+              let pattern = new RegExp(searchValue, "i");
+              this.activity.acSignForm.forEach((asf) => {
+                if (pattern.test(asf.atName)) {
+                  this.searchList.push(asf);
+                  return;
+                }
+                if (pattern.test(asf.asfName)) {
+                  this.searchList.push(asf);
+                  return;
+                }
+                if (pattern.test(asf.asfTel)) {
+                  this.searchList.push(asf);
+                  return;
+                }
+                if (pattern.test(asf.asfEmail)) {
+                  this.searchList.push(asf);
+                  return;
+                }
+              });
+
+              //console.log(this.searchList);
+            }
+          },
+
+          gender(g) {
+            if (g == "M") return "男";
+            if (g == "F") return "女";
+            if (g == "O") return "其他";
+          },
+          downloadAcSignForm(activity, event) {
+            //跳出複製活動的modal
+            event.preventDefault(); // 防止超鏈接默認行為
+            // this.selectedActivityName = activity.acName;
+            // this.selectedActivity = activity;
+            $("#downloadAcSignFormModal").modal("show");
+          },
+          downloadSignForm(selectedActivity) {
+            //這是modal的確認扭  把活動傳給後端複製
+            //console.log("當前活動", selectedActivity);
+            $("#downloadAcSignFormModal").modal("hide");
+
+            axios
+              .post(
+                "/api/downloadAcSignForm",
+                this.dlActivity,
+                { responseType: "blob" } // 重要：響應類型設為 blob
+              )
+              .then((response) => {
+                const url = window.URL.createObjectURL(
+                  new Blob([response.data])
+                );
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", "活動參加名單.xlsx"); // 設置下載的文件名
+                document.body.appendChild(link);
+                link.click();
+              })
+              .catch((error) => console.error(error));
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

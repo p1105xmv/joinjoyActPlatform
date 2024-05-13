@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+
+<div id="sendMailToAdmin">
+
+    <!-- modal -->
+    <div class="modal fade seminor-login-modal" id="sendMail" tabindex="-1" aria-labelledby="sendMailTitle"
+        aria-modal="true" role="dialog" data-bs-backdrop="static">
+
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-5 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title text-center" id="sendMailTitle">
+                        聯絡客服
+                    </h5>
+                    <button @click="closeModal" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <template v-if="isSubmit==false">
+                    <div class="modal-body">
+
+                        <div class="input-group mb-3"><span class="input-group-text"><i
+                                    class="bi bi-person-circle"></i></i></span><input v-model="rfuName" type="text"
+                                lang="zh-CN" class="form-control form-control-md" maxlength="20"
+                                placeholder="請輸入您的名字或稱謂" required>
+                        </div>
+                        <div class="input-group mb-3"><span class="input-group-text"><i
+                                    class="bi bi-question-circle-fill"></i></span><select v-model="rfuCategory"
+                                class="form-select-md validate " style="width: 100px;  border: 1px solid #ced4da;">
+                                <option disabled value="0">問題類型</option>
+                                <option value="1">登入/註冊</option>
+                                <option value="2">頁面錯誤</option>
+                                <option value="3">功能操作</option>
+                                <option value="4">報名問題</option>
+                                <option value="5">網站異常</option>
+                                <option value="6">資料遺失</option>
+                                <option value="7">平台相容性</option>
+                                <option value="8">技術支援</option>
+                                <option value="9">其他</option>
+
+                            </select><input v-model="rfuSubject" type="tel" id="mailSubject"
+                                class="form-control form-control-md" maxlength="20" placeholder="請輸入問題主旨">
+                        </div>
+
+                        <div class="col-12 mb-3">
+
+                            <input v-model="rfuEmail" type="email" class="form-control" placeholder="請輸入您的Email"
+                                required />
+                        </div>
+                        <div class="col-12 mb-3">
+
+                            <textarea v-model="rfuContent" rows="10" id="" class="form-control"
+                                placeholder="您想詢問或瞭解什麼呢？都歡迎聯繫我們。" required></textarea>
+                        </div>
+                        <div class="mt-2"><span class="mt-2"></span></div>
+                    </div>
+
+                    <div class="modal-footer row justify-content-center">
+                        <template v-if="submitErrMsg!=''">
+                            <div class="text-danger text-center">
+                                <i>{{submitErrMsg}}</i>
+                            </div>
+                        </template>
+                        <button @click.prevent="submitMail" type="button" id="submitBtn"
+                            class="btn shadow-sm rounded-pill btn-warning col-5 w-50">送出問題</button>
+                    </div>
+
+                </template>
+
+                <template v-if="isSubmit==true">
+                    <div class="text-warning text-center fs-5 mt-5 mb-5">
+                        您的詢問已送出，我們會盡快回覆您，謝謝您的等候。
+                    </div>
+                </template>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+<!-- modal end-->
+
+
+
+
+<script type="module">
+    import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.min.js";
+
+    createApp({
+        data() {
+            return {
+                userInfo: {},
+                rfuName: "",
+                rfuCategory: "0",
+                rfuSubject: "",
+                rfuEmail: "",
+                rfuContent: "",
+                isSubmit: false,
+                submitErrMsg: "",
+            };
+        },
+        methods: {
+            submitMail() {
+
+                if (this.userInfo.userid != undefined) {
+
+                    var data = {
+                        rfuName: this.rfuName,
+                        rfuCategory: parseInt(this.rfuCategory),
+                        rfuSubject: this.rfuSubject,
+                        rfuEmail: this.rfuEmail,
+                        rfuContent: this.rfuContent,
+                        userid: this.userInfo.userid
+                    }
+                    // //console.log("data", data)
+                } else {
+                    var data = {
+                        rfuName: this.rfuName,
+                        rfuCategory: parseInt(this.rfuCategory),
+                        rfuSubject: this.rfuSubject,
+                        rfuEmail: this.rfuEmail,
+                        rfuContent: this.rfuContent,
+                    }
+                    // //console.log("data", data)
+                }
+                if (this.rfuCategory != "0" && this.rfuSubject.length > 0 && this.rfuContent.length > 0 && this.rfuEmail.length > 0 && this.rfuName.length > 0) {
+
+                    axios.post(`/ask/${data.userid == undefined ? 0 : data.userid}`, data)
+                        .then(response => {
+                            if (response.data == "ok") {
+                                this.isSubmit = true;
+                            }
+                        })
+                    if (this.userInfo != null) {
+
+                        this.rfuName = "";
+                        this.rfuCategory = "0";
+                        this.rfuSubject = "";
+                        this.rfuEmail = "";
+                        this.rfuContent = "";
+
+                    } else {
+                        this.rfuName = this.userInfo.uName;
+                        this.rfuEmail = this.uAccountEmail;
+                        this.rfuCategory = "0";
+                        this.rfuSubject = "";
+                        this.rfuContent = "";
+                    }
+                } else {
+                    this.submitErrMsg = '請輸入完整資料';
+                }
+
+            },
+
+            closeModal() {
+                this.isSubmit = false;
+            }
+
+        },
+        created() {
+
+            axios.get("/api/session/getUserinfo")
+                .then(response => {
+                    if (response.data.userid != undefined) {
+                        let userid = response.data.userid
+                        axios.get(`/getAskUser/${userid}`)
+                            .then(response => {
+                                this.userInfo = response.data
+                                this.rfuName = this.userInfo.uname;
+                                this.rfuEmail = this.userInfo.uaccountEmail;
+                                // //console.log(this.userInfo)
+                            }
+
+                            )
+                    }
+                })
+        }
+    }).mount("#sendMailToAdmin");
+</script>
+
+
+</html>

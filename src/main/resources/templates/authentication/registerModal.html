@@ -1,0 +1,413 @@
+<html>
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        #RegisterModal .is-invalid {
+            z-index: auto !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="modal fade seminor-login-modal" id="RegisterModal" tabindex="-1" aria-labelledby="LoginModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4 rounded-5 shadow" style="border-radius: 20px !important;">
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <!-- Modal Title -->
+                    <button class="btn btn-outline-warning shadow-sm float-end me-3" @click="sample1">範本</button>
+
+                    <h4 class="pb-4 ps-4 ms-5 text-center">成為 Jo寶 的一員</h4>
+
+                    <div class="px-3">
+                        <!-- Alert -->
+                        <div class="alert alert-danger" role="alert" v-if="errorStatus">
+                            {{errormsg}}
+                        </div>
+                    </div>
+                    <div @submit.prevent="registerClick" class="px-3">
+                        <!-- email -->
+                        <div class="md-form mb-2">
+                            <div class="input-group borderless">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input v-model="email" type="text" class="form-control form-control-lg"
+                                    :class="{'is-invalid': emailCheckno},{'invalid': emailCheckok}" name="username"
+                                    placeholder="電子信箱" autofocus />
+                                <button class="btn btn-warning shadow-sm" @click="sendEmailVolidCode">寄送驗證碼</button>
+
+                            </div>
+                            <div class="mt-2">
+                                <span v-text="emailMessage"
+                                    :class="[{'text-danger': emailCheckno},{'text-success': emailCheckok},'mt-2']">
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- emailvolidcode -->
+                        <div class="md-form mb-2">
+                            <div class="input-group borderless">
+                                <span class="input-group-text">
+                                    <i class="bi bi-pencil-square"></i>
+                                </span>
+                                <input v-model="voildcode" type="text" class="form-control form-control-lg"
+                                    placeholder="驗證碼" />
+                            </div>
+                            <div class="mt-2">
+                                <span v-text="emailvolidcodemsg"
+                                    :class="[{'text-danger': emailvolidcodeno},{'text-success': emailvolidcodeok},{'text-warning': emailvolidloading}]"></span>
+                                <div v-if="emailvolidloading"
+                                    class="spinner-border spinner-border-sm text-warning mx-2 " role="status">
+                                    <span class="visually-hidden"> Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- username -->
+                        <div class="md-form mb-2">
+                            <div class="input-group borderless">
+                                <span class="input-group-text">
+                                    <i class="bi bi-people-fill"></i>
+                                </span>
+                                <input v-model="username" type="text" class="form-control form-control-lg validate"
+                                    placeholder="姓名" autofocus />
+                            </div>
+                            <div class="mt-2">
+                                <span v-text="usernameMessage"
+                                    :class="[{'text-danger': usernameCheckno},{'text-success': usernameCheckok}]">
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- TellPhone -->
+                        <div class="md-form mb-2">
+                            <div class="input-group borderless">
+                                <span class="input-group-text">
+                                    <i class="bi bi-telephone-fill"></i>
+                                </span>
+                                <select v-model="selected" class="form-select form-select-lg validate">
+                                    <option v-for="pcode in phonecodes" :value="pcode.value">
+                                        {{pcode.text}}
+                                    </option>
+                                </select>
+                                <input v-model="phonenumber" type="tel" class="form-control form-control-lg"
+                                    :class="{'is-invalid': phonenumberCheckno},{'invalid': phonenumberCheckok}"
+                                    placeholder="手機" />
+                            </div>
+                            <div class="mt-2">
+                                <span v-text="phonenumberMessage"
+                                    :class="[{'text-danger': phonenumberCheckno},{'text-success': phonenumberCheckok},'mt-2']">
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- password -->
+                        <div class="md-form mb-2">
+                            <div class="input-group borderless">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                <input v-model="password" :type="isActive ? 'password' : 'text'"
+                                    class="form-control form-control-lg"
+                                    :class="{'is-invalid': passwordCheckno},{'invalid': passwordCheckok}"
+                                    placeholder="密碼" />
+                                <i id="checkEyeforModel" :class="isActive ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                                    @click="isActive=!isActive"></i>
+                            </div>
+                            <div class="mt-2">
+                                <span v-text="passwordMessage"
+                                    :class="[{'text-danger': passwordCheckno},{'text-success': passwordCheckok}]" />
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            已經是Jo寶了，可以前往<a href="#LoginModal" data-bs-toggle="modal" data-bs-target="#LoginModal">登入</a>
+                            <!-- <a href="/register">註冊</a> -->
+                        </div>
+                    </div>
+
+                    <!-- Oauth2 -->
+                    <div class="d-flex justify-content-center mt-3 mb-2 px-3">
+                        <hr class="flex-grow-1" />
+                        <div class="px-4">使用其他帳號註冊</div>
+                        <hr class="flex-grow-1" />
+                    </div>
+                    <div class="text-center">
+                        <a href="/oauth2/authorization/google" style="background-color: transparent"
+                            @click="GoogleLoginClick">
+                            <button class="gsi-material-button">
+                                <div class="gsi-material-button-state"></div>
+                                <div class="gsi-material-button-content-wrapper">
+                                    <div class="gsi-material-button-icon">
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block">
+                                            <path fill="#EA4335"
+                                                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                            </path>
+                                            <path fill="#4285F4"
+                                                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                            </path>
+                                            <path fill="#FBBC05"
+                                                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                            </path>
+                                            <path fill="#34A853"
+                                                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                            </path>
+                                            <path fill="none" d="M0 0h48v48H0z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="gsi-material-button-contents">使用 Google 帳戶註冊</span>
+                                    <span style="display: none">Sign in with Google</span>
+                                </div>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn shadow-sm rounded-pill btn-warning col w-auto"
+                        @click="registerClick" data-dismiss="modal">
+                        註冊
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入 Vue.js 和 Axios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+    <script type="module">
+        Vue.createApp({
+            data() {
+                return {
+                    selected: "+886",
+                    phonecodes: [
+                        { value: "+886", text: "台灣 +886" },
+                        { value: "+86", text: "中國 +86" },
+                        { value: "+852", text: "香港 +852" },
+                        { value: "+60", text: "馬來西亞 +60" },
+                        { value: "+853", text: "澳門 +853" },
+                        { value: "+81", text: "日本 +81" },
+                        { value: "+82", text: "韓國 +82" },
+                        { value: "+63", text: "菲律賓 +63" },
+                        { value: "+65", text: "新加坡 +65" },
+                        { value: "+1", text: "美國 +1" },
+                        { value: "+0", text: "其他 +0" }
+                    ],
+                    email: "",
+                    phonenumber: "",
+                    username: "",
+                    password: "",
+                    errormsg: "",
+                    errorStatus: false,
+                    emailCheckok: false,
+                    emailCheckno: false,
+                    emailMessage: "",
+                    emailimg: "",
+                    usernameCheckok: false,
+                    usernameCheckno: false,
+                    usernameMessage: "",
+                    usernameimg: "",
+                    phonenumberemailimg: "",
+                    phonenumberCheckok: false,
+                    phonenumberCheckno: false,
+                    phonenumberMessage: "",
+                    img: "",
+                    passwordCheckok: false,
+                    passwordCheckno: false,
+                    passwordMessage: "",
+                    passwordimg: "",
+                    acceptIcon: "/img/icon/accept.png",
+                    cancelIcon: "/img/icon/cancel.png",
+                    emailvolidcodeok: false,
+                    emailvolidcodeno: false,
+                    emailvolidcodemsg: "",
+                    emailvolidloading: false,
+                    voildcode: "",
+                    isActive: true,
+                }
+            },
+            methods: {
+                registerClick() {
+                    if (!this.emailCheckok || !this.usernameCheckok || !this.passwordCheckok || !this.phonenumberCheckok) {
+                        //console.log("阻止提交表單");
+                        return; // 阻止提交表單
+                    }
+
+                    let uTel = this.selected + "-" + this.phonenumber;
+                    const raw = JSON.stringify({
+                        uAccountEmail: this.email,
+                        uTel: uTel,
+                        uName: this.username,
+                        uPwd: this.password,
+                        uidCode: this.voildcode,
+                    });
+                    axios.post("/register", raw, {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                        .then(rs => {
+                            // //console.log(rs.data)
+                            //console.log("註冊成功");
+                            $("#RegisterModal").modal("hide");
+                            $("#successRegisterModal").modal("show");
+                        })
+                        .catch(error => {
+                            this.errorStatus = true;
+                            this.errormsg = error.response.data;
+                            // this.error = true;
+                        });
+                },
+                sendEmailVolidCode() {
+                    if (!this.emailCheckok || !this.email.trim()) {
+                        //console.log("阻止提交表單，驗證碼");
+                        return; // 阻止提交表單
+                    }
+
+                    const formdata = new FormData();
+                    formdata.append("email", this.email);
+                    axios.post("/api/checkEmail", formdata)
+                        .then((rs) => {
+                            this.emailvolidloading = true;
+                            this.emailvolidcodeok = false;
+                            this.emailvolidcodeno = false;
+                            this.emailvolidcodemsg = "驗證碼正在寄送，請稍待片刻";
+                            axios.post("/api/sentEmailVolidCode", formdata)
+                                .then(rs => {
+                                    let volidCount = rs.data.volidCount
+                                    if (volidCount < 3) {
+                                        this.emailvolidcodemsg = `驗證碼已發送至您的信箱，請查收。您已進行 ${volidCount} 次驗證。` + "請注意，最多發送 3 次。";
+                                        this.emailvolidcodeok = true;
+                                        this.emailvolidcodeno = false;
+                                        this.emailvolidloading = false;
+                                    } else {
+                                        this.emailvolidcodemsg = '注意這是最後一次寄送驗證，之後請在5分鐘後再試呦～';
+                                        this.emailvolidcodeok = true;
+                                        this.emailvolidcodeno = false;
+                                        this.emailvolidloading = false;
+                                    }
+
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                    this.emailvolidcodemsg = "超過驗證次數，請5分鐘後再試";
+                                    this.emailvolidcodeok = false;
+                                    this.emailvolidcodeno = true;
+                                    this.emailvolidloading = false;
+                                });
+                        })
+                        .catch((error) => {
+                            this.emailvolidcodemsg = "已存在信箱，請重新輸入信箱";
+                            this.emailvolidcodeok = false;
+                            this.emailvolidcodeno = true;
+                            this.emailvolidloading = false;
+
+                            console.error("Error:", error);
+                        });
+                },
+                GoogleLoginClick() {
+                    //console.log(window.location.href);
+                    const formData = new FormData();
+                    formData.append("previousUrl", window.location.href);
+                    axios.post("/api/savePreviousUrl", formData)
+                        .then(rs => {
+                            //console.log(rs.data);
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                },
+                sample1() {
+                    this.email = 'joinjoylin@gmail.com';
+                    this.phonenumber = '983212456';
+                    this.username = '林柏辰';
+                    this.password = 'p@ssa0rd11';
+                },
+            },
+            watch: {
+                email(newValue, oldValue) {
+                    let re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+                    let isValidEmail = re.test(newValue);
+                    if (!newValue.trim()) {
+                        this.emailCheckno = true;
+                        this.emailCheckok = false;
+                        this.emailMessage = "必填";
+                        this.emailimg = cancelIcon;
+                    } else if (isValidEmail) {
+                        this.emailCheckok = true;
+                        this.emailCheckno = false;
+                        this.emailMessage = "格式符合";
+                        this.emailimg = acceptIcon;
+                    } else {
+                        this.emailCheckok = false;
+                        this.emailCheckno = true;
+                        this.emailMessage = "信箱格式錯誤";
+                        this.emailimg = cancelIcon;
+                    }
+                },
+                password(newValue, oldValue) {
+                    let re = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[#?!@$%^&*-_])[a-zA-Z0-9#?!@$%^&*-_]{7,20}$/;
+                    let isValidPwd = re.test(newValue);
+                    if (!newValue.trim()) {
+                        this.passwordCheckno = true;
+                        this.passwordCheckok = false;
+                        this.passwordMessage = "必填";
+                        this.passwordimg = cancelIcon;
+                    } else if (isValidPwd) {
+                        this.passwordCheckok = true;
+                        this.passwordCheckno = false;
+                        this.passwordMessage = "格式符合";
+                        this.passwordimg = acceptIcon;
+                    } else {
+                        this.passwordCheckok = false;
+                        this.passwordCheckno = true;
+                        this.passwordMessage = "密碼長度7~20字，含英文字母和數字，不可空格，支援特殊字元 #?!@$%^&*-_";
+                        this.passwordimg = cancelIcon;
+                    }
+                },
+                phonenumber(newValue, oldValue) {
+                    let re = /^\d{7,20}$/;
+                    let isValidphone = re.test(newValue);
+                    if (!newValue.trim()) {
+                        this.phonenumberCheckok = false;
+                        this.phonenumberCheckno = true;
+                        this.phonenumberMessage = "必填";
+                        this.phonenumberimg = cancelIcon;
+                    } else if (isValidphone) {
+                        this.phonenumberCheckok = true;
+                        this.phonenumberCheckno = false;
+                        this.phonenumberMessage = "格式符合";
+                        this.phonenumberimg = acceptIcon;
+                    } else {
+                        this.phonenumberCheckok = false;
+                        this.phonenumberCheckno = true;
+                        this.phonenumberMessage = "電話號碼為7~20字的數字";
+                        this.phonenumberimg = cancelIcon;
+                    }
+                },
+                username(newValue, oldValue) {
+                    if (!newValue.trim()) {
+                        this.usernameCheckok = false;
+                        this.usernameCheckno = true;
+                        this.usernameMessage = "必填";
+                        this.usernameimg = cancelIcon;
+                    } else {
+                        this.usernameCheckok = true;
+                        this.usernameCheckno = false;
+                        this.usernameMessage = "格式符合";
+                        this.usernameimg = acceptIcon;
+                    }
+                }
+            }
+        }).mount("#RegisterModal");
+    </script>
+</body>
+
+</html>

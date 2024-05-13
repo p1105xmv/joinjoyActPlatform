@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+<meta charset="UTF-8">
+<title>個人資料編輯</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" th:href="@{/css/croppie.css}" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.14/vue.esm-browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js" integrity="sha512-gEM2INjX66kRUIwrPiTBzAA6d48haC9kqrWZWjzrtnpCtBNxOXqXVFEeRDOeVC13pw4EOBrvlsJnNr2MXiQGvg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+
+<style>
+body{
+	background-color: #FFFFF0;
+}
+.section{
+	background-color: #ffffff;
+    border-radius: 20px;
+    margin: 30px 40px 40px -500px;
+    padding: 50px 50px 100px 50px;
+    width:70%;
+    box-shadow: 2px 2px 5px #8E8E8E;
+}
+
+#jojo {
+    display: block;
+    border: 10px solid #FFF4C1; /* 米白色粗邊框 */
+    border-radius: 50%; /* 把圖片變成圓形 */
+    width: 200px; 
+    height: 200px;
+    object-fit: cover;
+    margin: 0 auto; /* 水平居中 */
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3); /* 陰影 */
+    position: relative;
+    z-index: 1; 
+}
+
+#jojojo {
+    display: block;
+    border: 10px solid #FFF4C1; /* 米白色邊框 */
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    margin: 0 auto; /* 水平居中 */
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1; 
+}
+
+.plus {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    border: none;
+    font-size: 35px;
+    color: #8E8E8E;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -45px 280px 0px 380px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    z-index: 2;
+    text-align: center; 
+}
+
+.userInfo{
+	font-size:18px;
+	line-height:2em;
+	font-weight:500;
+}
+
+.form-check{
+	font-size:16px;
+}
+
+.toast {
+    width: 300px; /* 設定 Toast 寬度 */
+    position: relative;
+    top: 0;
+    right: 0;
+    margin: 0;
+    background-color: #343a40; /* 背景顏色 */
+    color: #ffffff; /* 文字顏色 */
+    border-radius: 0.25rem; /* 圓角 */
+}
+
+
+</style>
+
+<body>
+<div th:replace="~{layout/navbar}"></div>
+
+<div style="display: flex;background-color:#FFFFF0">
+<div th:replace="~{layout/users_sidebar}" style="width: 200px;position:fixed;"></div>
+
+<div class="section">
+<h3>個人資料編輯</h3>
+
+<!-- 個人資料變更成功訊息 -->
+<div style="font-size: 25px; line-height: 2.5em; color:#EA0000" th:text="${submitSuccess} ? ${submitSuccess}"></div>
+<div style="font-size: 25px; line-height: 2.5em; color:#EA0000" th:text="${submitFail} ? ${submitFail}"></div>
+
+<div class="jojoContainer">
+	<div class="headShot">
+        <img th:if="${photo}" th:src="@{|${photo}|}"
+        id="jojo" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <img th:unless="${photo}" th:src="@{/img/web/jojo_bird.png}"
+        id="jojojo" data-bs-toggle="modal" data-bs-target="#exampleModal"/>
+        <div class="plus" data-bs-toggle="modal" data-bs-target="#exampleModal">+</div>
+    </div>
+</div>
+<br>
+
+<!-- Modal 上傳頭貼-->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">裁切大頭貼</h5>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Croppie -->
+		<label class="btn btn-warning"><input id="upload_img" style="display:none;" type="file" accept="image/*"><i class="fa fa-photo"></i> 上傳圖片</label>
+		<br>
+		<div id="oldImg" style="display:none;margin-top:20px;"></div>
+		<!-- Croppie end!-->
+		
+	    <!-- <form th:action="@{/users/editUserinfo2}" method="post" enctype="multipart/form-data">
+	    <div class="input-group mb-3">
+		  <label class="input-group-text" for="inputGroupFile01">上傳照片</label>
+		  <input type="file" class="form-control" id="inputGroupFile01" name="file">
+		  <br>
+		</div>
+		<div>
+		  <input class="btn btn-outline-warning" type="submit" name="upload" value="更換頭貼">
+		  </div>
+	  	</form> -->
+  		<br>
+      </div>
+      <div class="modal-footer">
+      	<button id="crop_img" class="btn btn-primary"><i class="fa fa-scissors"></i>確定上傳</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+        >Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal end-->
+  <div id="app">
+  <form th:action="@{/users/editUserinfo}" th:method="post" id="inputForm">
+  
+    <label for="nickName" class="userInfo">暱稱</label>
+    <span style="font-size:15px;color:#EA0000;">*</span>
+  	<div class="input-group mb-3">
+	  <input type="text" class="form-control" placeholder="您在本網站的用戶名稱" aria-label="Recipient's username"
+	   aria-describedby="basic-addon2" id="nickName" name="nickName" v-model="dto.unickname">
+	</div>
+	
+	<label for="userName" class="userInfo">姓名</label>
+	<span style="font-size:15px;color:#EA0000;">*</span>
+  	<div class="input-group mb-3">
+	  <input type="text" class="form-control" placeholder="" aria-label="Recipient's username"
+	   aria-describedby="basic-addon2" id="userName" name="userName" v-model="dto.uname">
+	</div>
+	
+	<div>
+      <label for="gender" class="userInfo">性別</label>
+      <span style="font-size:15px;color:#EA0000;">*</span>
+	   <div class="form-check">
+		  <input class="form-check-input" type="radio" name="gender" id="gender" value="M" checked
+		  v-model="dto.ugender">
+		  <label class="form-check-label" for="exampleRadios1">
+		    男
+		  </label>
+		</div>
+		<div class="form-check">
+		  <input class="form-check-input" type="radio" name="gender" id="gender" value="F" checked
+		  v-model="dto.ugender">
+		  <label class="form-check-label" for="exampleRadios1">
+		    女
+		  </label>
+		</div>
+		<div class="form-check">
+		  <input class="form-check-input" type="radio" name="gender" id="gender" value="O" checked
+		  v-model="dto.ugender">
+		  <label class="form-check-label" for="exampleRadios1">
+		    其他
+		  </label>
+		</div>
+    </div>
+    
+    <br>
+    <div>
+          <label for="birthday" class="userInfo">生日</label>
+          <span style="font-size:15px;color:#EA0000;">*</span>
+          <br>
+          <input type="date" name="birth" class="form-control datepicker"
+          v-model="formattedBirthday">
+    </div>
+    <br>
+    
+    
+    <label for="phone" class="userInfo">電話號碼</label>
+    <span style="font-size:15px;color:#EA0000;">*</span>
+    <div class="input-group mb-3">
+	  <label class="input-group-text" for="phoneNumber">國碼</label>
+	  <select class="form-select" id="inputGroupSelect01" name="countryNo" v-model="uTelCountryNo">
+	    <option value="+886-">+886 (Taiwan)</option>
+	  	<option value="+1-">+1 (USA)</option>
+	    <option value="+86-">+86 (China)</option>
+	    <option value="+44-">+44 (UK)</option>
+	    <option value="+81-">+81 (Japan)</option>
+	    <option value="+49-">+49 (Germany)</option>
+	    <option value="+7-">+7 (Russia)</option>
+	    <option value="+91-">+91 (India)</option>
+	    <option value="+39-">+39 (Italy)</option>
+	    <option value="+33-">+33 (France)</option>
+	    <option value="+82-">+82 (South Korea)</option>
+	    <option value="+62-">+62 (Indonesia)</option>
+	    <option value="+81-">+81 (Japan)</option>
+	    <option value="+34-">+34 (Spain)</option>
+	    <option value="+61-">+61 (Australia)</option>
+	    <option value="+1-">+1 (Canada)</option>
+	    <option value="+65-">+65 (Singapore)</option>
+	    <option value="+46-">+46 (Sweden)</option>
+	    <option value="+31-">+31 (Netherlands)</option>
+	    <option value="+852-">+852 (Hong Kong)</option>
+	    <option value="+60-">+60 (Malaysia)</option>
+	  </select>
+	  <span class="input-group-text">手機號碼</span>
+	  <input type="text" aria-label="First name" class="form-control" name="phone" id="phone"
+	  v-model="uTelNumber">
+	</div>
+	
+      <label for="cityAndArea" class="userInfo">居住地</label>
+      <span style="font-size:15px;color:#EA0000;">*</span>
+
+      <div  v-if="editing" class="input-group mb-3">
+			<label class="input-group-text" for="phoneNumber">縣市</label>
+			<select class="form-select" id="city" name="city"> 
+			  	<option value = "">請選擇</option>
+			</select>
+			<span class="input-group-text">鄉鎮市區</span>
+			<select class="form-select" id="area" name="area">
+            	<option value = "">請選擇</option>
+          	</select>
+      </div>
+      
+      <div v-else class="input-group mb-3">
+			<label class="input-group-text" for="phoneNumber">縣市</label>
+			<select class="form-select" name="city" @click="toggleEditing"> 
+			  	<option :value = "dto.addCityid">{{uCityName}}</option>
+			</select>
+			<span class="input-group-text">鄉鎮市區</span>
+			<select class="form-select" name="area">
+            	<option :value = "dto.addAreaid">{{uAreaName}}</option>
+          	</select>
+      </div>
+
+	<label for="hobby" class="userInfo">興趣</label>
+	<br>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="1" name="hobby" :checked="hobby1">
+	    學習
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="2" name="hobby" :checked="hobby2">
+	    運動
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="3" name="hobby" :checked="hobby3">
+	    音樂
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="4" name="hobby" :checked="hobby4">
+	    博覽會
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="5" name="hobby" :checked="hobby5">
+	    文藝
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="6" name="hobby" :checked="hobby6">
+	    體驗
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="7" name="hobby" :checked="hobby7">
+	    財經
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="8" name="hobby" :checked="hobby8">
+	    創業
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="9" name="hobby" :checked="hobby9">
+	    手作
+	</div>
+	<div class="form-check form-check-inline">
+	  <input class="form-check-input" type="checkbox" value="10" name="hobby" :checked="hobby10">
+	    美食
+	</div>
+      
+      <br>
+      <br>
+      <br>
+      <br>
+    
+	    <button type="button" class="btn btn-primary" style="font-size:15px;float: right;
+	    margin:5px;" data-bs-toggle="modal" data-bs-target="#confirmModal">儲存</button>
+	    <button type="button" class="btn btn-secondary" style="float: right;
+	    margin:5px;" data-bs-toggle="modal" data-bs-target="#cancelModal">取消</button>
+		
+	 <br>
+	 <!-- 確認變更 Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">個人資料變更</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        確定要儲存嗎？
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="submit" class="btn btn-primary" id="sendButton" onclick="return validateForm();">確認</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 取消 Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cancelModalLabel">捨棄變更？</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        確定要捨棄變更嗎？
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="cancelChanges()">捨棄變更</button>
+      </div>
+    </div>
+  </div>
+</div>
+	 
+<!-- 這裡放一個吐司(通知個人資料變更成功或失敗) -->
+    <div class="toast-container">
+	<div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="toast">
+	  <div class="toast-header">
+	  <i class="bi bi-send-check" style="font-size:20px;color:#0000C6;"></i>
+	    <span class="me-auto" style="font-size:15px;font-weight:500;
+	    color:#0000C6">&nbsp;個人資料變更</span>
+	    <small>剛剛</small>
+	    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+	  </div>
+	  <div class="toast-body">
+	    <!-- <div id="result" th:text="${submitSuccess} ? ${submitSuccess}"></div>
+	    <div id="noResult"></div> -->
+	  </div>
+	</div>
+	</div>
+
+	 
+  </form>     
+</div>
+  <br>
+ 
+ </div>
+ </div>
+
+ <script>
+ //捨棄變更時，清空表單
+ function cancelChanges() {
+		var form = document.getElementById("inputForm");
+    
+    	// 使用表單的 reset 方法來重置表單
+    	form.reset();
+  	}
+
+  	
+//選擇縣市後，自動帶入對應的鄉鎮市區
+ $(document).ready(function(){		//確保文檔加載完成後再執行其中的程式碼
+
+	//第一層選單
+    $.ajax({
+        url: '/users/findAllCity',              
+        type: "get",
+		dataType: "json",
+        success: function (data) {
+			//console.log(data);
+			$.each(data,function(key,value){
+				//console.log(key,value)
+				$('#city').append('<option value="'+(key+1)+'">'+data[key].cityName+'</option>')
+			})
+		},
+        error: function (data) {
+            alert("fail");
+        }
+    });
+    
+  	//第二層選單
+	$("#city").change(function(){
+		cityvalue=$("#city").val();  //取值
+		$("#area").empty(); //清空上次的值
+		$("#area").css("display","inline"); //顯現
+		$.ajax({
+			url:'/users/findAllCity',
+			type:"get",
+			dataType:"json",
+			success:function(data){
+				//console.log(cityvalue);
+				eachval=data[cityvalue-1].areas; //鄉鎮
+				//console.log(eachval);
+				
+				$.each(eachval,function(key,value){
+					$('#area').append('<option value="'+eachval[key].addAreaid+'">'+eachval[key].areaName+'</option>')
+				});
+				
+			},
+			error:function(){
+				alert("fail");
+			}
+			
+		});
+	});
+});
+	
+ </script>
+ 
+ 
+ <script th:src="@{/js/croppie.js}"></script>
+ 
+
+ <!-- croppie 的程式碼 -->
+ <script>
+ 
+ Vue.createApp({
+      data() {
+      return { 
+      dto:{
+      	ubirthday: '1979-07-09T15:00:00.000+00:00', // 設置默認日期字符串
+      	utel:'+886-912345671',
+      	cityName:'',
+      	areaName:'',
+      	addCityid:'',
+      	addAreaid:'',
+      },
+      editing: false, // 是否處於編輯狀態
+      hobbyIds:'',
+      	hobby1:false,
+      	hobby2:false,
+      	hobby3:false,
+      	hobby4:false,
+      	hobby5:false,
+      	hobby6:false,
+      	hobby7:false,
+      	hobby8:false,
+      	hobby9:false,
+      	hobby10:false,
+      };
+      },
+      methods: {
+	  //轉換性別為中文
+	  transformUgender(ugender) {
+      switch (ugender) {
+        case 'F':
+          return "女";
+        case 'M':
+          return "男";
+        case 'O':
+          return "其他";
+      }
+      },
+      // 將整數興趣類別代號映射到名稱
+	  mapInterestType(typeId) {
+	    const interestTypes = {
+	      1: "學習",
+	      2: "運動",
+	      3: "音樂",
+	      4: "博覽會",
+	      5: "文藝",
+	      6: "體驗",
+	      7: "財經",
+	      8: "創業",
+	      9: "手作",
+	      10: "美食",
+	    };
+	    
+	    return interestTypes[typeId];
+	  },
+	  //取興趣資料～
+	  fetchInterest(){
+	  axios.get('/users/userInterest')
+	  	.then(response => {
+	      this.hobbyIds = response.data;
+	      this.setHobbyFlags(); 
+    	})
+	  },
+	  
+	  setHobbyFlags() {
+		  // 將hobbyIds陣列中的值映射到hobby1到hobby10屬性，如果存在於陣列中則為true，否則為false
+		  this.hobby1 = this.hobbyIds.includes(1);
+		  this.hobby2 = this.hobbyIds.includes(2);
+		  this.hobby3 = this.hobbyIds.includes(3);
+		  this.hobby4 = this.hobbyIds.includes(4);
+		  this.hobby5 = this.hobbyIds.includes(5);
+		  this.hobby6 = this.hobbyIds.includes(6);
+		  this.hobby7 = this.hobbyIds.includes(7);
+		  this.hobby8 = this.hobbyIds.includes(8);
+		  this.hobby9 = this.hobbyIds.includes(9);
+		  this.hobby10 = this.hobbyIds.includes(10);
+		},
+      
+      //取個人資料～
+      fetchData() {
+      axios.get('/users/allUserinfo')
+        .then(response => {
+          this.dto = response.data;
+          //console.log(response.data.addCityid);
+          //console.log(response.data.addAreaid);
+          //console.log(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+        },
+        toggleEditing() {
+            this.editing = !this.editing;
+            
+            //選擇縣市後，自動帶入對應的鄉鎮市區
+ $(document).ready(function(){		//確保文檔加載完成後再執行其中的程式碼
+
+	//第一層選單
+    $.ajax({
+        url: '/users/findAllCity',              
+        type: "get",
+		dataType: "json",
+        success: function (data) {
+			//console.log(data);
+			$.each(data,function(key,value){
+				//console.log(key,value)
+				$('#city').append('<option value="'+(key+1)+'">'+data[key].cityName+'</option>')
+			})
+		},
+        error: function (data) {
+            alert("fail");
+        }
+    });
+    
+  	//第二層選單
+	$("#city").change(function(){
+		cityvalue=$("#city").val();  //取值
+		$("#area").empty(); //清空上次的值
+		$("#area").css("display","inline"); //顯現
+		$.ajax({
+			url:'/users/findAllCity',
+			type:"get",
+			dataType:"json",
+			success:function(data){
+				//console.log(cityvalue);
+				eachval=data[cityvalue-1].areas; //鄉鎮
+				//console.log(eachval);
+				
+				$.each(eachval,function(key,value){
+					$('#area').append('<option value="'+eachval[key].addAreaid+'">'+eachval[key].areaName+'</option>')
+				});
+				
+			},
+			error:function(){
+				alert("fail");
+			}
+			
+		});
+	});
+});
+        },
+        },
+      computed: {
+		  formattedBirthday: {
+	      	get() {
+	        const uBirthday = new Date(this.dto.ubirthday);
+	        const year = uBirthday.getFullYear();
+	        const month = String(uBirthday.getMonth() + 1).padStart(2, '0');
+	        const day = String(uBirthday.getDate()).padStart(2, '0');
+	          //console.log(year);
+			  //console.log(month);
+			  //console.log(day);
+	        return `${year}-${month}-${day}`;
+	      },
+	      set(newValue) {
+	        // 將新的日期字符串轉換為 ISO 格式並更新 dto.ubirthday
+	        const date = new Date(newValue);
+	        this.dto.ubirthday = date.toISOString();
+	      }
+	    },
+	    uTelCountryNo(){
+	    	const countryNo = this.dto.utel.split('-')[0];
+	    	const telCountryNo = countryNo+'-';
+	    	return telCountryNo;
+	    },
+	    uTelNumber(){
+	    	return this.dto.utel.split('-')[1];
+	    },
+	    uCityName(){
+	    	return this.dto.cityName;
+	    },
+	    uAreaName(){
+	    	return this.dto.areaName;
+	    },
+	    
+	  },
+      created() {
+      	this.fetchData();
+      	this.fetchInterest();
+      	},
+      }).mount("#app");
+ 
+ 
+(function($) {
+  var width_crop = 200, // 圖片裁切寬度 px 值
+      height_crop = 200, // 圖片裁切高度 px 值
+      type_crop = "circle", // 裁切形狀: square 為方形, circle 為圓形
+      width_preview = 250, // 預覽區塊寬度 px 值
+      height_preview = 250, // 預覽區塊高度 px 值
+      compress_ratio = 1, // 圖片壓縮比例 0~1
+      type_img = "jpeg", // 圖檔格式 jpeg png webp
+      file,
+      oldImgDataUrl;
+
+  // 裁切初始參數設定
+  var myCrop = $("#oldImg").croppie({
+    viewport: { // 裁切區塊
+      width: width_crop,
+      height: height_crop,
+      type: type_crop,
+      background: '#FFFFFF' // 設置裁剪區域背景色為白色
+    },
+    boundary: { // 預覽區塊
+      width: width_preview,
+      height: height_preview,
+      background: '#FFFFFF' // 設置預覽區域背景色為白色      
+    }
+  });
+
+  function readFile(input) {
+    if (input.files && input.files[0]){
+      file = input.files[0];
+      //console.log(file);
+      //console.log(1234);
+    } else {
+      alert("瀏覽器不支援此功能！建議使用最新版本 Chrome");
+      return;
+    }
+
+    if (file.type.indexOf("image") == 0) {
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        oldImgDataUrl = e.target.result;
+        myCrop.croppie("bind", {
+          url: oldImgDataUrl
+        });
+      };
+
+      reader.readAsDataURL(file);
+    } else {
+      alert("您上傳的不是圖檔！");
+    }
+  }
+
+  $("#upload_img").on("change", function() {
+    $("#oldImg").show();
+    readFile(this);
+  });
+  
+  $("#crop_img").on("click", function() {
+    myCrop.croppie("result", {
+        type: "blob", // 改為 blob 格式
+        format: type_img,
+        quality: compress_ratio,
+        backgroundColor: '#FFFFFF'
+    }).then(function(blob) { // 返回的是 blob 物件
+        var file = new File([blob], "cropped_image." + type_img, { type: blob.type });
+        uploadCroppedImage(file);
+    });
+	});	
+	
+   function uploadCroppedImage(file) {
+    // 使用 FormData 將 file 資料傳送到後端
+    var formData = new FormData();
+    formData.append("file", file);
+    
+    // 使用 AJAX 將 FormData 傳送到後端
+    $.ajax({
+        url: "/users/editUserinfo2",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            //console.log("Image uploaded successfully:");
+            window.location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error uploading image:", error);
+        }
+    });
+	}
+
+	})(jQuery);
+
+ //確認必填欄位是否填寫
+ function validateForm() {
+    var nickName = document.getElementById("nickName").value;
+    var userName = document.getElementById("userName").value;
+    var phone = document.getElementById("phone").value;
+    var city = document.getElementById("city").value;
+    var area = document.getElementById("area").value;
+
+    // 檢查是否有任何欄位是空的
+    if (nickName === "" || userName === "" || phone === "" || city === "" || area === "") {
+        alert("請填寫所有必填欄位。");
+        return false; // 防止表單提交
+    }
+    return true; // 表單驗證通過
+}
+ 
+ </script>
+
+</body>
+</html>

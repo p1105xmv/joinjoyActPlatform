@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.14/vue.esm-browser.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js" integrity="sha512-gEM2INjX66kRUIwrPiTBzAA6d48haC9kqrWZWjzrtnpCtBNxOXqXVFEeRDOeVC13pw4EOBrvlsJnNr2MXiQGvg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<link th:href="@{/css/cards.css}" rel="stylesheet" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<title>活動管理頁面</title>
+<style>
+
+.profile-container {
+        display: flex;
+        align-items: center;
+        margin-top:35px;
+        margin-left:-450px;
+    }
+
+    .profile-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%; 
+        overflow: hidden;
+        margin-right:25px;
+    }
+
+    .profile-img img {
+        width: 100%;
+        height: auto;
+    }
+
+    .nickname {
+        font-size: 30px;
+    }
+#allCard {
+  display: inline-block;
+  flex-wrap: wrap;
+  margin-left:30px;
+  margin-top:20px;
+}
+
+.actCard {
+  font-size: 20px;
+  width: 320px;
+  height: 320px;
+  margin: 20px;
+  margin-bottom:40px;
+}
+
+.jcards {
+  gap: 2em;
+  padding: 0; 
+  padding-left: 1em;
+  padding-right: 1em;
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.noData{
+  font-size: 25px;
+  color:#7B7B7B;
+  margin-left:200px;
+  margin-top:30px;
+}
+
+/* Modal彈出視窗的CSS */
+    /* 文字顏色 */
+    .modal-confirm {
+        color: #636363;
+        width: 325px;
+        font-size: 14px;
+    }
+
+    .modal-confirm .modal-content {
+        padding: 20px;
+        border-radius: 5px;
+        border: none;
+    }
+
+    .modal-confirm .modal-header {
+        border-bottom: none;
+        position: relative;
+    }
+
+    .modal-confirm h4 {
+        text-align: center;
+        font-size: 26px;
+        margin: 30px 0 -15px;
+    }
+
+    .modal-confirm .form-control,
+    .modal-confirm .btn {
+        min-height: 40px;
+        border-radius: 3px;
+    }
+
+    .modal-confirm .close {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+    }
+
+    .modal-confirm .modal-footer {
+        border: none;
+        text-align: center;
+        border-radius: 5px;
+        font-size: 13px;
+    }
+
+    .modal-confirm .icon-box {
+        color: #fff;
+        position: absolute;
+        margin: 0 auto;
+        left: 0;
+        right: 0;
+        top: -70px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        z-index: 9;
+        background: #fff;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-confirm .icon-box i {
+        font-size: 58px;
+        position: relative;
+        top: 3px;
+    }
+
+    .modal-confirm.modal-dialog {
+        margin-top: 80px;
+    }
+
+    /* 下方按鍵顏色 */
+    .modal-confirm .btn {
+        color: #fff;
+        border-radius: 4px;
+        /* background: #82ce34; */
+        background: #8CEA00;
+        text-decoration: none;
+        transition: all 0.4s;
+        line-height: normal;
+        border: none;
+        font-size:15px;
+    }
+
+    .modal-confirm .btn:hover,
+    /* 下方按鍵選取顏色 */
+    .modal-confirm .btn:focus {
+        /* background: #6fb32b; */
+        background: #73BF00;
+        outline: none;
+    }
+
+    .trigger-btn {
+        display: inline-block;
+        margin: 100px auto;
+    }
+
+    /* ------- tick ------- */
+    #tick svg {
+        width: 100px;
+        display: block;
+        margin: 0;
+    }
+
+    .path {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 0;
+
+        &.circle {
+            -webkit-animation: dash .9s ease-in-out;
+            animation: dash .9s ease-in-out;
+        }
+
+        &.line {
+            stroke-dashoffset: 1000;
+            -webkit-animation: dash .9s .35s ease-in-out forwards;
+            animation: dash .9s .35s ease-in-out forwards;
+        }
+
+        &.check {
+            stroke-dashoffset: -100;
+            -webkit-animation: dash-check .9s .35s ease-in-out forwards;
+            animation: dash-check .9s .35s ease-in-out forwards;
+        }
+    }
+
+    p {
+        text-align: center;
+        margin: 20px 0 60px;
+        font-size: 1.25em;
+
+        &.success {
+            color: #ffffff;
+        }
+
+        &.error {
+            color: #D06079;
+        }
+    }
+
+    @-webkit-keyframes dash {
+        0% {
+            stroke-dashoffset: 1000;
+        }
+
+        100% {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    @keyframes dash {
+        0% {
+            stroke-dashoffset: 1000;
+        }
+
+        100% {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    @-webkit-keyframes dash-check {
+        0% {
+            stroke-dashoffset: -100;
+        }
+
+        100% {
+            stroke-dashoffset: 900;
+        }
+    }
+
+    @keyframes dash-check {
+        0% {
+            stroke-dashoffset: -100;
+        }
+
+        100% {
+            stroke-dashoffset: 900;
+        }
+    }
+    
+    .allStar{
+    	width:30px;
+    	margin:5px;
+    	filter: grayscale(1);
+    }
+    
+    .s {
+        filter: grayscale(1);
+        /*沒有任何色彩的黑白影像*/
+
+    }
+
+    .n {
+        filter: grayscale(0);
+        /*顏色不變*/
+    }
+    
+/* Modal彈出視窗的CSS end*/
+</style>
+</head>
+<body  style="background-color:#FFFFF0">
+<div th:replace="~{layout/navbar}"></div>
+<div style="display: flex;">
+<div th:replace="~{layout/users_sidebar}" style="width: 200px;position:fixed;"></div>
+
+<div style="flex-grow: 1; margin-top:0px;">
+
+<div class="profile-container">
+    <div class="profile-img">
+        <img th:if="${photoPath}" th:src="@{|${photoPath}|}"/>
+        <img th:unless="${photoPath}" th:src="@{/img/web/jojo_bird.png}"/>
+    </div>
+    <div th:if="${nickname}" class="nickname" th:text="${nickname}"></div>
+    <div th:unless="${nickname}" class="nickname" th:text="${session.userinfo.uName}"></div>
+</div>
+
+<ul class="nav nav-tabs" style="margin-top:10px;margin-left:-500px">
+  <li class="nav-item"  id="tab1" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/signed}" aria-current="page">已報名活動</a>
+  </li>
+  <li class="nav-item" id="tab2" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/joined}">已參加活動</a>
+  </li>
+  <li class="nav-item" id="tab3" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/canceled}">已取消活動</a>
+  </li>
+  <li class="nav-item" id="tab4" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/like}">收藏的活動</a>
+  </li>
+  <li class="nav-item" id="tab5" style="font-size:20px">
+    <a class="nav-link active" th:href="@{/users/manageActivity/comment}">待評論活動</a>
+  </li>
+  <li class="nav-item" id="tab6" style="font-size:20px">
+    <a class="nav-link" th:href="@{/users/manageActivity/followOrg}">已追蹤的主辦單位 </a>
+  </li>
+</ul>
+</div>
+ </div>
+ <div id="app" style="margin-left:250px;margin-top:10px;display: inline-flex;">
+ <div id="allCard">
+ 
+ <ul class="jcards">
+            <li v-for="activity in activities" :key="activity.acid">
+              <!--one card start-->
+              <a style="margin-bottom: 20px;" :href=`/showActivity/activityPage/${activity.acid}`
+                class="jcard shadow">
+                <img :src="activity.acImg" class="jcard__image" alt="" />
+
+                <div class="jcard__overlay">
+                  <div class="jcard__header">
+                    <svg class="jcard__arc" xmlns="http://www.w3.org/2000/svg">
+                      <path />
+                    </svg>
+                    <div class="jcard__header-text">
+
+                      <h3 class="jcard__title mb-2">{{limitedTitle(activity.acName)}}</h3>
+                      <span class="jcard__status">活動日期：{{activity.formattedStartDate}}</span>
+                    </div>
+                  </div>
+                  <div class="jcard__description_timeinfo">
+                    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" 
+						data-bs-target="#exampleModal" data-bs-whatever="@mdo" 
+						style="width:120px;height:50px;margin:10px 20px 20px 20px;border-radius:10px;font-size:15px;"
+						@click="setCurrentActivity($event,activity)"
+						>評論活動</button> 
+                  </div>
+               </div>
+              </a>
+            </li>
+            <!--one jcard end-->
+
+          </ul>
+
+<!-- 評論活動的Modal視窗 -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">評論活動</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="actName" class="col-form-label">活動名稱：{{currentActivity.acName}}</label>
+          </div>
+          <div class="mb-3">
+            <label for="recipient-name" class="col-form-label">評分：</label>
+            <span>(單擊星星可評分，雙擊星星重置)</span>
+            <div>
+		        <img id="idstar1" class="allStar" src="/img/icon/star.png" @click="setScore(1)">
+		        <img id="idstar2" class="allStar" src="/img/icon/star.png" @click="setScore(2)">
+		        <img id="idstar3" class="allStar" src="/img/icon/star.png" @click="setScore(3)">
+		        <img id="idstar4" class="allStar" src="/img/icon/star.png" @click="setScore(4)">
+		        <img id="idstar5" class="allStar" src="/img/icon/star.png" @click="setScore(5)">
+		    </div>
+          </div>
+          <div class="mb-3">
+            <label for="message-text" class="col-form-label">評論內容：</label>
+            <textarea class="form-control" v-model="commentContent" maxlength="200" pattern="^[^\W_]+$" placeholder="請輸入評論"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="reloadPage">關閉</button>
+        <button type="button" class="btn btn-primary" @click="submitComment(currentActivity.acid)">送出評論</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 評論活動的Modal視窗 end-->
+
+
+  <!-- 這裡加一個評論成功的彈出視窗 -->
+<!-- Modal HTML -->
+<div id="commentSuccessModal" class="modal fade">
+    <div class="modal-dialog modal-confirm modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="icon-box">
+                    <svg id="tick" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                        <!-- <circle class="path circle" fill="none" stroke="#73AF55" stroke-width="6" stroke-miterlimit="10" -->
+                        <!-- 框框顏色 -->
+                        <circle class="path circle" fill="none" stroke="#82D900" stroke-width="6" stroke-miterlimit="10"
+                            cx="65.1" cy="65.1" r="62.1" />
+                        <!-- 勾勾顏色 -->
+                        <!-- <polyline class="path check" fill="none" stroke="#73AF55" stroke-width="6" -->
+                        <polyline class="path check" fill="none" stroke="#82D900" stroke-width="6"
+                            stroke-linecap="round" stroke-miterlimit="10" points="100.2,40.2 51.5,88.8 29.8,67.5 " />
+                    </svg>
+                </div>
+                <h4 class="modal-title w-100">評論送出成功</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-center">回評論活動頁面</p>
+            </div>
+            <a th:href="@{/users/manageActivity/comment}" class="btn btn-info" role="button">
+                OK
+            </a>
+
+        </div>
+    </div>
+</div>
+<!-- Modal HTML end! -->
+
+
+<div class="noData" v-if="activities.length === 0">～～您目前沒有尚待評論的活動喔～～</div>
+</div>
+			
+</div>
+			
+
+<script>
+Vue.createApp({
+  data() {
+  return { 
+  activities:[],
+  formattedStartDate: '',
+  commentContent: '',
+  commentScore:'...', 
+  currentActivity:[], // 添加活動名的變量
+  currentActivityId:'0'
+  };
+  },
+  methods: {
+  //把日期格式改為年月日
+  formatStartDate(dateString) {
+  const startDate = new Date(dateString);
+  const year = startDate.getFullYear();
+  const month = String(startDate.getMonth() + 1).padStart(2, '0');
+  const day = String(startDate.getDate()).padStart(2, '0');
+  const hours = String(startDate.getHours()).padStart(2, '0');
+  return `${year}年${month}月${day}日 ${hours}:00`;
+  },
+  //取活動的資料～(包含日期格式)
+  fetchData() {
+  axios.get('/users/commentActivity')
+    .then(response => {
+      this.activities = response.data;
+      this.activities.forEach(activity => {
+    activity.formattedStartDate = this.formatStartDate(activity.acStartDate);
+  });
+      //console.log(response.data);
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+    },
+  // 計算字數限制
+  limitedTitle(title) {
+    const maxLength = 22; // 最大字數限制
+    return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
+  },
+  limitedStatus(content) {
+    const maxLength = 50; // 最大字數限制
+    return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+  },
+  //活動評分帶入星星數
+  setScore(score) {
+    this.commentScore = score;
+    },
+  setCurrentActivity(event,activity) {
+  	event.preventDefault(); // 阻止點擊時直接點到活動連結
+    this.currentActivity = activity;
+    },
+
+    submitComment(actId) {
+    const commentContent = this.commentContent;
+	  const commentScore = this.commentScore;
+	  this.currentActivityId = actId;
+	  const commentTrim = this.commentContent.trim();
+	   if (commentTrim === "") {
+            	alert("評論內容不能為空白");
+            	return; // 如果評論內容為空，直接返回，不執行後續的代碼
+		}else{
+    // 使用axios發送POST請求
+    axios.post('/users/commentActivity', {
+        commentContent: commentContent,
+        commentScore: commentScore,
+        acid: actId 
+    })
+    .then(response => {
+        // 處理請求成功的回應
+        //console.log('Comment submitted successfully');
+        // 觸發評論成功的小視窗
+        $('#commentSuccessModal').modal('show');
+        // 重置表單或執行其他操作
+        this.commentContent = ''; // 清空評論內容
+        this.commentScore = ''; // 重置評分
+    })
+    .catch(error => {
+        // 處理請求失敗的回應
+        console.error('Error submitting comment:', error);
+    });
+  }},
+    
+  reloadPage() {
+      // 重新載入頁面
+      location.reload();
+   },
+  },
+  created() {
+    this.fetchData();
+  }
+}).mount("#app");
+ </script>
+ 
+ <script>
+
+        let star = document.querySelectorAll(".allStar");
+
+        for (let i = 0; i < star.length; i++) {
+            star[i].addEventListener("mouseover", mouseOver);
+            star[i].addEventListener("mouseout", mouseOut);
+            star[i].addEventListener("click", Click);
+            star[i].addEventListener("dblclick", dblClick);
+        }
+
+        let starlight = false;
+
+        function mouseOver() {
+				
+			if (!starlight) {
+		        let index = Array.from(star).indexOf(this);
+		        for (let i = 0; i <= index; i++) {
+		            star[i].classList.remove("s");
+		            star[i].classList.add("n");
+		        }
+		        //console.log(index);
+		    }
+		    ////console.log(this.id);
+        }
+
+        function mouseOut() {
+            if (!starlight) {
+		        let index = Array.from(star).indexOf(this);
+		        for (let i = 0; i <= index; i++) {
+		            star[i].classList.remove("n");
+		            star[i].classList.add("s");
+		        }
+		    }
+		    //console.log(this.id);
+        }
+        
+        function Click() {
+            starlight = true;
+		    let index = Array.from(star).indexOf(this);
+		    for (let i = 0; i <= index; i++) {
+		        star[i].src = "/img/icon/star.png";
+		    }
+		    //console.log(this.id);
+		    //document.getElementById("rate1").innerHTML = `＊評分為${this.id.substring(6)}分`;
+        }
+        
+        function dblClick() {
+            for (let eachstar of star) {
+		        eachstar.classList.remove("n");
+		        eachstar.classList.add("s");
+		        //document.getElementById("rate1").innerHTML = "＊評分為....";
+		    }
+		    starlight = false;
+		    //console.log(this.id);
+        }
+
+    </script>
+ 
+</body>
+</html>

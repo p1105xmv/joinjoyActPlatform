@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>圖片上傳和剪裁</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <script src="https://unpkg.com/element-plus"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet" />
+  <script src="https://unpkg.com/cropperjs"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/lib/theme-chalk/index.css" />
+  <script src="https://unpkg.com/element-plus/lib/index.full.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+  <style>
+    .cropper-bg {
+      background-image: none !important;
+    }
+
+    .default-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 5px solid #ffffff;
+      box-shadow: 0 0 8px #999;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    /* 用于剪裁完成后的图像 */
+    .cropped-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 5px solid #ffffff;
+      box-shadow: 0 0 8px #999;
+      object-fit: cover;
+    }
+
+    .cropped-image {
+      width: 100px;
+      /* 設置圖片固定寬度 */
+      height: 100px;
+      /* 設置圖片固定高度 */
+      object-fit: cover;
+      /* 如果圖片比例不是1:1，這將幫助圖片以適當的方式填充容器 */
+    }
+
+    .cropper-view-box,
+    .cropper-face {
+      border-radius: 50%;
+    }
+
+    .modal-lg .modal-content {
+      max-width: 750px;
+      /* 或者您希望的任何尺寸 */
+      max-height: 750px;
+      /* 或者您希望的任何尺寸 */
+    }
+
+    .custom-cropper .cropper-view-box,
+    .custom-cropper .cropper-face {
+      border-radius: 0;
+      /* 移除圓角效果 */
+    }
+
+    .cropped-image2 {
+      width: 1200px;
+      /* 預覽圖片的寬度 */
+      height: 400px;
+      /* 預覽圖片的高度 */
+      object-fit: cover;
+      /* 保持圖片的比例 */
+      /* 可以添加其他需要的樣式 */
+    }
+
+    .default-image2 {
+      width: 1200px;
+      height: 400px;
+      border-radius: 5px;
+      border: 5px solid #ffffff;
+      box-shadow: 0 0 8px #999;
+      object-fit: cover;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <div v-if="!croppedImageUrl2" class="image-container">
+      <img ref="defaultImage2" src="../../img/orgBanner/orgdefault/testbird.png" @click="clickUpload2"
+        class="default-image2" />
+    </div>
+    <img v-if="croppedImageUrl2" :src="croppedImageUrl2" @click="clickUpload2" class="cropped-image2" />
+
+    <input type="file" id="fileInput2" @change="onFileChange2" style="display: none" />
+
+
+    <div v-if="!croppedImageUrl" class="image-container">
+      <!-- 點擊後可上傳新圖片 -->
+      <img ref="defaultImage" src="../../img/web/unloginUser.svg" @click="clickUpload" class="default-image" />
+    </div>
+
+    <img v-if="croppedImageUrl" :src="croppedImageUrl" @click="clickUpload" class="cropped-image" />
+
+    <!-- 隱藏的檔案輸入 -->
+    <input type="file" id="fileInput" @change="onFileChange" style="display: none" />
+
+
+    <!-- Cropper Modal -->
+    <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cropperModalLabel">裁剪圖片</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- 在模态框中展示待裁剪的图片 -->
+            <img ref="modalImage" style="max-width: 100%" />
+          </div>
+          <div class="modal-footer">
+            <input type="range" id="zoomRange" value="0" min="0" max="500" />
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              取消
+            </button>
+            <button type="button" class="btn btn-primary" @click="confirmCrop">
+              確認剪裁
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="cropperModal2" tabindex="-1" aria-labelledby="cropperModal2Label" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cropperModal2Label">裁剪圖片</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="custom-cropper">
+            <img ref="modalImage2" class="custom-cropper" style="max-width: 100%" />
+          </div>
+          <div class="modal-footer">
+            <input type="range" id="zoomRange2" value="0" min="0" max="800" />
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              取消
+            </button>
+            <button type="button" class="btn btn-primary" @click="confirmCrop2">
+              確認剪裁
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    Vue.createApp({
+      data() {
+        return {
+          cropper: null,
+          croppedImageUrl: null,
+          cropperVisible: false, // 控制剪裁框顯示的狀態
+
+          cropper2: null,
+          croppedImageUrl2: null,
+          cropperVisible2: false,
+        };
+      },
+      methods: {
+        clickUpload() {
+          this.cropperVisible = false; // 隱藏剪裁框
+          const fileInput = document.getElementById("fileInput");
+          fileInput.value = null; // 重置文件輸入，以便再次選擇相同文件時能夠觸發change事件
+          fileInput.click();
+        },
+
+        onFileChange(e) {
+          const file = e.target.files[0];
+          if (file) {
+            // 开启模态框并初始化裁剪功能
+            this.openCropperModal(file);
+          }
+        },
+        confirmCrop() {
+          // 取得剪裁後的圖片數據，並指定尺寸
+          const croppedCanvas = this.cropper.getCroppedCanvas({
+            width: 100, // 指定剪裁後圖片的寬度
+            height: 100, // 指定剪裁後圖片的高度
+          });
+          this.croppedImageUrl = croppedCanvas.toDataURL();
+          this.cropper.destroy();
+          this.cropper = null;
+          this.cropperVisible = false; // 隱藏剪裁框
+          $("#cropperModal").modal("hide");
+        },
+        openCropperModal(file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.$refs.modalImage.src = e.target.result;
+            this.$refs.modalImage.style.width = "100%"; // 新增这行代码
+
+            this.$nextTick(() => {
+              if (this.cropper) {
+                this.cropper.destroy();
+              }
+              this.cropper = new Cropper(this.$refs.modalImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 1,
+                background: false,
+                dragMode: "none", // 禁用鼠标拖动
+                cropBoxResizable: false, // 禁止调整剪裁框大小
+                minContainerWidth: 700, // 最小容器宽度
+                minContainerHeight: 350, // 最小容器高度
+                maxCropBoxWidth: 350,
+                maxCropBoxHeight: 350,
+                minCanvasWidth: 350, // 最小画布宽度
+                minCanvasHeight: 350, // 最小画布高度
+              });
+              // 显示模态框
+              $("#cropperModal").modal("show");
+            });
+          };
+          reader.readAsDataURL(file);
+        },
+        adjustCropBox() {
+          const rangeValue = document.getElementById("zoomRange").value;
+          if (this.cropper) {
+            // 计算新的剪裁框尺寸
+            const scale = rangeValue / 200;
+            const newWidth = this.originalCropBoxData.width * scale;
+            const newHeight = this.originalCropBoxData.height * scale;
+            // 设置新的剪裁框尺寸
+            this.cropper.setCropBoxData({
+              left: this.originalCropBoxData.left,
+              top: this.originalCropBoxData.top,
+              width: newWidth,
+              height: newHeight,
+            });
+          }
+        },
+        ///////////////////////////////////////////////////////////////
+
+        clickUpload2() {
+          this.cropperVisible2 = false; // 隱藏剪裁框
+          const fileInput = document.getElementById("fileInput2");
+          fileInput.value = null; // 重置文件輸入，以便再次選擇相同文件時能夠觸發change事件
+          fileInput.click();
+        },
+        onFileChange2(e) {
+          const file = e.target.files[0];
+          if (file) {
+            // 开启模态框并初始化裁剪功能
+            this.openCropperModal2(file);
+          }
+        },
+        confirmCrop2() {
+          // 取得剪裁後的圖片數據，並指定尺寸
+          const croppedCanvas = this.cropper2.getCroppedCanvas({
+            width: 1200, // 指定剪裁後圖片的寬度
+            height: 400, // 指定剪裁後圖片的高度
+          });
+          this.croppedImageUrl2 = croppedCanvas.toDataURL();
+          this.cropper2.destroy();
+          this.cropper2 = null;
+          this.cropperVisible2 = false; // 隱藏剪裁框
+
+          $("#cropperModal2").modal("hide");
+        },
+        openCropperModal2(file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.$refs.modalImage2.src = e.target.result;
+            this.$refs.modalImage2.style.width = "100%"; // 新增这行代码
+
+            this.$nextTick(() => {
+              if (this.cropper2) {
+                this.cropper2.destroy();
+              }
+              this.cropper2 = new Cropper(this.$refs.modalImage2, {
+                aspectRatio: 3 / 1,
+                viewMode: 1,
+                autoCropArea: 1,
+                background: false,
+                dragMode: "none", // 禁用鼠标拖动
+                cropBoxResizable: false, // 禁止调整剪裁框大小
+                minContainerWidth: 700, // 最小容器宽度
+                minContainerHeight: 400, // 最小容器高度
+                maxCropBoxWidth: 350,
+                maxCropBoxHeight: 350,
+                minCanvasWidth: 350, // 最小画布宽度
+                minCanvasHeight: 350, // 最小画布高度
+              });
+              // 显示模态框
+              $("#cropperModal2").modal("show");
+            });
+          };
+          reader.readAsDataURL(file);
+        },
+        adjustCropBox2() {
+          const rangeValue = document.getElementById("zoomRange2").value;
+          if (this.cropper2) {
+            // 计算新的剪裁框尺寸
+            const scale = rangeValue / 200;
+            const originalWidth = 300;
+            const originalHeight = 100;
+
+            const newWidth = this.originalCropBoxData.width * scale;
+            const newHeight = this.originalCropBoxData.height * scale;
+            // 设置新的剪裁框尺寸
+            this.cropper2.setCropBoxData({
+              width: newWidth,
+              height: newHeight,
+            });
+          }
+        },
+      },
+      mounted() {
+        this.$nextTick(() => {
+          const zoomRange = document.getElementById("zoomRange");
+          zoomRange.addEventListener("input", this.adjustCropBox);
+          // 设置初始剪裁框尺寸和位置
+          this.originalCropBoxData = {
+            left: 50, // 这些值应根据您的具体需求进行调整
+            top: 50,
+            width: 200,
+            height: 200,
+          };
+
+          const zoomRange2 = document.getElementById("zoomRange2");
+          zoomRange2.addEventListener("input", this.adjustCropBox2);
+        });
+      },
+    }).mount("#app");
+  </script>
+</body>
+
+</html>

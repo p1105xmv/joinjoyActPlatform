@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+
+  <style>
+    body {
+      background-color: #fdfd96;
+      color: #333;
+      font-family: 'Arial', sans-serif;
+      padding-top: 70px;
+    }
+
+    .navbar,
+    .popup-content {
+      background-color: #fff8dc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #organizerPopup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+    }
+
+    .popup-content {
+      margin: 20px;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      width: 600px;
+      height: 500px;
+      overflow: auto;
+      background-color: rgb(254, 253, 239);
+      overflow-y: auto;
+      font-size: 1.1rem;
+
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-top: 20px;
+
+    }
+
+    .button-container button {
+      background-color: #ffecb3;
+      color: #333;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-container button:hover {
+      background-color: #ffe082;
+    }
+
+    .vibrant-button {
+      background-color: #ffecb3;
+      color: #333;
+      border: none;
+      padding: 10px 30px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: bold;
+      font-size: 18px;
+      margin-right: 8px;
+
+
+    }
+
+    .vibrant-button:hover {
+      background-color: #f3ce5f;
+    }
+
+
+    .centered {
+      text-align: center;
+    }
+
+    .centered img {
+      width: 100px;
+      height: auto;
+      border-radius: 50%;
+      display: block;
+      margin: 0 auto;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .bold {
+      font-weight: bold;
+      font-size: 25px;
+      color: #555;
+    }
+
+    .table {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .table th,
+    .table td {
+      border-color: #ffecb3;
+    }
+
+    .table thead {
+      background-color: #ffecb3;
+    }
+
+    a {
+      color: #f9a825;
+      transition: color 0.3s;
+    }
+
+    a:hover {
+      color: #f57f17;
+      text-decoration: none;
+    }
+
+    .organizer-info {
+      padding: 20px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      font-size: 30px;
+      text-align: left;
+    }
+
+    .organizer-info:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+    }
+
+    .organizer-info h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #333;
+      display: flex;
+      align-items: center;
+    }
+
+    .organizer-info img {
+      margin-right: 15px;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+    }
+
+    .organizer-info a {
+      font-weight: bold;
+      color: #fffef3;
+      text-decoration: none;
+      transition: color 0.3s;
+      text-align: center;
+    }
+
+    .createorga {
+      color: #060606;
+      text-decoration: none;
+      cursor: pointer;
+      text-align: center;
+      font-size: 60px;
+    }
+
+    .image-container {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: inline-block;
+      overflow: hidden;
+      background-position: center;
+      background-size: cover;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .hover-row:hover {
+      background-color: #fffef7;
+      cursor: pointer;
+    }
+
+    ion-icon {
+      margin: 15px;
+      font-size: 80px;
+      max-width: 100%;
+      max-height: 100%;
+
+    }
+
+    .center-container {
+      width: 80%;
+      margin: auto;
+      background-color: #fdfdf3;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 30px;
+      border-radius: 40px;
+
+    }
+
+    .image-hover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .image-hover:hover {
+      transform: scale(1.15);
+    }
+
+    .image-container2 {
+      position: relative;
+      width: 144px;
+      height: 72px;
+      overflow: hidden;
+      border-radius: 10px;
+      cursor: pointer;
+
+    }
+
+    .text-ellipsis {
+      display: inline-block;
+      max-width: 550px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .table {
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .table th,
+    .table td {
+      border-bottom: 1px solid #fffbee;
+    }
+
+    .table th:first-child,
+    .table td:first-child {
+      border-top-left-radius: 10px;
+    }
+
+    .table th:last-child,
+    .table td:last-child {
+      border-top-right-radius: 10px;
+    }
+
+    .table tr:last-child td:first-child {
+      border-bottom-left-radius: 10px;
+    }
+
+    .table tr:last-child td:last-child {
+      border-bottom-right-radius: 10px;
+    }
+
+    .centered-content th,
+    .centered-content td {
+      text-align: center;
+      vertical-align: middle;
+      font-weight: bold;
+    }
+  </style>
+
+  <meta charset="UTF-8">
+  <title>主辦中心</title>
+</head>
+
+<body>
+  <div th:replace="~{layout/navbar}"></div>
+  <div th:replace="~{layout/footer}"></div>
+
+  <span id="userId" th:text="${session.userinfo?.userid}" style="display: none;"></span>
+
+  <div id="app" class="center-container">
+
+    <!--選取主辦-->
+
+    <div id="organizerPopup" v-if="showOrganizerPopup">
+      <div class="popup-content">
+        <h2>選擇主辦單位</h2>
+
+        <a :href="'/organizerBiz/createOrganizer'" class="createorga">
+
+          <div class="organizer-info">
+            <div class="image-container"
+              :style="{ backgroundImage: 'url(' + '/img/orgBanner/orgdefault/iconplus.png' + ')' }"></div>
+            &nbsp;&nbsp;建立主辦
+          </div>
+
+        </a>
+
+        <div v-for="organizer in organizers" class="organizer-info" @click="selectOrganizer(organizer.oid)">
+
+
+          <div class="image-container"
+            :style="{ backgroundImage: 'url(' + (organizer.oheadshot || '/img/web/unloginUser.svg') + ')' }"></div>
+
+          <div style="font-size: 30px;text-align: center;">&nbsp;&nbsp;{{ organizer.oname }}</div>
+
+
+        </div>
+        <div class="button-container">
+          <button @click="showOrganizerPopup = false">關閉</button>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div v-if="selectedOrganizer" class="centered">
+      <img :src="selectedOrganizer.oheadshot || '/img/web/unloginUser.svg'" @error="onImageError" alt="主辦頭貼圖片"
+        class="centered">
+      <div class="bold">{{ selectedOrganizer.oname }}</div>
+
+      <button @click="openOrganizerPopup" class="vibrant-button">選擇主辦單位</button>
+      <button @click="editOrganizer(selectedOrganizer)" class="vibrant-button">編輯主辦單位</button>
+      <button @click="showOrganizerPage(selectedOrganizer)" class="vibrant-button">瀏覽主辦頁面</button>
+      <button @click="showOrganizerActivities(selectedOrganizer)" class="vibrant-button">活動列表</button>
+    </div>
+    <!--撈一下主辦的活動-->
+    <h2>活動摘要</h2>
+
+    <div v-if="futureActivities.length > 0">
+      <table class="table table-hover">
+        <thead>
+          <tr class="centered-content">
+            <th>日期</th>
+            <th></th>
+            <th>名稱</th>
+            <th>已付款/已報名</th>
+            <th>報名人數上限</th>
+            <th>狀態</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="act in futureActivities" :key="act.id" @click="selectActivity(act)" class="hover-row">
+            <td style="text-align: center; vertical-align: middle; font-weight: bold;">{{ formatDate(act.acStartDate) }}
+            </td>
+            <td>
+              <div class="image-container2">
+                <img :src="act.acImgCompress" alt="活動圖片" class="image-hover">
+              </div>
+            </td>
+            <td style="vertical-align: middle; font-weight: bold;"><span class="text-ellipsis">{{ act.acName }}</span>
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+              {{countPaidStatus(act.acSignForm)}}/{{act.acSignForm.length}}</td>
+            <td style="text-align: center; vertical-align: middle;">{{ totalQuantity(act.activityTickets) }}</td>
+            <td style="text-align: center; vertical-align: middle;">{{ changeCheckStatus(act.acCheckStatus) }} <br> {{
+              changePublicStatus(act.acPublicStatus) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div v-if="futureActivities.length == 0">
+      目前還沒有活動，趕快去<a :href="'/createAc/chooseOrganizer/1'">辦活動</a>吧！
+    </div>
+
+  </div>
+
+  <script>
+    let userId = document.getElementById('userId').innerText;//調用thymeleaf儲存的userid並做js的全域宣告
+
+    Vue.createApp({
+      data() {
+        return {
+          organizers: [],
+          orgActivities: [],
+          showOrganizerPopup: false, //選擇主辦的彈出視窗
+          selectedOrganizer: null,//在選擇主辦單位的時候讓vue保存主辦單位的資料
+          organizerData: null,
+        };
+      },
+      created() {
+        const selectedOrganizer = JSON.parse(sessionStorage.getItem('selectedOrganizer'));
+        if (selectedOrganizer) {
+          this.selectedOrganizer = selectedOrganizer;
+          this.fetchEvents(selectedOrganizer.oid);
+          this.showOrganizerPopup = false;
+        } else {
+          this.fetchData();
+        }
+      },
+      mounted() {
+        const selectedOrganizer = JSON.parse(sessionStorage.getItem('selectedOrganizer'));
+        if (selectedOrganizer) {
+          this.selectedOrganizer = selectedOrganizer;
+          this.fetchEvents(selectedOrganizer.oid);
+          this.showOrganizerPopup = false; // 已有選擇的主辦單位，不顯示modal
+        } else {
+          this.showOrganizerPopup = true; // 沒有選擇的主辦單位，顯示modal
+          this.fetchData(); // 沒有選擇的主辦單位時，呼叫 fetchData 方法來獲取數據
+        }
+      },
+
+      methods: {
+        fetchData() {
+          axios.get('/api/organizers/editOrganizer/' + userId)
+            .then(response => {
+              this.organizers = response.data;
+              if (!this.selectedOrganizer) {
+                this.showOrganizerPopup = true;
+              }
+            })
+            .catch(error => {
+              console.error(error);
+              if (!this.selectedOrganizer) {
+                this.showOrganizerPopup = true;
+              }
+            });
+        },
+        formatDate(dateStr) {//處理日期格式~
+          const date = new Date(dateStr);
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
+          return `${month}.${day}`;
+        },
+        changePublicStatus(status) {//轉換01公開和不公開
+          return status === 1 ? '公開' : '非公開';
+        },
+        changeCheckStatus(status) {//轉換審核狀態
+          switch (status) {
+            case 0: return '草稿';
+            case 1: return '待審核';
+            case 2: return '已發布';
+          }
+        },
+        autoSelectOrganizer(oid) {
+          const organizer = this.organizers.find(o => o.oid === oid);
+          if (organizer) {
+            this.selectOrganizer(oid);
+            this.selectedOrganizer = organizer;
+            this.showOrganizerPopup = false;//關閉視窗
+          } else {
+
+          }
+        },
+
+        selectOrganizer(organizerId) {// 找到被選中的主辦單位並保存它的詳細資料
+          const organizer = this.organizers.find(o => o.oid === organizerId);
+          if (organizer) {
+            this.selectedOrganizer = organizer;
+            this.fetchEvents(organizer.oid);//載入~活動
+            this.showOrganizerPopup = false;//關閉視窗
+            sessionStorage.setItem('selectedOrganizer', JSON.stringify(organizer)); // 儲存到 SessionStorage
+
+          }
+        },
+        fetchEvents(organizerId) {//撈主辦的活動
+          axios.get('/api/organizers/getOrgActivitys/' + organizerId)
+            .then(response => {
+              this.orgActivities = response.data;
+            });
+        },
+        onImageError(event) {//顯示不出圖片的時候顯示小鳥
+          event.target.src = '/img/web/unloginUser.svg';
+        },
+        editOrganizer(organizer) {
+          sessionStorage.setItem('currentOrganizer', JSON.stringify(organizer));
+          window.location = '/organizerBiz/update';
+        },
+        showOrganizerActivities(organizer) {
+          sessionStorage.setItem('currentOrganizer', JSON.stringify(organizer));
+          window.location = '/organizerBiz/listActivity';
+        },
+        showOrganizerPage(organizer) {
+          window.location = '/api/organizers/'+organizer.oid;
+        },
+        selectActivity(act) {
+          sessionStorage.setItem('selectedActivity', JSON.stringify(act));
+          window.location.href = '/organizerBiz/OrganizerAcManage/' + act.acid;
+        },
+        openOrganizerPopup() {
+          this.fetchData(); // 重新獲取主辦單位數據
+          this.showOrganizerPopup = true; // 顯示選擇主辦單位的modal
+        },
+        countPaidStatus(signForms) {
+          return signForms.filter(form => form.asfPaidStatus === 1).length;
+        },
+        totalQuantity(activityTickets) {
+          return activityTickets.reduce((total, ticket) => total + ticket.atQuantity, 0);
+        },
+
+      },
+      computed: {
+        futureActivities() {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // 忽略當前時間，只比較日期
+          return this.orgActivities.filter((act) => {
+            const activityDate = new Date(act.acStartDate);
+            return activityDate >= today;
+          });
+        }
+      },
+
+    }).mount('#app');
+
+  </script>
+</body>
+
+</html>

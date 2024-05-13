@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>活動管理</title>
+    <link
+      rel="stylesheet"
+      href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      body {
+        background-color: rgb(255, 252, 233) !important;
+      }
+
+      .activityName {
+        margin-top: 20px;
+      }
+
+      .main {
+        background-color: white;
+        box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+        margin-top: 20px;
+        border-radius: 10px;
+        padding: 30px;
+        width: auto;
+      }
+
+      .editBtn {
+        border-radius: 9999px;
+        width: 100%;
+        text-align: center;
+        background-color: #a9b3c0;
+        color: white;
+        font-size: 18px;
+        padding: 5px;
+        cursor: pointer;
+      }
+
+      .editBtn:hover {
+        background-color: #ffcc38;
+      }
+
+      .smBtn {
+        border-radius: 9999px;
+        width: 100%;
+        text-align: center;
+        background-color: #a9b3c0;
+        color: white;
+        font-size: 16px;
+        padding: 5px;
+        cursor: pointer;
+      }
+
+      .smBtn:hover {
+        background-color: #ffcc38;
+      }
+
+      .yellowBtn {
+        border-radius: 9999px;
+        width: 100%;
+        text-align: center;
+        background-color: #ffcc38;
+        color: white;
+        font-size: 22px;
+        padding: 5px;
+        cursor: pointer;
+      }
+
+      .grayBtn {
+        border-radius: 9999px;
+        width: 100%;
+        text-align: center;
+        background-color: #c7c7c7;
+        color: white;
+        font-size: 22px;
+        padding: 5px;
+        cursor: pointer;
+      }
+
+      .yellowBtn:hover {
+        background-color: #ffda6a;
+      }
+
+      .smIcon {
+        color: white;
+        font-size: 20px;
+        margin-right: 10px;
+      }
+
+      .mIcon {
+        color: white;
+        font-size: 24px;
+        margin-right: 10px;
+      }
+
+      .acImg {
+        border-radius: 15px;
+      }
+
+      .grayBlock {
+        background-color: #fafafa;
+        margin: 0 5px;
+        padding: 20px;
+      }
+
+      .smTitle {
+        color: gray;
+        font-size: 20px;
+      }
+
+      .bigContent {
+        font-size: 40px;
+        text-align: center;
+      }
+
+      .block {
+        background-color: white;
+        box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 30px;
+        width: auto;
+      }
+
+      .smText {
+        font-size: 22px;
+        color: rgb(148, 148, 148);
+      }
+
+      .lineBtn-container {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .lineBtn {
+        flex: 1;
+        margin-right: 10px;
+      }
+
+      .lineBtn:last-child {
+        margin-right: 0;
+      }
+
+      .chartBlock {
+        margin: 0 15%;
+        display: block;
+      }
+
+      .noCursorPointer {
+        cursor: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div th:replace="~{layout/navbar}"></div>
+    <div id="app">
+      <div class="container">
+        <template v-if="activity">
+          <div class="row mt-4">
+            <div class="col-md-10">
+              <h1 class="fw-bolder">{{activity.acName}}</h1>
+            </div>
+            <div class="col-md-2">
+              <div
+                v-if="this.activity.acCheckStatus == 0 || this.activity.acCheckStatus == 3"
+                class="yellowBtn"
+                @click="publishAc"
+              >
+                發布
+              </div>
+              <div
+                v-if="this.activity.acCheckStatus == 1 "
+                class="grayBtn noCursorPointer"
+              >
+                審核中
+              </div>
+              <div
+                v-if="this.activity.acCheckStatus == 2"
+                class="grayBtn noCursorPointer"
+              >
+                已發布
+              </div>
+            </div>
+          </div>
+          <p class="smText">
+            {{this.activity.acStartDate}} ~ {{this.activity.acEndDate}} (GMT+8)
+          </p>
+          <div class="main">
+            <h4 class="fw-bolder">活動頁</h4>
+            <div class="row">
+              <div class="col-md-5">
+                <img
+                  :src="activity.acImgCompress"
+                  class="img-fluid acImg mt-4"
+                />
+                <div class="editBtn mt-4" @click="toActivityPage">
+                  <i class="bi bi-eye smIcon"></i>預覽
+                </div>
+                <div class="editBtn mt-4" @click="toAcIntroPage">
+                  <i class="bi bi-pencil smIcon"></i>編輯
+                </div>
+              </div>
+              <div class="col-md-7">
+                <div class="row mt-4">
+                  <div class="col-md-6">
+                    <div class="grayBlock">
+                      <div class="smTitle">活動頁瀏覽數</div>
+                      <div
+                        v-if="this.activity.acCheckStatus != 2"
+                        class="bigContent"
+                      >
+                        --
+                      </div>
+                      <div
+                        v-if="this.activity.acCheckStatus == 2"
+                        class="bigContent"
+                      >
+                        {{activity.acViewsCount}}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="grayBlock">
+                      <div class="smTitle">喜歡這個活動</div>
+                      <div
+                        v-if="this.activity.acCheckStatus != 2"
+                        class="bigContent"
+                      >
+                        --
+                      </div>
+                      <div
+                        v-if="this.activity.acCheckStatus == 2"
+                        class="bigContent"
+                      >
+                        {{activity.favCount}}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="grayBlock mt-4">
+                      <div class="smTitle">活動狀態</div>
+                      <div class="bigContent">{{acStatus}}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="main mt-4">
+            <h4 class="fw-bolder">編輯活動</h4>
+            <div class="lineBtn-container mt-4">
+              <div class="lineBtn yellowBtn" @click="toAcInfoPage">
+                活動資訊
+              </div>
+              <div class="lineBtn yellowBtn" @click="toAcIntroPage">
+                活動介紹
+              </div>
+              <div class="lineBtn yellowBtn" @click="toAcCrewPage">
+                活動嘉賓
+              </div>
+              <div class="lineBtn yellowBtn" @click="toAcTicketPage">
+                活動票券
+              </div>
+            </div>
+            <!-- <div class="row">
+              <div class="col-md-6 mt-4">
+                <div class="yellowBtn">
+                  <i class="bi bi-ticket-perforated-fill mIcon"></i>編輯票券
+                </div>
+              </div>
+              <div class="col-md-6 mt-4">
+                <div class="yellowBtn">
+                  <i class="bi bi-person-lines-fill mIcon"></i>編輯報名表
+                </div>
+              </div>
+            </div> -->
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-5">
+              <div class="block">
+                <div class="row">
+                  <div class="col-md-8">
+                    <h4 class="fw-bolder">售票狀況</h4>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="yellowBtn" @click="toTicket">售票資訊</div>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <canvas id="ticketChart" class="chartBlock"></canvas>
+                  <h4 class="text-center mt-3">總販售張數:{{totalTickets}}</h4>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-7">
+              <div class="block">
+                <div class="row">
+                  <div class="col-md-8">
+                    <h4 class="fw-bolder" @click="toParticipantsList">
+                      參加人
+                    </h4>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="yellowBtn" @click="toParticipantsList">
+                      參加名單
+                    </div>
+                  </div>
+                </div>
+                <div class="smText">數據統計</div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <h5 class="fw-bolder text-center mt-5">性別比例</h5>
+                    <canvas id="genderChart"></canvas>
+                  </div>
+                  <div class="col-md-6">
+                    <h5 class="fw-bolder text-center mt-5">居住地分布</h5>
+                    <canvas id="cityChart"></canvas>
+                  </div>
+                </div>
+
+                <h5 class="fw-bolder text-center mt-5">年齡分布</h5>
+                <canvas id="ageChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        createApp,
+        ref,
+      } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+
+      createApp({
+        data() {
+          return {
+            acid: 0,
+            activity: null,
+            totalTickets: 0,
+            soldTickets: 0,
+            genderM: 0,
+            genderF: 0,
+            genderO: 0,
+            startDate: null,
+            endDate: null,
+            signupSuccessList: [],
+            organizer: null,
+            userinfo: null,
+          };
+        },
+        methods: {
+          toTicket() {
+            window.location.href = `ticket/${this.acid}`;
+          },
+          toParticipantsList() {
+            window.location.href = `participantslist/${this.acid}`;
+          },
+          toActivityPage() {
+            window.location.href = `/showActivity/activityPage/${this.acid}`;
+          },
+          toAcInfoPage() {
+            axios
+              .get(`/updateAc/editActivity/${this.acid}`)
+              .then((response) => {
+                window.location.href = "/createAc/activityBasicInfo/2";
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          },
+          toAcIntroPage() {
+            axios
+              .get(`/updateAc/editActivity/${this.acid}`)
+              .then((response) => {
+                window.location.href = "/createAc/activityIntro/2";
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          },
+          toAcCrewPage() {
+            axios
+              .get(`/updateAc/editActivity/${this.acid}`)
+              .then((response) => {
+                window.location.href = "/createAc/activityGuest/2";
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          },
+          toAcTicketPage() {
+            axios
+              .get(`/updateAc/editActivity/${this.acid}`)
+              .then((response) => {
+                window.location.href = "/createAc/activityTicket/2";
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          },
+          publishAc() {
+            axios
+              .get(`/api/postActivity/${this.acid}`)
+              .then((response) => {
+                alert(response.data);
+                window.location.href = `/organizerBiz/OrganizerAcManage/${this.acid}`;
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          },
+        },
+        computed: {
+          acStatus() {
+            if (this.activity && this.activity.acCheckStatus == 0) {
+              return "草稿";
+            } else if (this.activity.acCheckStatus == 1) {
+              return "待審核";
+            } else if (this.activity.acCheckStatus == 2) {
+              return "已發布";
+            } else if (this.activity.acCheckStatus == 3) {
+              return "退回";
+            }
+          },
+        },
+
+        mounted() {
+          const currentUrl = window.location.href;
+          let parts = currentUrl.split("/");
+          this.acid = parts[parts.length - 1];
+
+          axios
+            .get(`/api/activityForAcManage/${this.acid}`)
+            .then((response) => {
+              this.activity = response.data;
+              //console.log(this.activity);
+
+              $.ajax({
+                url: "/api/session/getUserinfo",
+                method: "GET",
+                success: (data) => {
+                  this.userinfo = data;
+                  if (this.userinfo.userid != this.activity.acUserid) {
+                    alert("您無權限觀看此頁面");
+                    window.location.href = "/";
+                  }
+                },
+              });
+
+              for (let t in this.activity.acSignForm) {
+                if (this.activity.acSignForm[t].asfSignStatus == 2) {
+                  this.signupSuccessList.push(this.activity.acSignForm[t]);
+                }
+              }
+
+              //console.log(this.signupSuccessList);
+
+              for (let t in this.activity.activityTickets) {
+                this.totalTickets +=
+                  this.activity.activityTickets[t].atQuantity;
+              }
+
+              for (let t in this.signupSuccessList) {
+                if (this.signupSuccessList[t].atid) this.soldTickets++;
+              }
+
+              for (let t in this.signupSuccessList) {
+                if (this.signupSuccessList[t].asfGender == "M") this.genderM++;
+                if (this.signupSuccessList[t].asfGender == "F") this.genderF++;
+                if (this.signupSuccessList[t].asfGender == "O") this.genderO++;
+              }
+
+              this.$nextTick(() => {
+                const ctx = document.getElementById("ticketChart");
+                const ctx2 = document.getElementById("genderChart");
+                const ctx3 = document.getElementById("cityChart");
+
+                new Chart(ctx, {
+                  type: "pie",
+                  data: {
+                    labels: ["已售出", "未售出"],
+                    datasets: [
+                      {
+                        label: "售票狀況",
+                        data: [
+                          this.soldTickets,
+                          this.totalTickets - this.soldTickets,
+                        ],
+                        backgroundColor: [
+                          "rgba(54, 162, 235, 0.2)",
+                          "rgba(50, 50, 50, 0.2)",
+                        ],
+                        hoverOffset: 4,
+                      },
+                    ],
+                  },
+                });
+
+                new Chart(ctx2, {
+                  type: "pie",
+                  data: {
+                    labels: ["男", "女", "其他"],
+                    datasets: [
+                      {
+                        label: "性別比例",
+                        data: [this.genderM, this.genderF, this.genderO],
+                        backgroundColor: [
+                          "rgba(54, 162, 245, 0.2)",
+                          "rgba(255, 158, 199, 0.62)",
+                          "rgba(50, 50, 50, 0.2)",
+                        ],
+                        hoverOffset: 4,
+                      },
+                    ],
+                  },
+                });
+
+                let cityCounts = {};
+
+                for (let i = 0; i < this.signupSuccessList.length; i++) {
+                  let city = this.signupSuccessList[i].asfCity;
+
+                  if (cityCounts[city]) {
+                    cityCounts[city]++;
+                  } else {
+                    cityCounts[city] = 1;
+                  }
+                }
+
+                let labels = Object.keys(cityCounts);
+                let data = Object.values(cityCounts);
+
+                new Chart(ctx3, {
+                  type: "pie",
+                  data: {
+                    labels: labels,
+                    datasets: [
+                      {
+                        label: "居住地分布",
+                        data: data,
+                        backgroundColor: [
+                          "rgba(46, 204, 64, 0.5)",
+                          "rgba(255, 133, 27, 0.5)",
+                          "rgba(127, 219, 255, 0.5)",
+                          "rgba(255, 65, 54, 0.5)",
+                          "rgba(0, 116, 217, 0.5)",
+                          "rgba(177, 13, 201, 0.5)",
+                          "rgba(255, 220, 0, 0.5)",
+                          "rgba(0, 31, 63, 0.5)",
+                          "rgba(57, 204, 204, 0.5)",
+                          "rgba(1, 255, 112, 0.5)",
+                          "rgba(133, 20, 75, 0.5)",
+                          "rgba(240, 18, 190, 0.5)",
+                          "rgba(61, 153, 112, 0.5)",
+                          "rgba(17, 17, 17, 0.5)",
+                          "rgba(170, 170, 170, 0.5)",
+                          "rgba(255, 87, 51, 0.5)",
+                          "rgba(248, 187, 208, 0.5)",
+                          "rgba(141, 110, 99, 0.5)",
+                          "rgba(144, 164, 174, 0.5)",
+                          "rgba(197, 202, 233, 0.5)",
+                          "rgba(178, 235, 242, 0.5)",
+                          "rgba(100, 255, 218, 0.5)",
+                        ],
+                        hoverOffset: 4,
+                      },
+                    ],
+                  },
+                });
+
+                const ageGroups = {};
+                this.signupSuccessList.forEach((participant) => {
+                  const birthday = new Date(participant.asfBirthday);
+                  const age = new Date().getFullYear() - birthday.getFullYear();
+                  const ageGroup = Math.floor(age / 10) * 10;
+                  if (!ageGroups[ageGroup]) {
+                    ageGroups[ageGroup] = 0;
+                  }
+                  ageGroups[ageGroup]++;
+                });
+
+                const ageLabels = Object.keys(ageGroups).map((ageGroup) => {
+                  let ageGroupEnd = parseInt(ageGroup) + 9;
+                  return `${ageGroup}-${ageGroupEnd}歲`;
+                });
+                const ageData = Object.values(ageGroups);
+
+                const ctx4 = document
+                  .getElementById("ageChart")
+                  .getContext("2d");
+                const ageChart = new Chart(ctx4, {
+                  type: "bar",
+                  data: {
+                    labels: ageLabels,
+                    datasets: [
+                      {
+                        label: "年齡分布",
+                        data: ageData,
+                        backgroundColor: "rgba(75, 192, 192, 0.5)",
+                        borderWidth: 1,
+                      },
+                    ],
+                  },
+                  options: {
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1,
+                        },
+                      },
+                    },
+
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
+                    },
+                  },
+                });
+              });
+            });
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

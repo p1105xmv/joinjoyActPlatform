@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.0.3/vue-resource.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <style>
+      .ui-autocomplete {
+        z-index: 9999 !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light j_nav j-color fixed-top">
+      <div class="container-fluid">
+        <a th:href="@{/}"
+          ><img class="nav-object" th:src="@{/img/web/logo.svg}"
+        /></a>
+        <div class="j_navbox-center collapse navbar-collapse">
+          <a class="nav-object" th:href="@{/}"
+            ><img class="nav-object" th:src="@{/img/web/jojoWord.svg}"
+          /></a>
+        </div>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div
+          class="collapse navbar-collapse"
+          id="navbarSupportedContent"
+          style="margin-left: 30px"
+        >
+          <form id="searchForm">
+            <div class="input-group">
+              <div>
+                <select class="form-select" id="articleType">
+                  <option value="0" selected>文章</option>
+                  <option value="1">閒聊</option>
+                </select>
+              </div>
+              <input
+                id="searchInput"
+                type="text"
+                class="form-control"
+                placeholder="找文章"
+              />
+              <button id="searchBtn" class="btn btn-light" type="button">
+                搜尋
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto j_navbox-right">
+            <li class="nav-item"></li>
+            <li class="nav-item">
+              <a class="nav-object j_btn-small" th:href="@{/}" tabindex="-1"
+                >報名查詢</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-object j_btn-small"
+                th:href="@{/articles/allArticles}"
+                tabindex="-1"
+                >討論區</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-object j_btn-small"
+                th:href="@{/createAc/chooseOrganizer/1}"
+                tabindex="-1"
+                >辦活動</a
+              >
+            </li>
+
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <!-- 登入頭貼顯示 -->
+                <img
+                  sec:authorize=" isAuthenticated()"
+                  th:src="@{${session.userinfo.uImgpath != null ? session.userinfo.uImgpath : '../img/web/unloginUser.svg'}}"
+                  class="nav-object j_btn-circle"
+                />
+
+                <!-- 未登入預設 -->
+                <img
+                  sec:authorize=" !isAuthenticated()"
+                  class="nav-object j_btn-circle"
+                  th:src="@{../img/web/unloginUser.svg}"
+                />
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="navbarDropdown"
+              >
+                <!-- 登入的互動視窗，取代原本的路徑 -->
+                <li sec:authorize="!isAuthenticated()">
+                  <a
+                    class="dropdown-item"
+                    data-bs-toggle="modal"
+                    data-bs-target="#LoginModal"
+                    >登入</a
+                  >
+                </li>
+                <li sec:authorize="!isAuthenticated()">
+                  <!-- <a class="dropdown-item" th:href="@{/register}">註冊</a> -->
+                  <a
+                    class="dropdown-item"
+                    data-bs-toggle="modal"
+                    data-bs-target="#RegisterModal"
+                    >註冊</a
+                  >
+                </li>
+                <!-- 登入才會出現 -->
+                <li sec:authorize="isAuthenticated()">
+                  <a class="dropdown-item" th:href="@{/logout}">登出</a>
+                </li>
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
+                <li sec:authorize="isAuthenticated()">
+                  <a class="dropdown-item" th:href="@{/articles/myArticles}"
+                    >我的文章</a
+                  >
+                </li>
+                <li sec:authorize="isAuthenticated()">
+                  <a class="dropdown-item" th:href="@{/userHome}">會員專區</a>
+                </li>
+                <li sec:authorize="isAuthenticated()">
+                  <a class="dropdown-item" th:href="@{/organizerBiz}"
+                    >主辦中心</a
+                  >
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div th:replace="~{authentication/authModal}"></div>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+  </body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的票券</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+</head>
+
+<body>
+    <div id="app" th:attr="data-asf-name=${asfName}, data-asf-email=${asfEmail}, data-asfid=${asfid}, data-asf-hash=${asfHash}">
+        <form @submit.prevent="submitForm">
+        </form>
+        <div v-if="imageUrl">
+            <img :src="imageUrl" alt="Response Image" style="max-width:100%;">
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            created() {
+            },
+
+            mounted() {
+                const appDiv = document.getElementById('app');
+                this.form.asfName = appDiv.getAttribute('data-asf-name');
+                this.form.asfEmail = appDiv.getAttribute('data-asf-email');
+                this.form.asfid = appDiv.getAttribute('data-asfid');
+                this.form.asfHash = appDiv.getAttribute('data-asf-hash');
+                //console.log(this.form);
+                this.submitForm();
+            },
+
+            data() {
+                return {
+                    form: {
+                        asfName: '',
+                        asfEmail: '',
+                        asfid: '',
+                        asfHash: ''
+                    },
+                    imageUrl: null  // 用於儲存圖片的 URL
+                };
+            },
+            methods: {
+                submitForm() {
+                    axios({
+                        method: 'post',
+                        url: '/qrcode/get',
+                        data: this.form,
+                        responseType: 'blob'
+                    }).then(response => {
+                        const urlCreator = window.URL || window.webkitURL;
+                        this.imageUrl = urlCreator.createObjectURL(response.data);
+                    }).catch(error => {
+                        alert('驗證失敗');
+                        console.error('There was an error!', error);
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

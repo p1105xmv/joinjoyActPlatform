@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- vue3 -->
+  <!-- <script src="https://unpkg.com/vue@next"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+  <!-- 日期選擇器 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.21/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- flatpicker 中文語言包 -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+  <!-- bootstrap5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
+    crossorigin="anonymous"></script>
+  <title>活動票卷</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #fef8f8;
+    }
+
+    main {
+      display: block;
+      unicode-bidi: isolate;
+    }
+
+    .Main {
+      width: 1080px;
+      min-height: calc(100vh - 95px);
+      margin: 20px auto 26px;
+      background-color: #fff;
+      padding: 5px 0 46px;
+      box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    div {
+      display: block;
+      unicode-bidi: isolate;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    p {
+      margin-top: 0;
+    }
+
+    .Ticket-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+    }
+
+    .Ticket-inner {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 75%;
+    }
+
+    .Ticket-title {
+      color: #36353c;
+      font-size: 25px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 34px;
+    }
+
+    .Field-field {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+
+    .Field-label {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.71;
+      color: #282828;
+      padding-bottom: 10px;
+    }
+
+    .BasicInfoPage-field-label {
+      font-size: 20px;
+    }
+
+    .Field-tip {
+      color: #a9a9a9;
+    }
+
+    .BasicInfoPage-date-select-inner {
+      display: flex;
+    }
+
+    .Datepicker-container {
+      width: 50%;
+    }
+
+    .Select-dateSelect {
+      width: 100% !important;
+      padding: 14px 18px 14px 24px !important;
+      background: #f1f1f1 url("/img/icon/chevron-down.svg") top 18px right 22px no-repeat !important;
+      background-size: 18px 18px !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      font-size: 16px !important;
+      color: #282828 !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+    }
+
+    .Select-dateSelect:focus {
+      border-radius: 3px !important;
+      outline: 2px solid #282828 !important;
+      box-shadow: none !important;
+    }
+
+    .SelectTime-Container {
+      width: 25%;
+      margin-left: 10px;
+    }
+
+    .Select-select {
+      width: 100%;
+      padding: 14px 18px 14px 24px;
+      background: #f1f1f1 url("/img/icon/chevron-down.svg") top 18px right 22px no-repeat;
+      background-size: 18px 18px;
+      border: 0;
+      border-radius: 0;
+      font-size: 16px;
+      color: #282828;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+
+    .Ticket-tickets-table-container {
+      /* min-height: 50vh; */
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+
+    .Ticket-table {
+      display: table;
+      table-layout: fixed;
+      width: 100%;
+      color: #656a72;
+      border-collapse: collapse;
+    }
+
+    .Ticket-table-row.Ticket-table-row-header {
+      display: table-header-group;
+      font-size: 14px;
+      border-bottom: none;
+      background-color: #1c2833;
+      color: #c1c7cd;
+      font-weight: 500;
+    }
+
+    .Ticket-table-cell {
+      display: table-cell;
+      overflow-wrap: break-word;
+      word-wrap: normal;
+      padding: 12px 15px;
+      vertical-align: middle;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .Ticket-table-cell-xl {
+      width: 30%;
+    }
+
+    .Ticket-table-cell-s {
+      width: 10%;
+    }
+
+    .Ticket-table-cell-m {
+      width: 15%;
+    }
+
+    .Ticket-text-center {
+      text-align: center;
+    }
+
+    .Ticket-ticket-container {
+      display: table-row-group;
+      border-left: 1px solid #f8f8fa;
+      border-right: 1px solid #f8f8fa;
+    }
+
+    .Ticket-table-row {
+      display: table-row;
+      font-size: 16px;
+    }
+
+    .Input-input {
+      width: 100%;
+      flex: 1 1;
+      border: 0;
+      padding: 16px 24px;
+      background-color: #f1f1f1;
+      position: relative;
+      font-size: 16px;
+      border-radius: 0;
+    }
+
+    .Ticket-free-span {
+      font-size: 16px;
+      color: #2d9fdd;
+    }
+
+    .NumberInput-input {
+      width: 100%;
+      flex: 1 1;
+      border: 1px solid #e6ebf2;
+      padding: 16px 24px;
+      background-color: white;
+      position: relative;
+      font-size: 16px;
+      border-radius: 0;
+    }
+
+    .Ticket-table-cell-input,
+    .Ticket-table-cell-currency-input {
+      padding: 16px;
+      color: #656a72;
+      background-color: #fff;
+      border: 1px solid #e6ebf2;
+      border-radius: 2px;
+    }
+
+    .Ticket-currency-container {
+      position: relative;
+    }
+
+    .Ticket-currency-container .Ticket-currency {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      z-index: 1;
+      font-size: 16px;
+      color: #bbbfc4;
+      padding: 0px 12px;
+      pointer-events: none;
+    }
+
+    .Ticket-table-cell-currency-input {
+      padding: 16px 6px 16px 60px;
+    }
+
+    .Ticket-option-container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .Ticket-option-button {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 50%;
+      font-size: 20px;
+      color: #2d9fdd;
+      background-color: rgba(0, 0, 0, 0);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .Ticket-option-button:hover {
+      background-color: #dfe5eb;
+    }
+
+    .AccuIcon-root {
+      --icon-size: 24px;
+      --icon-color: inherit;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      display: inline-block;
+      flex-shrink: 0;
+      font-size: var(--icon-size);
+      color: var(--icon-color);
+      fill: currentColor;
+    }
+
+    .Ticket-ticket-expand-area {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background-color: #f8f8fa;
+      width: 809px;
+      overflow: hidden;
+    }
+
+    .Ticket-ticket-content {
+      padding: 35px;
+    }
+
+    .Field-field {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+
+    .Field-c0623445-label {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.71;
+      color: #282828;
+      padding-bottom: 10px;
+    }
+
+    .Ticket-field-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #282c35;
+    }
+
+    .TextArea-textarea {
+      resize: none;
+      width: 100%;
+      min-height: 156px;
+      background-color: white;
+      font-size: 16px;
+      line-height: 24px;
+      color: #282828;
+      border: 1px solid #e6ebf2;
+      padding: 14px 24px;
+      box-sizing: border-box;
+      border-radius: 0;
+    }
+
+    .RadioButtons-box {
+      margin-top: 10px;
+    }
+
+    .RadioButtons-normal {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+      /* width: calc(99% - 30px); */
+      vertical-align: middle;
+      font-size: 16px;
+      color: #424242;
+    }
+
+    .RadioButtons-text {
+      margin-left: 10px;
+      width: auto;
+      vertical-align: middle;
+      font-size: 16px;
+      color: #424242;
+      cursor: pointer;
+    }
+
+    .Radio-input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .Ticket-expand-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+      color: #2bb3fc;
+      background-color: #f3f3f4;
+      cursor: pointer;
+    }
+
+    .Ticket-tickets-buttons-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 2px;
+      background-color: #f8f8fa;
+      padding: 30px 0px;
+    }
+
+    .Ticket-tickets-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 13px 50px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 2px;
+      border: 1px solid #000000;
+      color: #000000;
+      background-color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .Ticket-tickets-button:hover {
+      background-color: rgb(255, 224, 124);
+    }
+
+    .PagerButtons-button-container {
+      border-top: 1px solid #a9a9a9;
+      margin: 10px 0px;
+      padding: 10px 0px;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+
+    .PagerButton-button {
+      width: 200px;
+      height: 50px;
+      cursor: not-allowed;
+      font-size: 16px;
+      background-color: rgb(255, 196, 0);
+      border: none;
+      border-radius: 5px;
+      transition: all .3s;
+    }
+
+    .PagerButton-button:hover {
+      /* 調整亮度 */
+      filter: brightness(0.9);
+    }
+
+    .fileUpload-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .UploadButton-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 16px;
+      background-color: #c9c9c9;
+      border: none;
+      border-radius: 5px;
+      transition: all .3s;
+      box-shadow: 0 3px 6px 2px rgba(0, 0, 0, .1);
+      outline: none;
+      white-space: pre-line;
+      z-index: 10;
+    }
+
+    .UploadButton-button:hover {
+      /* 調整亮度 */
+      filter: brightness(0.9);
+    }
+
+    .file-name {
+      margin-left: 10px;
+    }
+
+    .Field-required {
+      color: #d84a49;
+      padding-left: 3px;
+    }
+
+    /*展開/收起效果*/
+    /* 進入和離開的動畫時間 */
+    .expand-enter-active,
+    .expand-leave-active {
+      transition: max-height 0.5s ease;
+    }
+
+    /* 開始時高度為0（完全收起） */
+    .expand-enter-from,
+    .expand-leave-to {
+      max-height: 0;
+    }
+
+    /* 結束狀態：高度最好使用實際内容高度的最大值 */
+    .expand-enter-to {
+      max-height: 700px;
+    }
+
+    .modal-dialog {
+      max-width: 200px !important;
+    }
+
+    .deleteModal-noborder {
+      border-bottom: 0px !important;
+      border-top: 0px !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    .modal-btn-size {
+      width: 70px !important;
+    }
+
+    .modal-footer {
+      display: flex !important;
+      justify-content: space-between !important;
+    }
+
+    .Ticket-ticket-basic-field-error {
+      font-size: 14px;
+      color: #de1f36;
+      padding: 0 15px 10px;
+      white-space: initial;
+      text-overflow: initial;
+      overflow: initial;
+      text-align: left;
+    }
+
+    /* error class */
+    .error-border {
+      border: 1px solid red;
+      border-radius: 3px;
+    }
+
+    .error-message {
+      color: red;
+      margin: 5px;
+    }
+
+    .time-error-border {
+      outline: 1px solid red;
+    }
+
+    .error-form-control {
+      outline: red 1px solid !important;
+      cursor: pointer !important;
+    }
+
+    .image-box {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .image-container {
+      max-width: 600px;
+      /* 設置最大寬度 */
+      max-height: 400px;
+      /* 設置最大高度 */
+      overflow: hidden;
+      /* 如果内容超出容器大小，則隐藏超出部分 */
+      display: flex;
+      /* 使用 flex 布局以便容器内的元素居中 */
+      justify-content: center;
+      /* 水平居中 */
+      align-items: center;
+      /* 垂直居中 */
+    }
+
+    .image-container img {
+      max-width: 100%;
+      /* 圖像最大寬度為容器寬度 */
+      max-height: 100%;
+      /* 圖像最大高度為容器高度 */
+      height: auto;
+      width: auto;
+    }
+
+    .hint-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .BasicInfoPage-nextPage-btn-label {
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div th:replace="~{layout/navbar}"></div>
+  <div id="app">
+    <template v-if="loadingFinish">
+      <div>
+        <main class="Main">
+          <div class="Ticket-container">
+            <div class="Ticket-inner">
+              <p class="Ticket-title">設定活動票卷</p>
+              <div class="Field-field">
+                <div class="Field-label BasicInfoPage-field-label">
+                  售票時間<span class="Field-required">*</span>
+                </div>
+                <div class="">
+                  <div class="">
+                    <div class="Field-field">
+                      <span class="Field-tip">開始時間</span>
+                      <div class="BasicInfoPage-date-select-inner">
+                        <div class="Datepicker-container">
+                          <input type="text" id="datepickerStart" class="form-control Select-dateSelect"
+                            :class="{'error-form-control': startDateFieldError}" v-model="startDate"
+                            @input="checkStartDateField" />
+                        </div>
+                        <div class="SelectTime-Container">
+                          <select class="Select-select" :class="{'time-error-border': startHourFieldError }"
+                            v-model=" startHour" @change="checkStartHourField">
+                            <option value="null" disabled selected>時</option>
+                            <option v-for="i in 25" :value="i <= 10 ? '0' + (i-1) : (i-1)">
+                              {{ i <= 10 ? '0' + (i-1) : (i-1)}} </option>
+                          </select>
+                        </div>
+                        <div class="SelectTime-Container">
+                          <select class="Select-select" :class="{'time-error-border': startMinFieldError }"
+                            v-model="startMin" @change="checkStartMinField">
+                            <option value="null" disabled selected>分</option>
+                            <option v-for="i in options" :value="i">
+                              {{i}}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                      <div v-if="(startDateFieldError || startHourFieldError || startMinFieldError)"
+                        class="error-message">必填</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="">
+                  <div class="Field-field">
+                    <span class="Field-tip">結束時間</span>
+                    <div class="BasicInfoPage-date-select-inner">
+                      <div class="Datepicker-container">
+                        <input type="text" id="datepickerEnd" class="form-control Select-dateSelect"
+                          :class="{'error-form-control': endDateFieldError }" v-model="endDate"
+                          @input="checkEndDateField" />
+                      </div>
+                      <div class="SelectTime-Container">
+                        <select class="Select-select"
+                          :class="{'time-error-border': endHourFieldError || currentHourError}" v-model="endHour"
+                          @change="checkEndHourField">
+                          <option value="null" disabled selected>時</option>
+                          <option v-for="i in 25" :value="i <= 10 ? '0' + (i-1) : (i-1)">
+                            {{ i <= 10 ? '0' + (i-1) : (i-1)}} </option>
+                        </select>
+                      </div>
+                      <div class="SelectTime-Container">
+                        <select class="Select-select"
+                          :class="{'time-error-border': endMinFieldError || currentMinError}" v-model="endMin"
+                          @change="checkEndMinField">
+                          <option value="null" disabled selected>分</option>
+                          <option v-for="i in options" :value="i">
+                            {{i}}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    <div v-if="(endDateFieldError || endHourFieldError || endMinFieldError || currentTimeError)"
+                      class="error-message">
+                      {{currentTimeError?"結束售票時間必須晚於開始時間":"必填"}}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="Field-label BasicInfoPage-field-label">
+                活動票券<span class="Field-required">*</span>
+              </div>
+              <div class="Ticket-tickets-table-container">
+                <div class="Ticket-table">
+                  <div class="Ticket-table-row Ticket-table-row-header">
+                    <div class="Ticket-table-cell Ticket-table-cell-xl">
+                      票券名稱
+                    </div>
+                    <div class="Ticket-table-cell Ticket-table-cell-s">
+                      票券數量
+                    </div>
+                    <div class="Ticket-table-cell Ticket-table-cell-m">
+                      票價
+                    </div>
+                    <div class="Ticket-table-cell Ticket-table-cell-m Ticket-text-center">
+                      操作
+                    </div>
+                  </div>
+                  <div class="Ticket-ticket-container" v-for="ticket in activityTickets" :key="ticket.fakeId">
+                    <div class="Ticket-table-row">
+                      <div class="Ticket-table-cell">
+                        <input type="text" class="Input-input Ticket-table-cell-input"
+                          :class="{'error-border': ticket.atNameError}" maxlength="1000" step="1"
+                          v-model="ticket.atName" @input="checkAtNameField(ticket)" />
+                      </div>
+                      <div class="Ticket-table-cell" title="數量20~100張">
+                        <input type="text" class="NumberInput-input Ticket-table-cell-input"
+                          :class="{'error-border': ticket.atQuantityError}" maxlength="4" v-model="ticket.atQuantity"
+                          @input="event =>{checkAtQuantityField(ticket);handleQtyInput(event);}" />
+                      </div>
+                      <div class=" Ticket-table-cell">
+                        <span class="Ticket-free-span" v-if="!ticket.atCostStatus">免費</span>
+                        <div class=" Ticket-currency-container" v-if="ticket.atCostStatus" title="NT$ 100~10000">
+                          <div class="Ticket-currency">NT$</div>
+                          <input type="text" class="NumberInput-input Ticket-table-cell-currency-input"
+                            :class="{'error-border': ticket.atPriceError}" maxlength="5"
+                            @input="event =>{checkAtPriceField(ticket);handlePriceInput(event);}"
+                            v-model="ticket.atPrice" />
+                        </div>
+                      </div>
+                      <div class="Ticket-table-cell">
+                        <div class="Ticket-option-container">
+                          <button class="Ticket-option-button" title="設定" @click="toggleTicketExpand(ticket.fakeId)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none"
+                              viewBox="0 0 24 24" class="AccuIcon-root">
+                              <path fill="#000"
+                                d="m21.753 10.488-2.236-.667a7.772 7.772 0 0 0-.634-1.555l1.095-2.048a.407.407 0 0 0-.074-.48L18.31 4.135a.407.407 0 0 0-.48-.074L15.793 5.15a7.754 7.754 0 0 0-1.574-.667l-.668-2.21A.407.407 0 0 0 13.158 2h-2.256a.407.407 0 0 0-.387.287l-.667 2.202a7.76 7.76 0 0 0-1.589.668L6.257 4.075a.407.407 0 0 0-.48.074L4.155 5.73a.407.407 0 0 0-.073.48l1.081 2.003c-.28.5-.504 1.031-.667 1.581l-2.21.668a.407.407 0 0 0-.286.387v2.255a.407.407 0 0 0 .287.387l2.222.668c.165.54.389 1.062.667 1.554L4.082 17.81a.407.407 0 0 0 .073.48l1.595 1.595a.407.407 0 0 0 .48.074l2.063-1.101a7.776 7.776 0 0 0 1.535.627l.667 2.249a.407.407 0 0 0 .387.287h2.256a.407.407 0 0 0 .387-.287l.667-2.256a7.763 7.763 0 0 0 1.521-.627l2.076 1.108a.407.407 0 0 0 .48-.074l1.595-1.595a.407.407 0 0 0 .073-.48L18.83 15.74c.265-.485.478-.997.634-1.528l2.249-.667a.407.407 0 0 0 .287-.387v-2.276a.406.406 0 0 0-.247-.394ZM12.03 15.68a3.67 3.67 0 1 1 0-7.34 3.67 3.67 0 0 1 0 7.34Z">
+                              </path>
+                            </svg>
+                          </button>
+                          <button class="Ticket-option-button" title="複製" @click="copyTicket(ticket.fakeId)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none"
+                              viewBox="0 0 24 24" class="AccuIcon-root">
+                              <path fill="#000" fill-rule="evenodd"
+                                d="M17.3 4.85v11.1a1.85 1.85 0 0 1-1.85 1.85H4.35a1.85 1.85 0 0 1-1.85-1.85V4.85A1.85 1.85 0 0 1 4.35 3h11.1a1.85 1.85 0 0 1 1.85 1.85Zm-1.85 0H4.35v11.1h11.1V4.85Zm3.7 12.95V6.7A1.85 1.85 0 0 1 21 8.55v9.25a3.7 3.7 0 0 1-3.7 3.7H8.05a1.85 1.85 0 0 1-1.85-1.85h11.1a1.85 1.85 0 0 0 1.85-1.85Z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                          </button>
+                          <button class="Ticket-option-button" title="刪除" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal" @click="setCurrentDeleteFakeId(ticket.fakeId)">
+                            <svg xmlns=" http://www.w3.org/2000/svg" width="1em" height="1em" fill="none"
+                              viewBox="0 0 24 24" class="AccuIcon-root">
+                              <path fill="#000"
+                                d="M7 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2h4a1 1 0 1 1 0 2h-1.069l-.867 12.142A2 2 0 0 1 17.069 22H6.93a2 2 0 0 1-1.995-1.858L4.07 8H3a1 1 0 0 1 0-2h4V4Zm2 2h6V4H9v2ZM6.074 8l.857 12H17.07l.857-12H6.074ZM10 10a1 1 0 0 1 1 1v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 1-1Zm4 0a1 1 0 0 1 1 1v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 1-1Z">
+                              </path>
+                            </svg>
+                          </button>
+                          <!-- delete Modal -->
+                          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                              <div class="modal-content">
+                                <div class="modal-header deleteModal-noborder">
+
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body deleteModal-noborder">
+                                  <span class="Field-label BasicInfoPage-field-label">確定要刪除嗎?</span>
+                                </div>
+                                <div class="modal-footer deleteModal-noborder">
+                                  <button type="button" class="btn btn-secondary modal-btn-size"
+                                    data-bs-dismiss="modal">取消</button>
+                                  <button type="button" class="btn btn-danger modal-btn-size" data-bs-dismiss="modal"
+                                    aria-label="Close" @click="deleteTicket">確定</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="Ticket-table-row" v-if="ticket.hasError">
+                      <div class="Ticket-table-cell Ticket-ticket-basic-field-error">
+                        {{ticket.atNameError?"必填":""}}
+                      </div>
+                      <div class="Ticket-table-cell Ticket-ticket-basic-field-error">
+                        {{ticket.atQuantityError?"最少20張票":""}}</div>
+                      <div class="Ticket-table-cell Ticket-ticket-basic-field-error">
+                        {{checkTicketPrice(ticket)}}</div>
+                    </div>
+                    <transition name="expand">
+                      <div class="Ticket-ticket-expand-area" v-if="ticket.isExpanded">
+                        <div class="Ticket-ticket-content">
+                          <div class="Field-field">
+                            <div class="Field-c0623445-label Ticket-field-label">
+                              方案內容<span class="Field-required">*</span>
+                            </div>
+                            <textarea class="TextArea-textarea Ticket-f8919699-bg-white"
+                              :class="{'error-border': ticket.atIntroError}" v-model="ticket.atIntro"
+                              placeholder="ex.購票附贈贈品" maxlength="100" @input="checkAtIntroField(ticket)"></textarea>
+                            <div v-if="ticket.atIntroError" class="error-message">必填</div>
+                          </div>
+                          <div class="Field-field">
+                            <div class="Field-c0623445-label Ticket-field-label">
+                              票券說明<span class="Field-required">*</span>
+                            </div>
+                            <textarea class="TextArea-textarea Ticket-f8919699-bg-white"
+                              :class="{'error-border': ticket.atDirectionError}" v-model="ticket.atDirection"
+                              placeholder="ex.退票機制、其他購票注意事項" maxlength="100"
+                              @input="checkAtDirectionField(ticket)"></textarea>
+                            <div v-if="ticket.atDirectionError" class="error-message">必填</div>
+                          </div>
+                          <div class="Field-field">
+                            <div class="Field-c0623445-label Ticket-field-label">
+                              完售是否可候補？<span class="Field-required">*</span>
+                            </div>
+                          </div>
+                          <div class="RadioButtons-box" v-for="AlternateStatus in 2">
+                            <label class="RadioButtons-normal RadioButtons-ba58e659-bg-white"><input type="radio"
+                                class="Radio-input" :value="AlternateStatus-1" v-model="ticket.atIsAlternate"
+                                :id="'AlternateStatus'+AlternateStatus" /><i
+                                class="RadioButtons-ce15695c-radio-button"></i><span
+                                class="RadioButtons-text">{{AlternateStatus==1?'不可候補':'可候補'}}
+                              </span></label>
+                          </div>
+                        </div>
+
+                        <button class="Ticket-expand-button" @click="toggleTicketExpand(ticket.fakeId)">
+                          收合資訊
+                        </button>
+                      </div>
+                    </transition>
+                  </div>
+
+                </div>
+                <div class="Ticket-tickets-buttons-container">
+                  <button class="Ticket-tickets-button" @click="addFreeTicket">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 24 24"
+                      class="AccuIcon-root Ticket-fbc25a03-add-icon" style="--icon-size: 20px">
+                      <path fill="#000" fill-rule="evenodd"
+                        d="M20.615 13.135a1.385 1.385 0 1 0 0-2.77h-7.48v-7.48a1.385 1.385 0 1 0-2.77 0v7.48h-7.48a1.385 1.385 0 1 0 0 2.77h7.48v7.48a1.385 1.385 0 1 0 2.77 0v-7.48h7.48Z"
+                        clip-rule="evenodd"></path>
+                    </svg>
+                    免費票
+                  </button>
+                  <div style="width: 30px"></div>
+                  <button class="Ticket-tickets-button" @click="addPayTicket">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 24 24"
+                      class="AccuIcon-root Ticket-fbc25a03-add-icon" style="--icon-size: 20px">
+                      <path fill="#000" fill-rule="evenodd"
+                        d="M20.615 13.135a1.385 1.385 0 1 0 0-2.77h-7.48v-7.48a1.385 1.385 0 1 0-2.77 0v7.48h-7.48a1.385 1.385 0 1 0 0 2.77h7.48v7.48a1.385 1.385 0 1 0 2.77 0v-7.48h7.48Z"
+                        clip-rule="evenodd"></path>
+                    </svg>
+                    付費票
+                  </button>
+                </div>
+              </div>
+
+              <div class="Field-field">
+                <div class="Field-label BasicInfoPage-field-label">
+                  退票規則<span class="Field-required">*</span>
+                </div>
+                <div class="RadioButtons-box" display="none" v-for="refundRules in 2">
+                  <label class="RadioButtons-normal RadioButtons-ba58e659-bg-white" :for="'safeStatus'+refundRules">
+                    <input type="radio" name="Condition-radio" class="Radio-input"
+                      :class="{'error-border': RefundRulesFiledError}" :value="refundRules"
+                      :id="'safeStatus'+refundRules" v-model="acRefundRules" @change="checkRefundRulesFiledError" />
+                    <span class="RadioButtons-text">{{refundRules==1?'報名截止前可退票':'不可退票'}}
+                    </span>
+                  </label>
+                </div>
+                <div v-if="RefundRulesFiledError" class="error-message">必填</div>
+              </div>
+              <template v-if="showPaymentAndRefundOptions">
+                <div class="Field-field">
+                  <div class="Field-label BasicInfoPage-field-label">
+                    付款方式<span class="Field-required">*</span>
+                  </div>
+                  <div class="RadioButtons-box" display="none" v-for="payMethod in allPayMethods" v-show="payMethod.pmid!=5">
+                    <label class="RadioButtons-normal RadioButtons-ba58e659-bg-white" :for="'payMethod'+payMethod.pmid">
+                      <input type="checkbox" name="Condition-radio" :class="{'error-border': payMethodsFieldError}"
+                        :value="payMethod" class="Radio-input" v-model="payMethods" :id="'payMethod'+payMethod.pmid"
+                        @change="checkPayMethodsField" />
+
+                      <span class="RadioButtons-text">{{payMethod.pmName}}
+                      </span>
+                    </label>
+                  </div>
+                  <div v-if="payMethodsFieldError" class="error-message">必填</div>
+                </div>
+
+                <div class="Field-field">
+                  <div class="Field-label BasicInfoPage-field-label"> 收款帳戶(銀行/存摺)<span class="Field-required">*</span>
+                  </div>
+                  <div class="fileUpload-container">
+                    <input type="file" @change="handleFileChange" id="fileUpload" style="display: none"
+                      accept="image/*"><label for="fileUpload" class="UploadButton-button">上傳檔案</label>
+                    <div class="file-name">{{fileName}}</div> <!-- 顯示當前文件名或未選擇檔案的提示 -->
+                  </div>
+
+                  <div v-if="oaccPictureFieldError" class="error-message">必填</div>
+                  <br><br>
+                  <div class="image-box">
+                    <div class="image-container">
+                      <img :src="oaccPicture" />
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <div class="hint-container" v-if="!TicketsExist">
+                <p class="Field-required">至少設定一種票卷</p>
+              </div>
+              <div class="PagerButtons-button-container">
+                <button class="PagerButton-button"
+                  :style="{'color':optionStatus==1?'#000':'#fff','background-color':optionStatus==1?'#ffc400':'#16cbf8'}"
+                  @click="goBack(optionStatus)">{{optionStatus==1?"返回上一步":"返回活動管理"}}</button>
+                <button class="PagerButton-button"
+                  :style="{'color':optionStatus==1?'#000':'#fff','background-color':optionStatus==1?'#ffc400':'#16cbf8'}"
+                  @click="trySubmit" :disabled="isButtonDisabled">
+                  <span v-if="insertLoading" class="spinner-border" :style="{'color':optionStatus==1?'#000':'#fff'}"
+                    role="status" aria-hidden="true"></span>
+                  <span v-if="!insertLoading"
+                    class="BasicInfoPage-nextPage-btn-label">{{optionStatus==1?"下一步":"儲存設定"}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </template>
+  </div>
+
+  <script type="module">
+    Vue.createApp({
+      data() {
+        return {
+          acid: null,
+          acRefundRules: null,
+          activityTickets: null,
+          payMethods: [],
+          allPayMethods: null,
+          acSignUpStartDate: null,
+          acSignUpEndDate: null,
+          deleteAtids: [],
+          oid: null,
+          //存摺圖檔
+          oaccPicture: null,
+          //日期選擇器
+          weekDays: ["日", "一", "二", "三", "四", "五", "六"],
+          startDate: null,
+          startHour: null,
+          startMin: null,
+          endDate: null,
+          endHour: null,
+          endMin: null,
+          endDatePicker: null,
+
+          isPay: false,
+          //設定按鈕開關
+          settingOptionStatus: false,
+          //要刪除的fakeId
+          currentDeleteFakeId: null,
+          //確認欄位狀態
+          startDateFieldError: false,
+          startHourFieldError: false,
+          startMinFieldError: false,
+          endDateFieldError: false,
+          endHourFieldError: false,
+          endMinFieldError: false,
+          currentTimeError: false,//檢查結束日期是否大於開始日期
+          currentHourError: false,//檢查結束小時是否大於開始小時
+          currentMinError: false,//檢查結束分鐘是否大於開始分鐘
+          payMethodsFieldError: false,
+          RefundRulesFiledError: false,
+          oaccPictureFieldError: false,
+          //新建或編輯狀態
+          optionStatus: null,
+          //是否載入完成
+          loadingFinish: true,
+          //檔案名稱
+          fileName: '未選擇檔案',
+          //讀取狀態
+          insertLoading: false,
+        };
+      },
+      mounted() {
+        //取得頁面路徑
+        const path = window.location.pathname;
+        const segments = path.split("/");
+        //從最後一個索引值獲取 optionStatus
+        this.optionStatus = segments[segments.length - 1];
+        axios
+          .get("/createAc/getAcTickets")
+          .then((response) => {
+            // console.log(response.data);
+            //增加陣列屬性
+            const tickets = response.data.activityTickets.map((ticket, index) => ({
+              ...ticket, // 複製全部屬性
+              atCostStatus: ticket.atPrice ? 1 : 0,
+              isExpanded: false, // 加一個 isExpanded 属性,展開齒輪設定狀態
+              fakeId: index + 1, // 加一個 fakeId 属性,複製物件時用
+              hasError: false, //檢查欄位
+              atNameError: false, //檢查欄位
+              atQuantityError: false, //檢查欄位
+              atPriceError: false, //檢查欄位
+              atIntroError: false, //檢查欄位
+              atDirectionError: false, //檢查欄位
+            }));
+            this.activityTickets = tickets;
+            this.payMethods = response.data.payMethods;
+            this.acRefundRules = response.data.acRefundRules ? response.data.acRefundRules.startsWith("不") ? 2 : 1 : response.data.acRefundRules;
+            this.acid = response.data.acid;
+            this.allPayMethods = response.data.allPayMethods;
+
+            if (response.data.acSignUpStartDate != null) {
+              this.acSignUpEndDate = response.data.acSignUpEndDate;
+              this.setStartDate(response.data.acSignUpStartDate);
+            }
+            if (response.data.acSignUpEndDate != null) {
+              this.acSignUpEndDate = response.data.acSignUpEndDate;
+              this.setEndDate(response.data.acSignUpEndDate);
+            }
+            this.oaccPicture = response.data.oaccPicture;
+            if (this.oaccPicture) {
+              this.fileName = this.oaccPicture.split('/').pop();
+            }
+            this.oid = response.data.oid;
+            // 初始化日期選擇器
+            this.initFlatpickr();
+
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      },
+      methods: {
+        initFlatpickr() {
+          const Mandarin = {
+            weekdays: {
+              shorthand: ["日", "一", "二", "三", "四", "五", "六"], // 星期的簡寫
+              longhand: [
+                "星期日",
+                "星期一",
+                "星期二",
+                "星期三",
+                "星期四",
+                "星期五",
+                "星期六",
+              ], // 完整星期
+            },
+            months: {
+              shorthand: [
+                "1月",
+                "2月",
+                "3月",
+                "4月",
+                "5月",
+                "6月",
+                "7月",
+                "8月",
+                "9月",
+                "10月",
+                "11月",
+                "12月",
+              ],
+              longhand: [
+                "一月",
+                "二月",
+                "三月",
+                "四月",
+                "五月",
+                "六月",
+                "七月",
+                "八月",
+                "九月",
+                "十月",
+                "十一月",
+                "十二月",
+              ],
+            },
+          };
+          // 開始日期選擇器
+          flatpickr("#datepickerStart", {
+            enableTime: false,
+            dateFormat: "Y / m / d (D)",
+            locale: Mandarin,
+            defaultDate: this.startDate,
+            minDate: "today",
+            onReady: function (selectedDates, dateStr, instance) {
+              instance.input.placeholder = "日期";
+            },
+            onChange: (selectedDates) => {
+              this.startDate = selectedDates[0]
+                ? flatpickr.formatDate(selectedDates[0], "Y/m/d(D)") // 格式化的日期包括星期
+                : null;
+            },
+          });
+          // 結束日期選擇器
+          this.endDatePicker = flatpickr("#datepickerEnd", {
+            enableTime: false,
+            dateFormat: "Y / m / d (D)",
+            locale: Mandarin,
+            defaultDate: this.endDate,
+            minDate: this.StartDate ? this.StartDate : "today",
+            onReady: function (selectedDates, dateStr, instance) {
+              instance.input.placeholder = "日期";
+            },
+            onChange: (selectedDates) => {
+              this.endDate = selectedDates[0]
+                ? flatpickr.formatDate(selectedDates[0], "Y/m/d(D)") // 格式化的日期包括星期
+                : null;
+            },
+          });
+        },
+        setStartDate(acStartDate) {
+          //設定開始日期
+          const StartDate = new Date(acStartDate);
+          this.startDate =
+            StartDate.getFullYear() +
+            " / " +
+            (StartDate.getMonth() + 1 < 10
+              ? "0" + (StartDate.getMonth() + 1)
+              : StartDate.getMonth() + 1) +
+            " / " +
+            (StartDate.getDate() < 10
+              ? "0" + StartDate.getDate()
+              : StartDate.getDate()) +
+            " (" +
+            this.weekDays[StartDate.getDay()] +
+            ")";
+          this.startHour =
+            StartDate.getHours() < 10
+              ? `0${StartDate.getHours()}`
+              : StartDate.getHours();
+          this.startMin =
+            StartDate.getMinutes() < 10
+              ? `0${StartDate.getMinutes()}`
+              : StartDate.getMinutes();
+        },
+        setEndDate(acEndDate) {
+          //設定結束日期
+          const EndDate = new Date(acEndDate);
+          this.endDate =
+            EndDate.getFullYear() +
+            " / " +
+            (EndDate.getMonth() + 1 < 10
+              ? "0" + (EndDate.getMonth() + 1)
+              : EndDate.getMonth() + 1) +
+            " / " +
+            (EndDate.getDate() < 10
+              ? "0" + EndDate.getDate()
+              : EndDate.getDate()) +
+            " (" +
+            this.weekDays[EndDate.getDay()] +
+            ")";
+          this.endHour =
+            EndDate.getHours() < 10
+              ? `0${EndDate.getHours()}`
+              : EndDate.getHours();
+          this.endMin =
+            EndDate.getMinutes() < 10
+              ? `0${EndDate.getMinutes()}`
+              : EndDate.getMinutes();
+        },
+        toggleTicketExpand(selectedFakeId) {
+          //遍歷 activityTickets
+          this.activityTickets = this.activityTickets.map(ticket => {
+            // 如果是當前點擊的 ticket，切换它的 isExpanded 狀態
+            // 如果不是，則改為 false
+            if (ticket.fakeId === selectedFakeId) {
+              return { ...ticket, isExpanded: !ticket.isExpanded };
+            } else {
+              return { ...ticket, isExpanded: false };
+            }
+          });
+        },
+        copyTicket(selectedFakeId) {
+          // 找到要複製的 ticket
+          const originalTicket = this.activityTickets.find(ticket => ticket.fakeId === selectedFakeId);
+          if (!originalTicket) return; // 没找到，直接 return
+          // 複製 ticket 的屬性，把 atid 設置為 null
+          const newFakeId = this.activityTickets.length + 1;
+          const newTicket = { ...originalTicket, atid: null, fakeId: newFakeId };
+          // 把新的 ticket 加到 activityTickets
+          this.activityTickets.push(newTicket);
+        },
+        //因為所有的按鈕都是引用同一個 modal，所以先把選中的 fakeId 存入
+        setCurrentDeleteFakeId(selectedFakeId) {
+          this.currentDeleteFakeId = selectedFakeId;
+        },
+        deleteTicket() {
+          // 找到要刪除的 ticket
+          const originalTicket = this.activityTickets.find(ticket => ticket.fakeId === this.currentDeleteFakeId);
+          //console.log(originalTicket)
+          if (originalTicket.atid) this.deleteAtids.push(originalTicket.atid);
+          if (!originalTicket) return; // 没找到，直接 return
+          // 刪除 ticket
+          this.activityTickets.splice(this.activityTickets.indexOf(originalTicket), 1);
+          //console.log(this.activityTickets)
+        },
+        addFreeTicket() {
+          const newTicket = {
+            atid: null,
+            atName: null,
+            atIntro: null,
+            atImg: null,
+            atImgName: null,
+            atImgType: null,
+            atImgWidth: null,
+            atPrice: 0,
+            atQuantity: 20,
+            atIsAlternate: 0,
+            atDirection: null,
+            isExpanded: false,
+            fakeId: this.activityTickets.length + 1,
+            hasError: false, //檢查欄位
+            atNameError: false, //檢查欄位
+            atQuantityError: false, //檢查欄位
+            atPriceError: false, //檢查欄位
+            atIntroError: false,
+            atDirectionError: false,
+            atCostStatus: 0
+          }
+          this.activityTickets.push(newTicket);
+          //console.log(this.activityTickets);
+        },
+        addPayTicket() {
+          const newTicket = {
+            atid: null,
+            atName: null,
+            atIntro: null,
+            atImg: null,
+            atImgName: null,
+            atImgType: null,
+            atImgWidth: null,
+            atPrice: 100,
+            atQuantity: 20,
+            atIsAlternate: 0,
+            atDirection: null,
+            isExpanded: false,
+            fakeId: this.activityTickets.length + 1,
+            hasError: false, //檢查欄位
+            atNameError: false, //檢查欄位
+            atQuantityError: false, //檢查欄位
+            atPriceError: false, //檢查欄位
+            atIntroError: false,
+            atDirectionError: false,
+            atCostStatus: 1
+          }
+          this.activityTickets.push(newTicket);
+          //console.log(this.activityTickets);
+        },
+
+        handleFileChange(e) {
+          const file = e.target.files[0];
+          //console.log(file);
+          if (!file) {
+
+            return;
+          }
+          // const mimeType = file.type; // 取得檔案的MIME類型
+          this.oaccPictureFieldError = false;
+          this.fileName = file.name;
+
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = (e) => {
+            this.oaccPicture = e.target.result;
+            // 圖片轉為base64，根據原本圖片的MIME類型來處理
+            // this.processImage(e.target.result, mimeType, (processedSrc) => {
+            //     this.checkUploadAccountField();
+            // });
+          };
+
+
+        },
+        //前端壓縮圖片
+        // processImage(src, mimeType, callback) {
+        //     const img = new Image();
+        //     img.src = src;
+        //     img.onload = () => {
+        //         const canvas = document.createElement('canvas');
+        //         const ctx = canvas.getContext('2d');
+        //         canvas.width = img.width;
+        //         canvas.height = img.height;
+        //         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        //         const processedSrc = canvas.toDataURL(mimeType);
+        //         callback(processedSrc);
+        //     };
+        // },
+
+
+        //防止複製貼上非數字
+        handleQtyInput(event) {
+          // 移除非數字字符
+          event.target.value = event.target.value.replace(/\D/g, '');
+          this.atQuantity = event.target.value;
+        },
+        //防止複製貼上非數字
+        handlePriceInput(event) {
+          // 移除非數字字符
+          event.target.value = event.target.value.replace(/\D/g, '');
+          this.atPrice = event.target.value;
+        },
+        checkStartDateField() {
+          this.startDateFieldError = this.startDate != null ? this.startDate.trim().length === 0 : true;
+          this.isTimeValid;
+        },
+        checkStartHourField() {
+          this.startHourFieldError = this.startHour == null;
+          this.isTimeValid;
+        },
+        checkStartMinField() {
+          this.startMinFieldError = this.startMin == null;
+          this.isTimeValid;
+        },
+        checkEndDateField() {
+          this.endDateFieldError = this.endDate != null ? this.endDate.trim().length === 0 : true;
+          this.isTimeValid;
+        },
+        checkEndHourField() {
+          this.endHourFieldError = this.endHour == null;
+          this.isTimeValid;
+        },
+        checkEndMinField() {
+          this.endMinFieldError = this.endMin == null;
+          this.isTimeValid;
+        },
+        checkPayMethodsField() {
+          this.payMethodsFieldError = this.payMethods.length > 0 ? false : true;
+        },
+        checkUploadAccountField() {
+          this.oaccPictureFieldError = this.oaccPicture ? false : true;
+        },
+        checkRefundRulesFiledError() {
+          this.RefundRulesFiledError = this.acRefundRules ? false : true;
+        },
+
+        checkAtNameField(ticket) {
+          ticket.atNameError = !ticket.atName || ticket.atName.trim().length === 0;
+          this.checkHasError(ticket);
+        },
+        checkAtQuantityField(ticket) {
+          ticket.atQuantityError = !ticket.atQuantity || ticket.atQuantity < 20;
+          this.checkHasError(ticket);
+        },
+        checkAtPriceField(ticket) {
+          ticket.atPriceError = (ticket.atPrice < 100 || ticket.atPrice > 50000) && ticket.atCostStatus == 1;
+          this.checkHasError(ticket);
+          //console.log(ticket.atPrice);
+        },
+        //必填div顯示狀態
+        checkHasError(ticket) {
+          ticket.hasError = ticket.atNameError || ticket.atQuantityError || ticket.atPriceError;
+        },
+        checkTicketPrice(ticket) {
+          if (!ticket.atPriceError) {
+            return '';
+          }
+          if (ticket.atPrice > 50000) {
+            return '最高為 NT$ 50000';
+          }
+          if (ticket.atPrice < 100 && ticket.atPrice) {
+            return '最低為 NT$ 100';
+          }
+          return '必填';
+        },
+        checkAtIntroField(ticket) {
+          ticket.atIntroError = !ticket.atIntro || ticket.atIntro.trim().length === 0;
+        },
+        checkAtDirectionField(ticket) {
+          ticket.atDirectionError = !ticket.atDirection || ticket.atDirection.trim().length === 0;
+        },
+        isTicketFieldsValid() {
+          let allFieldError = false;
+          let hasError = false;
+          this.activityTickets.forEach(ticket => {
+            ticket.atNameError = !ticket.atName || ticket.atName.trim().length === 0;
+            ticket.atQuantityError = !ticket.atQuantity || ticket.atQuantity < 20;
+            ticket.atPriceError = (ticket.atPrice < 100 || ticket.atPrice > 50000) && ticket.atCostStatus == 1;
+            ticket.hasError = ticket.atNameError || ticket.atQuantityError || ticket.atPriceError;
+            ticket.atIntroError = !ticket.atIntro || ticket.atIntro.trim().length === 0;
+            ticket.atDirectionError = !ticket.atDirection || ticket.atDirection.trim().length === 0;
+            ticket.isExpanded = ticket.atIntroError || ticket.atDirectionError;
+            if (ticket.hasError) {
+              hasError = true;
+            }
+            if (ticket.hasError || ticket.atIntroError || ticket.atDirectionError) {
+              allFieldError = true;
+            }
+          });
+
+          return !allFieldError;
+        },
+
+        trySubmit() {
+          this.checkStartDateField();
+          this.checkStartHourField();
+          this.checkStartMinField();
+          this.checkEndDateField();
+          this.checkEndHourField();
+          this.checkEndMinField();
+          this.checkPayMethodsField();
+          this.checkRefundRulesFiledError();
+          this.checkUploadAccountField();
+          let isAllValid = this.activityTickets.some(ticket => ticket.atCostStatus === 1) ?
+            this.isTimeValid && this.isTicketFieldsValid() && !this.payMethodsFieldError && !this.RefundRulesFiledError && !this.oaccPictureFieldError : this.isTimeValid && this.isTicketFieldsValid() && !this.RefundRulesFiledError;
+          // //console.log(this.isTimeValid);
+          // //console.log(this.isTicketFieldsValid());
+          // //console.log(!this.payMethodsFieldError);
+          // //console.log(!this.RefundRulesFiledError);
+          // //console.log(!this.oaccPictureFieldError);
+          this.$nextTick(() => {
+            this.scrollToFirstError();
+          });
+          //console.log("isAllValid: " + isAllValid);
+          if (isAllValid) {
+            //console.log("in isAllValid");
+            this.insertLoading = true;
+            let refundRules = this.acRefundRules == 1 ? '報名截止前可退票' : '不可退票';
+            const dataToSend = {
+              acid: this.acid,
+              acRefundRules: refundRules,
+              acSignUpStartDate: this.acSignUpStartDate,
+              acSignUpEndDate: this.acSignUpEndDate,
+              activityTickets: this.activityTickets,
+              payMethods: this.payMethods,
+              deleteAtids: this.deleteAtids ? this.deleteAtids : null,
+              oaccPicture: this.oaccPicture,
+              oid: this.oid
+            }
+            //console.log(dataToSend);
+            this.nextPage(dataToSend);
+          }
+        },
+
+        nextPage(dataToSend) {
+          axios
+            .post("/createAc/saveAcTickets", dataToSend)
+            .then((response) => {
+              this.insertLoading = false;
+              window.location.href = `/organizerBiz/OrganizerAcManage/${this.acid}`;
+              //console.log("save success" + response);
+            })
+            .catch((error) => {
+              this.insertLoading = false;
+              console.error("Error:", error);
+            })
+        },
+        goBack(optionStatus) {
+          window.location.href = optionStatus == 1 ? `/createAc/activityGuest/${this.optionStatus}` : `/organizerBiz/OrganizerAcManage/${this.acid}`;
+        },
+        scrollToFirstError() {
+          // 優先順序是 .error-form-control、.time-error-border、.error-border
+          const selectors = ['.error-form-control', '.time-error-border', '.error-border'];
+          let targetElement = null;
+
+          for (const selector of selectors) {
+            targetElement = document.querySelector(selector);
+            if (targetElement) {
+              // 找到第一個匹配的元素，跳出迴圈
+              break;
+            }
+          }
+
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        },
+      },
+      computed: {
+        //分鐘選項，每5分鐘間隔
+        options() {
+          const options = [];
+          for (let i = 0; i <= 55; i += 5) {
+            options.push(i < 10 ? "0" + i : i.toString());
+          }
+          return options;
+        },
+
+        isTimeValid() {
+          if (this.startDate && this.endDate && this.startHour && this.startMin && this.endHour && this.endMin) {
+            if (this.startDate == this.endDate && this.endHour < this.startHour) {
+              this.currentHourError = true;
+              this.currentMinError = false;
+            } else if (this.startDate == this.endDate && this.endHour == this.startHour) {
+              this.currentMinError = this.endMin <= this.startMin;
+              this.currentHourError = false;
+            } else {
+              this.currentMinError = false;
+              this.currentHourError = false;
+            }
+
+            this.acSignUpStartDate = new Date(
+              this.startDate
+                .replace(/\s*\(.\)\s*/, "")
+                .replace(/\s*\/\s*/g, "-") +
+              " " +
+              this.startHour +
+              ":" +
+              this.startMin +
+              ":00"
+            );
+            this.acSignUpEndDate = new Date(
+              this.endDate
+                .replace(/\s*\(.\)\s*/, "")
+                .replace(/\s*\/\s*/g, "-") +
+              " " +
+              this.endHour +
+              ":" +
+              this.endMin +
+              ":00"
+            );
+            if (this.acSignUpEndDate > this.acSignUpStartDate) {
+              this.currentTimeError = false;
+              return true;
+            } else {
+              this.currentTimeError = true;
+              return false;
+            }
+          } else {
+            return false;
+          }
+        },
+        showPaymentAndRefundOptions() {
+          // 檢查票卷陣列中是否有一个元素的 acCostStatus 是1 (表示需要付費)
+          return this.activityTickets && this.activityTickets.length > 0 ? this.activityTickets.some(ticket => ticket.atCostStatus === 1) : false;
+        },
+
+        TicketsExist() {
+          return this.activityTickets && this.activityTickets.length > 0 ? true : false
+        }
+      },
+      watch: {
+        //監控開始日期欄位
+        startDate(newStartDate) {
+          if (this.endDatePicker) {
+            // 更新结束日期選擇器的最小日期
+            this.endDatePicker.set('minDate', newStartDate || 'today');
+
+            // 如果结束日期小於開始日期，則清除结束日期
+            if (newStartDate && this.endDate && newStartDate > this.endDate) {
+              this.endDate = null;
+              this.endDatePicker.clear();
+            }
+          }
+        },
+      }
+    }).mount("#app");
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+    <meta charset="UTF-8">
+    <title>修改密碼</title>
+    <style>
+        body {
+            background-color: rgb(255, 252, 233) !important;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            background-image: url("../img/web/jojo_bird.png");
+            background-position: right bottom;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: 20%;
+        }
+
+        .centered-card {
+            display: flex;
+            /* justify-content: center; */
+            align-items: center;
+            min-height: 100vh;
+            /* 100% viewport height */
+        }
+    </style>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div th:replace="~{layout/navbar}"></div>
+    <input type="hidden" id="token" th:value="${token}" />
+    <input type="hidden" id="email" th:value="${uAccountEmail}" />
+    <section class="centered-card" id="resetPassword">
+        <div class="container h-100">
+            <div class="row justify-content-sm-center h-100">
+                <div class="col-xxl-4 col-xxl-4 col-lg-5 col-md-7 col-sm-9">
+                    <div class="card shadow rounded-5 p-4">
+                        <div class="card-body">
+                            <h2 class="card-title text-center fw-bold mb-4">註冊</h2>
+                            <form>
+                                <!-- username -->
+                                <div class="form-group mb-2">
+                                    <label for="uAccountEmail" class="sr-only">電子信箱：</label>
+                                    <!-- <v-error-message name="userEmail">請填寫ＥＭＡＩＬ</v-error-message> -->
+                                    <!-- email -->
+                                    <div class="md-form mb-2">
+                                        <div class="input-group borderless">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-envelope"></i>
+                                            </span>
+                                            <input v-model="email" type="text" class="form-control"
+                                                :class="{'is-invalid': emailCheckno},{'invalid': emailCheckok}"
+                                                name="username" placeholder="電子信箱" autofocus />
+                                            <button class="btn btn-warning shadow-sm"
+                                                @click="sendEmailVolidCode">寄送驗證碼</button>
+                                        </div>
+                                        <div class="mt-2">
+                                            <span v-text="emailMessage"
+                                                :class="[{'text-danger': emailCheckno},{'text-success': emailCheckok},'mt-2']">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- emailvolidcode -->
+                                <div class="md-form mb-2">
+                                    <div class="input-group borderless">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </span>
+                                        <input v-model="voildcode" type="text" class="form-control" placeholder="驗證碼" />
+
+                                    </div>
+                                    <div class="mt-2">
+                                        <span v-text="emailvolidcodemsg"
+                                            :class="[{'text-danger': emailvolidcodeno},{'text-success': emailvolidcodeok},{'text-warning': emailvolidloading}]"></span>
+                                        <div v-if="emailvolidloading"
+                                            class="spinner-border spinner-border-sm text-warning mx-2 " role="status">
+                                            <span class="visually-hidden"> Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TellPhone -->
+                                <div class="md-form mb-2">
+                                    <div class="input-group borderless">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-telephone-fill"></i>
+                                        </span>
+                                        <select v-model="selected" class="form-select">
+                                            <option v-for="pcode in phonecodes" :value="pcode.value">
+                                                {{pcode.text}}
+                                            </option>
+                                        </select>
+                                        <input v-model="phonenumber" type="tel" class="form-control"
+                                            :class="{'is-invalid': phonenumberCheckno},{'invalid': phonenumberCheckok}"
+                                            placeholder="手機" />
+                                    </div>
+                                    <div class="mt-2">
+                                        <span v-text="phonenumberMessage"
+                                            :class="[{'text-danger': phonenumberCheckno},{'text-success': phonenumberCheckok},'mt-2']">
+                                        </span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn shadow-sm rounded-pill btn-warning col w-auto"
+                                @click="resetPasswordClick" data-dismiss="modal">
+                                送出
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+    <script type="module">
+        Vue.createApp({
+            data() {
+                return {
+                    password: "",
+                    passwordCheckok: false,
+                    passwordCheckno: false,
+                    passwordMessage: "",
+                    passwordConfirm: "",
+                    confirmOk: false,
+                    confirmNo: false,
+                }
+            },
+            computed: {
+                message() {
+                    if (this.password == this.passwordConfirm) {
+                        this.confirmNo = false;
+                        return "";
+                    } else {
+                        this.confirmNo = true;
+                        return "密碼不相符";
+                    }
+                }
+            },
+            methods: {
+                resetPasswordClick() {
+                    const formdata = new FormData();
+                    formdata.append("token", $("#token").val());
+                    formdata.append("uAccountEmail", $("#email").val());
+                    formdata.append("password", this.password);
+                    axios.post("/user/resetPassword", formdata)
+                        .then(rs => {
+                            //console.log(rs.data)
+                            $("#successPostModal").modal("show");
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            // this.error = true;
+                        })
+                }
+            },
+            watch: {
+                password(newValue, oldValue) {
+                    let re = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[#?!@$%^&*-_])[a-zA-Z0-9#?!@$%^&*-_]{7,20}$/;
+                    let isValidPwd = re.test(newValue);
+                    if (!newValue.trim()) {
+                        this.passwordCheckno = true;
+                        this.passwordCheckok = false;
+                        this.passwordMessage = "必填";
+                    } else if (isValidPwd) {
+                        this.passwordCheckok = true;
+                        this.passwordCheckno = false;
+                        this.passwordMessage = "格式符合";
+                    } else {
+                        this.passwordCheckok = false;
+                        this.passwordCheckno = true;
+                        this.passwordMessage = "密碼長度7~20字，含英文字母和數字，不可空格，支援特殊字元 #?!@$%^&*-_";
+                    }
+                },
+            },
+            mounted() {
+
+            }
+        }).mount("#resetPassword");
+    </script>
+</body>
+
+</html>

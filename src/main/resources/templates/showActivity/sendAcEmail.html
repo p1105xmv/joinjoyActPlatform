@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<title>您的活動訊息</title>
+<style>
+body {
+	font-family: 'Arial', sans-serif;
+	background-color: #fff4e6;
+	color: #333;
+	line-height: 1.6;
+}
+
+a {
+	color: #ff9900;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+	margin: 0 auto;
+}
+
+.content, .footer-info {
+	background-color: #fff;
+	padding: 20px;
+	margin: 10px auto;
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+	max-width: 600px;
+	text-align: center;
+}
+
+.footer-info {
+	background-color: #fffbea;
+	font-size: 0.8em;
+	color: #333;
+}
+
+hr {
+	border: 0;
+	height: 1px;
+	background: #ffcc00;
+}
+
+.blue-link {
+	color: #0000FF; /* 正藍色 */
+	text-decoration: none; /* 移除下劃線 */
+}
+
+.blue-link:hover {
+	text-decoration: underline; /* 滑鼠懸停時加上下劃線 */
+}
+</style>
+</head>
+<body>
+	<div class="content">
+		<a href="http://localhost:8081/"> <img
+			src="https://i.imgur.com/4rgzF8A_d.webp?maxwidth=1520&fidelity=grand"
+			alt="JoinJoy橫幅">
+		</a>
+
+		<p>主辦人 您好：</p>
+
+		<p>
+			<span th:text="${acMailDTO.userName}">[名字]</span> 於您的活動頁 ( <span
+				th:text="${acMailDTO.activityName}">[活動]</span> ) 傳送了一則提問訊息：
+		</p>
+
+		<p>
+			<span th:text="${acMailDTO.content}">[描述]</span>
+		</p>
+
+		<hr>
+
+		<p>
+			聯絡電話: <span th:text="${acMailDTO.userTel}">[電話]</span>
+		</p>
+		<p>
+			聯絡Email: <span th:text="${acMailDTO.userEmail}">[電子郵件]</span>
+		</p>
+
+		<div class="footer">
+			<p>※如需回覆，您可直接點選上方Email，或是複製聯絡人信箱，再建立新郵件回覆。</p>
+			<p>此信為系統發信，請勿直接回覆此信。</p>
+		</div>
+				<hr>
+		
+	</div>
+	<div class="footer-info">
+		<p>
+			系統操作或票券取得相關問題，請洽 <a href="客服中心的路徑" class="blue-link">JOINJOY客服中心</a>。
+		</p>
+		<p>服務時間 : 週一到週五 10:00 ~ 18:30</p>
+		<p>Copyright © Accuvally, All rights reserved.</p>
+	</div>
+
+</body>
+</html>

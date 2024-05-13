@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>JoinJoy討論區</title>
+    <style>
+      body {
+        background-color: rgb(255, 252, 233) !important;
+        background-attachment: fixed;
+        margin: 0;
+        padding: 0;
+        background-image: url("../img/web/jojo_bird.png");
+        background-position: right 4% bottom;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: 10%;
+      }
+
+      .fixed-side {
+        position: fixed;
+        top: 90px;
+      }
+
+      .left {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px !important;
+        margin: 0 auto;
+      }
+
+      li {
+        font-size: 22px;
+        cursor: pointer;
+      }
+
+      .left ul {
+        list-style-type: none;
+        padding-left: 0;
+      }
+
+      .left ul li {
+        border-bottom: 2px solid transparent;
+      }
+
+      .left ul li:hover {
+        border-bottom-color: #ffcc38;
+      }
+
+      .yellowHover {
+        border-bottom: 2px solid transparent;
+      }
+
+      .yellowHover:hover {
+        border-bottom-color: #ffcc38;
+      }
+
+      .cursorPointer {
+        cursor: pointer;
+      }
+
+      .articleBlock:hover .artTitle {
+        color: #ffcc38;
+      }
+
+      .artTitle {
+        font-weight: 550;
+        margin-top: 5px;
+      }
+
+      .ui-autocomplete {
+        z-index: 9999 !important;
+      }
+
+      .toTop {
+        position: fixed;
+        bottom: 100px;
+        left: 20px;
+        width: 65px !important;
+        height: 65px;
+        border-radius: 50%;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 2px 4px 4px 1px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+      }
+
+      .toTop:hover {
+        transform: translateY(3px);
+        background-color: rgb(233, 233, 233);
+        cursor: pointer;
+      }
+
+      .addPost {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 65px !important;
+        height: 65px;
+        border-radius: 50%;
+        background-color: #ffcc38;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 2px 4px 4px 1px rgba(0, 0, 0, 0.3);
+        padding: 2px;
+        transition: transform 0.3s ease;
+      }
+
+      .addPost:hover {
+        transform: translateY(3px);
+        background-color: #e4ba00;
+        cursor: pointer;
+      }
+
+      .fontBold {
+        font-weight: 550;
+      }
+
+      .main {
+        background-color: white;
+        border-radius: 10px;
+        margin-top: 90px;
+      }
+
+      .mainTitle {
+        margin: 10px 0 20px 0;
+        color: rgb(94, 56, 34);
+      }
+
+      .mainTitleBorder {
+        border: none;
+        height: 2px;
+        background-color: rgb(94, 56, 34);
+        margin-top: 20px !important;
+        margin-bottom: 20px !important;
+      }
+
+      .icon1 {
+        font-size: 24px;
+        color: #3564bc;
+        margin-right: 10px !important;
+      }
+
+      .icon2 {
+        font-size: 24px;
+        color: #ff9c4d;
+        margin-right: 10px !important;
+      }
+
+      .bigIcon1 {
+        font-size: 32px;
+        color: #3564bc;
+        margin-right: 10px !important;
+      }
+
+      .bigIcon2 {
+        font-size: 32px;
+        color: #ff9c4d;
+        margin-right: 10px !important;
+      }
+
+      .bi-pencil-square {
+        font-size: 32px;
+      }
+
+      .smallIcon {
+        font-size: 20px;
+        color: rgb(201, 201, 201);
+        margin-right: 8px !important;
+      }
+
+      .mrImportant {
+        margin-right: 15px !important;
+      }
+
+      .rightCard {
+        width: 300px;
+        border-radius: 40px;
+      }
+
+      .topBlock {
+        position: sticky;
+        top: 60px;
+        background-color: white;
+        z-index: 5;
+        padding: 20px 3% 0 3% !important;
+      }
+
+      .postsBlock {
+        padding: 0 3%;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <link th:href="@{/css/cards.css }" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div th:replace="~{layout/articles/searchArticlesNavbar}"></div>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2 d-flex justify-content-center">
+          <div class="fixed-side left shadow">
+            <h3
+              id="allArticles"
+              class="allArticles cursorPointer yellowHover fontBold"
+            >
+              <i class="bi bi-card-list icon1"></i>
+              全部文章
+            </h3>
+
+            <hr />
+            <h5 style="color: gray">活動類型</h5>
+            <ul class="fontBold">
+              <li id="c1" class="category">
+                <i class="bi bi-book icon2"></i>學習
+              </li>
+              <li id="c2" class="category">
+                <i class="bi bi-bicycle icon2"></i>運動
+              </li>
+              <li id="c3" class="category">
+                <i class="bi bi-music-note icon2"></i>音樂
+              </li>
+              <li id="c4" class="category">
+                <i class="bi bi-binoculars icon2"></i>博覽會
+              </li>
+              <li id="c5" class="category">
+                <i class="bi bi-vector-pen icon2"></i>文藝
+              </li>
+              <li id="c6" class="category">
+                <i class="bi bi-emoji-sunglasses icon2"></i>體驗
+              </li>
+              <li id="c7" class="category">
+                <i class="bi bi-currency-dollar icon2"></i>財經
+              </li>
+              <li id="c8" class="category">
+                <i class="bi bi-lightbulb icon2"></i>創業
+              </li>
+              <li id="c9" class="category">
+                <i class="bi bi-hammer icon2"></i>手作
+              </li>
+              <li id="c10" class="category">
+                <i class="bi bi-egg-fried icon2"></i>美食
+              </li>
+            </ul>
+            <hr />
+            <h3 id="chat" class="chat cursorPointer yellowHover fontBold">
+              <i class="bi bi-chat-dots icon1"></i>閒聊
+            </h3>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+          <div class="main shadow">
+            <div class="topBlock">
+              <h1 id="postType" class="mainTitle">
+                <i class="bi bi-card-list bigIcon1"></i>全部文章
+              </h1>
+
+              <div id="sortDiv" class="sortDiv">
+                <button id="newBtn" type="button" class="btn btn-warning">
+                  最新
+                </button>
+                <button
+                  id="popBtn"
+                  type="button"
+                  class="btn btn-outline-warning"
+                >
+                  熱門
+                </button>
+              </div>
+              <hr class="mainTitleBorder" />
+            </div>
+            <div class="postsBlock">
+              <div id="posts"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 d-flex justify-content-center">
+          <div class="fixed-side">
+            <h4 class="fontBold">熱門活動</h4>
+            <div
+              id="card1"
+              class="carousel slide carousel-fade shadow rightCard"
+              data-bs-ride="carousel"
+            >
+              <div class="carousel-inner" id="card1-inner"></div>
+            </div>
+            <div
+              id="card2"
+              class="carousel slide carousel-fade mt-4 shadow rightCard"
+              data-bs-ride="carousel"
+            >
+              <div class="carousel-inner" id="card2-inner"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="toTop" class="toTop" title="Top">
+          <i class="bi bi-arrow-up-short" style="font-size: 44px"></i>
+        </div>
+
+        <div id="addPost" class="addPost" title="發文">
+          <i class="bi bi-pencil-square"></i>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.onload = function () {
+        let nowIndex = 0;
+        let page = 2;
+        let sort = 0;
+        let isSearchMode = false;
+        let searchUrl = "";
+
+        function renderArticles(articles) {
+          articles.forEach(function (article) {
+            var tempElement = document.createElement("div");
+            tempElement.innerHTML = article.artContent;
+            var textContent =
+              tempElement.textContent || tempElement.innerText || "";
+            var shortContent = textContent.substring(0, 80);
+            if (textContent.length > 80) shortContent += "...";
+
+            var imgRegex = /<img[^>]+src="([^">]+)"/;
+
+            var match = article.artContent.match(imgRegex);
+
+            var imagePath = "";
+            let imgTag = "";
+            let nickName = "";
+            let userImg = "";
+            if (!article.userinfo.unickname) {
+              nickName = "匿名";
+            } else {
+              nickName = article.userinfo.unickname;
+            }
+            if (!article.userinfo.uimgpath) {
+              userImg = "img/web/unloginUser.svg";
+            } else {
+              userImg = article.userinfo.uimgpath;
+            }
+
+            if (match && match.length > 1) {
+              imagePath = match[1];
+              imgTag = `<div class="image-container" style="width: 230px; height: 140px; overflow: hidden; display: flex; justify-content: center; align-items: center; border-radius: 12px;">
+                <img src="..${imagePath}" style="max-width: 100%; max-height: auto;"/>
+              </div>`;
+            }
+
+            var articleHtml = `
+            <div id="art${article.artid}" class='articleBlock cursorPointer' style='margin: 3px; '>
+              <div class='author'>
+                <span><img src='..${userImg}' style='width: 20px; height: 20px; border-radius:50%;' /></span>
+                <span>${nickName}&nbsp;</span>
+                <span>${article.artCreateTime}</span>
+              </div>
+              <div class='row' style='height:150px; position: relative;'>
+                <div class='col-md-8'>
+                  <h4 class='artTitle'>${article.artTitle}</h4>
+                  <p><span>${shortContent}</span></p>
+                  <div style='position:absolute; bottom: 0;'>
+                    <span class='mrImportant'><i class='bi bi-hand-thumbs-up-fill smallIcon'></i>${article.likesCount}</span>
+                    <span class='mrImportant'><i class="bi bi-chat-fill smallIcon"></i>${article.chatCount}</span>
+                    <span><i class="bi bi-eye-fill smallIcon"></i>${article.artViewCount}</span>
+                  </div>
+                </div>
+                <div class='col-md-4 text-center' >
+                  ${imgTag}
+                </div>
+              </div>
+              <hr/>
+            </div>`;
+            $("#posts").append(articleHtml);
+          });
+        }
+
+        function fetchAndDisplayArticles(url, clear) {
+          if (clear == 1) $("#posts").empty();
+          $.ajax({
+            url: url,
+            type: "GET",
+            success: function (articles) {
+              renderArticles(articles);
+            },
+            error: function (xhr, status, error) {
+              console.error("Fail: ", status, error);
+            },
+          });
+        }
+
+        $("#allArticles").click(function () {
+          nowIndex = 0;
+          updatePostTypeText();
+          defaultPage();
+          fetchAndDisplayArticles(
+            "/api/articleslist/type/0/isChat/0/page/1/sort/0",
+            1
+          );
+        });
+
+        $(".category").click(function () {
+          var typeId = this.id.replace("c", "");
+          nowIndex = typeId;
+          updatePostTypeText();
+          defaultPage();
+          fetchAndDisplayArticles(
+            "/api/articleslist/type/" + typeId + "/isChat/0/page/1/sort/0",
+            1
+          );
+        });
+
+        $("#chat").click(function () {
+          nowIndex = 11;
+          updatePostTypeText();
+          defaultPage();
+          fetchAndDisplayArticles(
+            "/api/articleslist/type/0/isChat/1/page/1/sort/0",
+            1
+          );
+        });
+
+        function updatePostTypeText() {
+          var postTypes = [
+            "<i class='bi bi-card-list bigIcon1'></i>全部文章",
+            "<i class='bi bi-book bigIcon2'></i>學習",
+            "<i class='bi bi-bicycle bigIcon2'></i>運動",
+            "<i class='bi bi-music-note bigIcon2'></i>音樂",
+            "<i class='bi bi-binoculars bigIcon2'></i>博覽會",
+            "<i class='bi bi-vector-pen bigIcon2'></i>文藝",
+            "<i class='bi bi-emoji-sunglasses bigIcon2'></i>體驗",
+            "<i class='bi bi-currency-dollar bigIcon2'></i>財經",
+            "<i class='bi bi-lightbulb bigIcon2'></i>創業",
+            "<i class='bi bi-hammer bigIcon2'></i>手作",
+            "<i class='bi bi-egg-fried bigIcon2'></i>美食",
+            "<i class='bi bi-chat-dots bigIcon1'></i>閒聊",
+          ];
+          $("#postType").html(postTypes[nowIndex]);
+        }
+
+        fetchAndDisplayArticles(
+          "/api/articleslist/type/0/isChat/0/page/1/sort/0",
+          1
+        );
+
+        $(document).on("click", ".articleBlock", function () {
+          var artId = this.id.replace("art", "");
+          window.location.href = "/articles/article?&id=" + artId;
+        });
+
+        function defaultPage() {
+          $("#newBtn").addClass("btn-warning");
+          $("#popBtn").removeClass("btn-warning");
+          $("#popBtn").addClass("btn-outline-warning");
+          $("#newBtn").removeClass("btn-outline-warning");
+          page = 2;
+          isSearchMode = false;
+        }
+
+        $("#newBtn").click(function () {
+          sort = 0;
+          page = 2;
+          $("#newBtn").addClass("btn-warning");
+          $("#popBtn").removeClass("btn-warning");
+          $("#popBtn").addClass("btn-outline-warning");
+          $("#newBtn").removeClass("btn-outline-warning");
+
+          if (isSearchMode) {
+            searchUrl = updateUrlWithSortParam(searchUrl, 0);
+            fetchAndDisplayArticles(searchUrl, 1);
+          } else if (nowIndex == 11)
+            fetchAndDisplayArticles(
+              "/api/articleslist/type/0/isChat/1/page/1/sort/0",
+              1
+            );
+          else
+            fetchAndDisplayArticles(
+              "/api/articleslist/type/" + nowIndex + "/isChat/0/page/1/sort/0",
+              1
+            );
+        });
+
+        $("#popBtn").click(function () {
+          sort = 1;
+          page = 2;
+          $("#popBtn").addClass("btn-warning");
+          $("#newBtn").removeClass("btn-warning");
+          $("#newBtn").addClass("btn-outline-warning");
+          $("#popBtn").removeClass("btn-outline-warning");
+
+          if (isSearchMode) {
+            searchUrl = updateUrlWithSortParam(searchUrl, 1);
+            fetchAndDisplayArticles(searchUrl, 1);
+          } else if (nowIndex == 11)
+            fetchAndDisplayArticles(
+              "/api/articleslist/type/0/isChat/1/page/1/sort/1",
+              1
+            );
+          else
+            fetchAndDisplayArticles(
+              "/api/articleslist/type/" + nowIndex + "/isChat/0/page/1/sort/1",
+              1
+            );
+        });
+
+        function updateUrlWithSortParam(url, sort) {
+          return url.replace(/sort\/\d+/, `sort\/${sort}`);
+        }
+
+        window.onscroll = function (ev) {
+          var threshold = 300;
+          var scrollPosition = window.innerHeight + window.scrollY;
+          var documentHeight = Math.max(
+            document.documentElement.scrollHeight,
+            document.body.scrollHeight
+          );
+          var distanceToBottom = documentHeight - scrollPosition;
+
+          if (distanceToBottom <= threshold) {
+            loadMorePosts();
+          }
+        };
+
+        function loadMorePosts() {
+          if (isSearchMode) {
+            addSearchUrl = searchUrl.replace(/page\/\d/, `page\/${page}`);
+            fetchAndDisplayArticles(addSearchUrl, 0);
+          } else if (nowIndex == 11)
+            fetchAndDisplayArticles(
+              "/api/articleslist/type/0/isChat/1/page/" +
+                page +
+                "/sort/" +
+                sort,
+              0
+            );
+          else
+            fetchAndDisplayArticles(
+              "/api/articleslist/type/" +
+                nowIndex +
+                "/isChat/0/page/" +
+                page +
+                "/sort/" +
+                sort,
+              0
+            );
+          page++;
+        }
+
+        $("#searchForm").submit(function (event) {
+          event.preventDefault();
+          isSearchMode = true;
+          const searchText = $("#searchInput").val();
+          const articleType = $("#articleType").val();
+          $("#postType").text(`'${searchText}'搜尋結果`);
+          searchUrl = `/api/articleslist/search/${searchText}/isChat/${articleType}/page/1/sort/${sort}`;
+          fetchAndDisplayArticles(searchUrl, 1);
+        });
+
+        $("#searchInput").on("input", function () {
+          const searchText = $(this).val();
+          const articleType = $("#articleType").val();
+
+          if (searchText.trim() !== "") {
+            $.ajax({
+              url: `/api/articleslist/search/${searchText}/isChat/${articleType}/page/1/sort/0`,
+              type: "GET",
+              success: function (articles) {
+                var articleTitles = [];
+                for (let a in articles) {
+                  articleTitles.push(articles[a].artTitle);
+                }
+                $("#searchInput").autocomplete({
+                  source: articleTitles,
+                  select: function (event, ui) {
+                    var selectedText = ui.item.value;
+                    $("#postType").text(`'${selectedText}'搜尋結果`);
+                    searchUrl = `/api/articleslist/search/${selectedText}/isChat/${articleType}/page/1/sort/0`;
+                    fetchAndDisplayArticles(searchUrl, 1);
+                  },
+                });
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+        });
+
+        $("#addPost").click(() => {
+          $.ajax({
+            url: "/api/session/getUserinfo",
+            method: "GET",
+            success: (data) => {
+              window.location.href = "/articles/add";
+            },
+            error: (xhr, status, error) => {
+              console.error("Error fetching userdata: ", error);
+            },
+          });
+        });
+
+        $("#toTop").click(function () {
+          $("html, body").animate(
+            {
+              scrollTop: 0,
+            },
+            "fast"
+          );
+        });
+
+        $(document).ready(function () {
+          $.ajax({
+            url: "/api/listPopularActivities",
+            type: "GET",
+            success: function (activities) {
+              //console.log(activities);
+              renderActivities(convertAcObject(activities));
+              startCarousel();
+            },
+            error: function (xhr, status, error) {
+              console.error("Fail: ", status, error);
+            },
+          });
+        });
+
+        function convertAcObject(list) {
+          for (let ac of list) {
+            let acDateTime = new Date(ac.acStartDate);
+            let acDate =
+              acDateTime.getFullYear() +
+              "/" +
+              ("0" + (acDateTime.getMonth() + 1)).slice(-2) +
+              "/" +
+              ("0" + acDateTime.getDate()).slice(-2);
+            let acTime =
+              ("0" + acDateTime.getHours()).slice(-2) +
+              ":" +
+              ("0" + acDateTime.getMinutes()).slice(-2);
+            ac.date = acDate;
+            ac.time = acTime;
+            ac.alltypeids = [];
+            ac.typeNames = [];
+
+            for (let type of ac.allTypes) {
+              ac.alltypeids.push(type.alltypeid);
+              ac.typeNames.push(type.typeName);
+            }
+          }
+
+          return list;
+        }
+
+        function renderActivities(activities) {
+          for (let i = 0; i < 6; i++) {
+            let ac = activities[i];
+            //console.log(ac);
+            const activeClass = i === 0 || i === 3 ? "active" : "";
+            const popActivityHtml = `
+        <div class="carousel-item ${activeClass} " data-bs-interval="3000">
+      <a style="width: 100%;" href="/showActivity/activityPage/${
+        ac.acid
+      }" class="jcard">
+              <img style="height:250px ;padding-bottom:40px" src="${
+                ac.acImg
+              }" class="jcard__image"
+                alt="" />
+
+              <div class="jcard__overlay">
+                <div class="jcard__header">
+                  <svg class="jcard__arc" xmlns="http://www.w3.org/2000/svg">
+                    <path />
+                  </svg>
+                  <div class="jcard__header-text">
+
+                    <h3 class="jcard__title mb-2">${ac.acName}</h3>
+
+                    <span class="jcard__status"></span><span class="jcard__status"><i
+                        class="bi bi-pin-map-fill mr-sm-1"></i>${
+                          ac.acCity
+                        }</span>
+                  </div>
+
+                  <div class="jcard__thumbnum">
+                    <button id="likeBtn" class="btn btn-link text-warning" @click="likeAc">
+                      <span><i class="bi bi-heart mr-sm-2"></i>${
+                        ac.favCount
+                      }</span>
+                    </button>
+                  </div>
+
+
+                </div>
+                <p class="jcard__description">
+                <div class="jcard__description_timeinfo">
+
+                  <span class="jcard__status">日期：${
+                    ac.date
+                  }</span><br><span class="jcard__status">時間：${
+              ac.time
+            }</span>
+                </div>
+                <span v-if="ac.typeNames.length>0" class="jcard__description_type">#${ac.typeNames.join(
+                  "、"
+                )}</span>
+                <div class="jcard__description_info">
+                  <template v-if="ac.priceLowest<ac.priceHighest"><span class="text-warning">${
+                    ac.priceLowest
+                  } ~
+                      ${
+                        ac.priceHighest
+                      } </span><span class="text-secondary mb-md-2"> 元</span></template>
+                  <template v-if="ac.priceLowest==ac.priceHighest && ac.priceLowest>0"><span
+                      class="text-warning">${
+                        ac.priceLowest
+                      }</span><span class="text-secondary mb-md-2">
+                      元</span></template>
+                  <template v-if="ac.priceLowest==0"><span class="text-warning mb-md-2">免費</span></template>
+                  <br>
+                  <button id="signBtn" class="btn btn-link text-secondary" @click="signAc">
+                    <span class="text-secondary text-end"><i
+                        class="bi bi-bookmark-check mr-sm-2"></i>${
+                          ac.signedCount
+                        }</span>
+                  </button>
+                </div>
+                </p>
+              </div>
+            </a>
+          </li>
+          </div>
+      `;
+            if (i < 3) {
+              $("#card1-inner").append(popActivityHtml);
+            } else {
+              $("#card2-inner").append(popActivityHtml);
+            }
+          }
+
+          const btns = `
+        <button class="carousel-control-prev" type="button" data-bs-target="#card1" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#card1" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        `;
+          const btns2 = `
+        <button class="carousel-control-prev" type="button" data-bs-target="#card2" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#card2" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        `;
+
+          $("#card1").append(btns);
+          $("#card2").append(btns2);
+        }
+
+        function startCarousel() {
+          $("#card1").carousel();
+          $("#card2").carousel();
+        }
+      };
+    </script>
+  </body>
+</html>

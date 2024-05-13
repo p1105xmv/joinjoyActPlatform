@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- vue3 -->
+  <!-- <script src="https://unpkg.com/vue@next"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.min.js"></script>
+  <!-- ckEditor -->
+  <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/super-build/ckeditor.js"></script>
+  <title>活動介紹</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #fef8f8;
+    }
+
+    .Main {
+      width: 1080px;
+      min-height: calc(100vh - 95px);
+      margin: 20px auto 26px;
+      background-color: #fff;
+      padding: 5px 0 46px;
+      box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .Field-field {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+
+    .Field-label {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.71;
+      color: #282828;
+      padding-bottom: 10px;
+    }
+
+    .IntroPage-field-label {
+      font-size: 20px;
+    }
+
+    .Field-tip {
+      color: #a9a9a9;
+    }
+
+    .Field-required {
+      color: #d84a49;
+      padding-left: 3px;
+    }
+
+    .IntroPage-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+      width: 85%;
+      margin: auto;
+    }
+
+    .IntroPage-form-container {
+      width: 100%;
+      padding-left: 25px;
+      padding-right: 25px;
+    }
+
+    .IntroPage-greeting {
+      color: #36353c;
+      font-size: 25px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 34px;
+
+      /* padding-bottom: 22px;
+			font-size: 20px;
+			font-weight: 500;
+			line-height: 1.6;
+			color: #36353c; */
+    }
+
+    .TextArea-textarea {
+      resize: none;
+      width: 100%;
+      min-height: 156px;
+      background-color: #f1f1f1;
+      font-size: 16px;
+      line-height: 24px;
+      color: #282828;
+      border: 0;
+      padding: 14px 24px;
+      box-sizing: border-box;
+      border-radius: 0;
+    }
+
+    .CharacterCounter {
+      color: #a7a7a7;
+      font-size: 16px;
+      font-weight: 500;
+      float: right;
+    }
+
+    .ck-content .image {
+      /* Block images */
+      max-width: 80%;
+      margin: 20px auto;
+    }
+
+    .PagerButtons-button-container {
+      border-top: 1px solid #a9a9a9;
+      margin: 10px 0px;
+      padding: 10px 0px;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+
+    .PagerButton-button {
+      width: 200px;
+      height: 50px;
+      cursor: not-allowed;
+      font-size: 16px;
+      background-color: rgb(255, 196, 0);
+      border: none;
+      border-radius: 5px;
+      transition: all .3s;
+    }
+
+    .PagerButton-button:hover {
+      /* 調整亮度 */
+      filter: brightness(0.9);
+    }
+
+    .error-border {
+      border: red 1px solid !important;
+    }
+
+    .error-message {
+      color: red;
+      margin: 5px;
+    }
+
+    .IntroPage-nextPage-btn-label {
+      font-size: 16px;
+    }
+
+    .BasicInfoPage-nextPage-btn-label {
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div th:replace="~{layout/navbar}"></div>
+  <div id="app">
+    <template v-if="loadingFinish">
+      <div>
+        <main class="Main">
+          <div class="IntroPage-container">
+            <div class="IntroPage-form-container">
+              <p class="IntroPage-greeting">活動詳細介紹</p>
+              <div class="Field-field">
+                <div class="Field-label IntroPage-field-label">活動摘要<span class="Field-required">*</span>
+
+                </div>
+                <span class="Field-tip">請填寫活動亮點。</span>
+                <textarea class="TextArea-textarea" :class="{'error-border': summaryFieldError && formTried}" rows="4"
+                  placeholder="請填寫「活動特色」或吸引人之處。" v-model="activityIntro.acSummary"
+                  @input="limitInput();checkSummaryField();"></textarea>
+                <p class="CharacterCounter">
+                  <span class="">{{currentLength}}</span> / <span>200</span>
+                </p>
+                <div v-if="summaryFieldError && formTried" class="error-message">必填</div>
+              </div>
+
+              <div class="Field-field">
+                <div class="Field-label IntroPage-field-label">
+                  活動介紹<span class="Field-required">*</span>
+                </div>
+                <div>
+                  <textarea id="editor" :class="{'error-border': editorFieldError && formTried}"></textarea>
+                </div>
+                <div v-if="editorFieldError && formTried" class="error-message">
+                  必填</div>
+              </div>
+
+              <div class="PagerButtons-button-container">
+                <button class="PagerButton-button"
+                  :style="{'color':optionStatus==1?'#000':'#fff','background-color':optionStatus==1?'#ffc400':'#16cbf8'}"
+                  @click="goBack(optionStatus)">{{optionStatus==1?"返回上一步":"返回活動管理"}}</button>
+                <button class="PagerButton-button"
+                  :style="{'color':optionStatus==1?'#000':'#fff','background-color':optionStatus==1?'#ffc400':'#16cbf8'}"
+                  @click="trySubmit" :disabled="isButtonDisabled">
+                  <span v-if="insertLoading" class="spinner-border" :style="{'color':optionStatus==1?'#000':'#fff'}"
+                    role="status" aria-hidden="true"></span>
+                  <span v-if="!insertLoading"
+                    class="BasicInfoPage-nextPage-btn-label">{{optionStatus==1?"下一步":"儲存設定"}}</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </main>
+      </div>
+    </template>
+  </div>
+
+  <script type="module">
+    Vue.createApp({
+      data() {
+        return {
+          activityIntro: [],
+          formTried: false,
+          //檢查欄位
+          editorFieldError: false,
+          summaryFieldError: false,
+          //loading狀態
+          insertLoading: false,
+          //下一步按鈕狀態
+          isButtonDisabled: false,
+          //新建或編輯狀態
+          optionStatus: null,
+          //是否載入完成
+          loadingFinish: true,
+        };
+      },
+      mounted() {
+        //取得頁面路徑
+        const path = window.location.pathname;
+        const segments = path.split("/");
+        //從最後一個索引值獲取 optionStatus
+        this.optionStatus = segments[segments.length - 1];
+        axios
+          .get("/createAc/getAcIntro")
+          .then((response) => {
+            //console.log(response.data);
+            this.activityIntro = response.data;
+            // // CKEditor 初始化可能已經完成，所以這裡也需要更新編輯器的内容
+            if (this.ckEditor) {
+              this.ckEditor.setData(this.activityIntro.acIntro);
+            }
+
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+        //初始化ckEditor
+        CKEDITOR.ClassicEditor.create(document.getElementById("editor"), {
+          toolbar: {
+            items: [
+              "exportPDF",
+              "exportWord",
+              "|",
+              "findAndReplace",
+              "selectAll",
+              "|",
+              "heading",
+              "|",
+              "bold",
+              "italic",
+              "strikethrough",
+              "underline",
+              "code",
+              "subscript",
+              "superscript",
+              "removeFormat",
+              "|",
+              "bulletedList",
+              "numberedList",
+              "todoList",
+              "|",
+              "outdent",
+              "indent",
+              "|",
+              "undo",
+              "redo",
+              "-",
+              "fontSize",
+              "fontFamily",
+              "fontColor",
+              "fontBackgroundColor",
+              "highlight",
+              "|",
+              "alignment",
+              "|",
+              "link",
+              "uploadImage",
+              "blockQuote",
+              "insertTable",
+              "mediaEmbed",
+              "codeBlock",
+              "htmlEmbed",
+              "|",
+              "specialCharacters",
+              "horizontalLine",
+              "pageBreak",
+              "|",
+              "textPartLanguage",
+              "|",
+              "sourceEditing",
+            ],
+            shouldNotGroupWhenFull: true,
+          },
+          // Changing the language of the interface requires loading the language file using the <script> tag.
+          // language: 'es',
+          list: {
+            properties: {
+              styles: true,
+              startIndex: true,
+              reversed: true,
+            },
+          },
+          // https://ckeditor.com/docs/ckeditor5/latest/features/headings.html#configuration
+          heading: {
+            options: [
+              {
+                model: "paragraph",
+                title: "Paragraph",
+                class: "ck-heading_paragraph",
+              },
+              {
+                model: "heading1",
+                view: "h1",
+                title: "Heading 1",
+                class: "ck-heading_heading1",
+              },
+              {
+                model: "heading2",
+                view: "h2",
+                title: "Heading 2",
+                class: "ck-heading_heading2",
+              },
+              {
+                model: "heading3",
+                view: "h3",
+                title: "Heading 3",
+                class: "ck-heading_heading3",
+              },
+              {
+                model: "heading4",
+                view: "h4",
+                title: "Heading 4",
+                class: "ck-heading_heading4",
+              },
+              {
+                model: "heading5",
+                view: "h5",
+                title: "Heading 5",
+                class: "ck-heading_heading5",
+              },
+              {
+                model: "heading6",
+                view: "h6",
+                title: "Heading 6",
+                class: "ck-heading_heading6",
+              },
+            ],
+          },
+          // https://ckeditor.com/docs/ckeditor5/latest/features/editor-placeholder.html#using-the-editor-configuration
+          placeholder: "請輸入活動內容、詳細介紹",
+          // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-family-feature
+          fontFamily: {
+            options: [
+              "default",
+              "Arial, Helvetica, sans-serif",
+              "Courier New, Courier, monospace",
+              "Georgia, serif",
+              "Lucida Sans Unicode, Lucida Grande, sans-serif",
+              "Tahoma, Geneva, sans-serif",
+              "Times New Roman, Times, serif",
+              "Trebuchet MS, Helvetica, sans-serif",
+              "Verdana, Geneva, sans-serif",
+            ],
+            supportAllValues: true,
+          },
+          // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-size-feature
+          fontSize: {
+            options: [10, 12, 14, "default", 18, 20, 22],
+            supportAllValues: true,
+          },
+          // Be careful with the setting below. It instructs CKEditor to accept ALL HTML markup.
+          // https://ckeditor.com/docs/ckeditor5/latest/features/general-html-support.html#enabling-all-html-features
+          htmlSupport: {
+            allow: [
+              {
+                name: /.*/,
+                attributes: true,
+                classes: true,
+                styles: true,
+              },
+            ],
+          },
+          // Be careful with enabling previews
+          // https://ckeditor.com/docs/ckeditor5/latest/features/html-embed.html#content-previews
+          htmlEmbed: {
+            showPreviews: true,
+          },
+          // https://ckeditor.com/docs/ckeditor5/latest/features/link.html#custom-link-attributes-decorators
+          link: {
+            decorators: {
+              addTargetToExternalLinks: true,
+              defaultProtocol: "https://",
+              toggleDownloadable: {
+                mode: "manual",
+                label: "Downloadable",
+                attributes: {
+                  download: "file",
+                },
+              },
+            },
+          },
+          // https://ckeditor.com/docs/ckeditor5/latest/features/mentions.html#configuration
+          mention: {
+            feeds: [
+              {
+                marker: "@",
+                feed: [
+                  "@apple",
+                  "@bears",
+                  "@brownie",
+                  "@cake",
+                  "@cake",
+                  "@candy",
+                  "@canes",
+                  "@chocolate",
+                  "@cookie",
+                  "@cotton",
+                  "@cream",
+                  "@cupcake",
+                  "@danish",
+                  "@donut",
+                  "@dragée",
+                  "@fruitcake",
+                  "@gingerbread",
+                  "@gummi",
+                  "@ice",
+                  "@jelly-o",
+                  "@liquorice",
+                  "@macaroon",
+                  "@marzipan",
+                  "@oat",
+                  "@pie",
+                  "@plum",
+                  "@pudding",
+                  "@sesame",
+                  "@snaps",
+                  "@soufflé",
+                  "@sugar",
+                  "@sweet",
+                  "@topping",
+                  "@wafer",
+                ],
+                minimumCharacters: 1,
+              },
+            ],
+          },
+          // The "superbuild" contains more premium features that require additional configuration, disable them below.
+          // Do not turn them on unless you read the documentation and know how to configure them and setup the editor.
+          removePlugins: [
+            // These two are commercial, but you can try them out without registering to a trial.
+            // 'ExportPdf',
+            // 'ExportWord',
+            "AIAssistant",
+            "CKBox",
+            "CKFinder",
+            "EasyImage",
+            // This sample uses the Base64UploadAdapter to handle image uploads as it requires no configuration.
+            // https://ckeditor.com/docs/ckeditor5/latest/features/images/image-upload/base64-upload-adapter.html
+            // Storing images as Base64 is usually a very bad idea.
+            // Replace it on production website with other solutions:
+            // https://ckeditor.com/docs/ckeditor5/latest/features/images/image-upload/image-upload.html
+            // 'Base64UploadAdapter',
+            "RealTimeCollaborativeComments",
+            "RealTimeCollaborativeTrackChanges",
+            "RealTimeCollaborativeRevisionHistory",
+            "PresenceList",
+            "Comments",
+            "TrackChanges",
+            "TrackChangesData",
+            "RevisionHistory",
+            "Pagination",
+            "WProofreader",
+            // Careful, with the Mathtype plugin CKEditor will not load when loading this sample
+            // from a local file system (file://) - load this site via HTTP server if you enable MathType.
+            "MathType",
+            // The following features are part of the Productivity Pack and require additional license.
+            "SlashCommand",
+            "Template",
+            "DocumentOutline",
+            "FormatPainter",
+            "TableOfContents",
+            "PasteFromOfficeEnhanced",
+            "CaseChange",
+          ],
+        })
+          .then((editor) => {
+            this.ckEditor = editor; // 保存 CKEditor 實例以便後續使用
+            editor.editing.view.change(writer => {
+              const rootElement = editor.editing.view.document.getRoot();
+              writer.setStyle('height', '500px', rootElement);
+              writer.setStyle('width', '100%', rootElement);
+            });
+            if (this.activityIntro.acIntro) {
+              // 設置 CKEditor 的初始内容
+              editor.setData(this.activityIntro.acIntro);
+            }
+            // 同步 CKEditor 的數據到 Vue data
+            editor.model.document.on("change:data", () => {
+              this.activityIntro.acIntro = editor.getData();
+              this.checkEditorField();
+            });
+          })
+          .catch((error) => {
+            console.error("CKEditor初始化出错：", error);
+          });
+      },
+      methods: {
+        //限制 Summary 字數
+        limitInput() {
+          if (this.activityIntro.acSummary != null && this.activityIntro.acSummary.length > 200) {
+            this.activityIntro.acSummary = this.activityIntro.acSummary.slice(0, 200);
+          }
+        },
+        checkSummaryField() {
+          if (this.formTried == true) {
+            this.summaryFieldError = this.activityIntro.acSummary == null ? true : this.activityIntro.acSummary.trim().length == 0;
+          }
+        },
+        checkEditorField() {
+          if (this.formTried == true) {
+            this.editorFieldError = this.activityIntro.acIntro == null ? true : this.activityIntro.acIntro.trim().length == 0;
+          }
+
+        },
+        scrollToFirstError() {
+          const firstErrorElement = document.querySelector('.error-border');
+          if (firstErrorElement) {
+            firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        },
+        trySubmit() {
+          this.formTried = true; // 更改是否點擊過的狀態
+          // 檢查是否需要更改"必填"狀態
+          this.checkEditorField();
+          this.checkSummaryField();
+          this.$nextTick(() => {
+            this.scrollToFirstError();
+          });
+          if (this.isIntroValid && !this.summaryFieldError && !this.editorFieldError) {
+            //console.log("submit success");
+            this.isButtonDisabled = true;//取消按鈕功能
+            this.insertLoading = true;//讀取動畫啟動
+            this.nextPage();
+          }
+        },
+        nextPage() {
+          //console.log(this.activityIntro);
+          axios
+            .post("/createAc/addAcIntro", this.activityIntro)
+            .then((response) => {
+              window.location.href = `/createAc/activityGuest/${this.optionStatus}`;
+            })
+            .catch((error) => {
+              this.insertLoading = false;
+              this.isButtonDisabled = false;
+              console.error("Error:", error);
+            });
+        },
+        goBack(optionStatus) {
+          window.location.href = optionStatus == 1 ? `/createAc/activityBasicInfo/${this.optionStatus}` : `/organizerBiz/OrganizerAcManage/${this.activityIntro.acid}`;
+        },
+
+      },
+      computed: {
+        isIntroValid() {
+          if (
+            this.activityIntro.acIntro &&
+            this.activityIntro.acIntro.trim().length > 0
+          ) {
+            //console.log(this.activityIntro.acIntro);
+            return true;
+          }
+        },
+        currentLength() {
+          return this.activityIntro.acSummary != null ? this.activityIntro.acSummary.length : 0;
+        },
+      },
+      beforeUnmount() {
+        if (this.ckEditor) {
+          this.ckEditor.destroy(); // 組件銷毀前銷毀CKEditor實例
+        }
+      },
+    }).mount("#app");
+  </script>
+
+</body>
+
+</html>

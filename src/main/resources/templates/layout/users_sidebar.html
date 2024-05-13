@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8" />
+    <title>users_sidebar</title>
+  </head>
+<style>
+body{
+	background:#FFFFF0;
+	font-family: "Microsoft JhengHei", sans-serif;
+	margin: 0; 
+}
+
+body, ul, li, div {
+	margin: 0;
+	padding: 0;
+}
+
+img {
+	border:0;
+}
+
+a {
+	text-decoration:none;
+}
+
+/* ------- wrapper ------- */
+#wrapper {
+	width: 740px;
+	height: 100%;
+	margin-top: 30px;
+	margin-left:20px;
+	color:	#6C6C6C;
+	display: flex;
+    flex-direction: row; /* 水平排列 */
+}
+
+/* ------- nav ------- */
+#nav {
+	width:190px;
+	position: fixed; /* 设置固定位置 */
+    height: 100%;
+    background-color: #FFFFF0; /* 设置背景色 */
+    overflow-y: auto; /* 设置垂直方向滚动条 */
+}
+
+#nav li {
+	list-style: none;
+}
+
+div.main {
+	height: 60px;
+	line-height: 60px;
+	text-indent:30px;
+	background-color:#FFE66F;
+	border-right:10px solid #FFF8D7;
+	cursor:pointer;
+	font-size:20px;
+}
+
+ul.subs li a {
+	display:block;
+	height: 40px;
+	line-height: 40px;
+	text-indent:35px;
+	background-color:#F5F5F5;
+	border-right:10px solid #FFF8D7;
+	font-size:15px;
+	color: #BEBEBE;
+}
+
+/* ------- color selection ------- */
+/* main menu*/
+li.color-top div.main {
+	background-color:#FFF4C1;
+	border-right:10px solid #FFF4C1	;
+}
+
+li.color-blue div.main {
+	background-color:	#FFE153;
+	border-right:10px solid #FFF0AC	;
+}
+
+li.color-red div.main {
+	background-color:#FFE153;
+	border-right:10px solid #FFF0AC	;
+}
+
+li.color-yellow div.main {
+	background-color:#FFE153;
+	border-right:10px solid #FFF0AC	;
+}
+
+
+/* sub menu*/
+li.color-blue ul.subs li a {
+	border-right:10px solid #FFF0AC	;
+	color: #8E8E8E;
+}
+
+li.color-red ul.subs li a {
+	border-right:10px solid #FFF0AC	;
+	color: #8E8E8E;
+}
+
+li.color-yellow ul.subs li a {
+	border-right:10px solid #FFF0AC	;
+	color: #8E8E8E;
+}
+
+li.color-blue ul.subs li a:hover {
+	background-color: #FFF0AC	;
+	color: #272727;
+}
+
+li.color-red ul.subs li a:hover {
+	background-color: #FFF0AC	;
+	color: #272727;
+}
+
+li.color-yellow ul.subs li a:hover {
+	background-color: #FFF0AC;
+	color: #272727;
+}
+
+
+/* -------  sub menu open------- */
+li.color-blue div.open {
+	background:url("images/arrow.png") no-repeat #FFF0AC 28px bottom;
+}
+
+li.color-red div.open {
+	background:url("images/arrow.png") no-repeat #FFF0AC 28px bottom;
+}
+
+li.color-yellow div.open {
+	background:url("images/arrow.png") no-repeat #FFF0AC 28px bottom;
+}
+
+
+/* ------- mouseover ------- */
+
+li.color-blue div.rollover {
+	background-color: #FFF0AC;
+}
+
+li.color-red div.rollover {
+	background-color: #FFF0AC;
+}
+
+li.color-yellow div.rollover {
+	background-color: #FFF0AC;
+}
+
+
+</style>
+<body>
+
+	<aside id="wrapper" style="display: flex;
+    flex-direction: row;height: 100%;">
+<div class="container">
+  <div id="nav">
+    <ul>
+      <li class="color-top">
+        <div class="main" style="font-weight: 500; text-indent:px">
+        <a th:href="@{/userHome}" style="text-decoration: none; color: #6C6C6C;
+        font-size:20px;background-color: transparent;"
+        onmouseover="this.style.backgroundColor='transparent'"
+        onmouseout="this.style.backgroundColor='transparent'">會員專區</a></div>
+      </li>
+      <li class="color-blue">
+        <div class="main">帳號管理</div>
+        <ul class="subs">
+          <li><a th:href="@{/users/changeEmail}">變更Email</a></li>
+          <li><a th:href="@{/users/changePwd}">變更密碼</a></li>
+          <li><a th:href="@{/users/editUserinfo}">個人資料編輯</a></li>
+        </ul>
+      </li>
+      <li class="color-red">
+        <div class="main">我的活動</div>
+        <ul class="subs">
+          <li><a th:href="@{/users/manageActivity/signed}">已報名活動</a></li>
+          <li><a th:href="@{/users/manageActivity/joined}">已參加活動</a></li>
+          <li><a th:href="@{/users/manageActivity/canceled}">已取消活動</a></li>
+          <li><a th:href="@{/users/manageActivity/like}">收藏的活動</a></li>
+          <li><a th:href="@{/users/manageActivity/comment}">待評論活動</a></li>
+          <li><a th:href="@{/users/manageActivity/followOrg}">已追蹤的主辦單位</a></li>
+        </ul>
+      </li>
+      <li class="color-yellow">
+        <div class="main"><a th:href="@{/organizerBiz}" style="text-decoration: none; color: #6C6C6C;
+        font-size:20px;background-color: transparent;">主辦中心</a></div>
+      </li>
+    </ul>
+  </div>
+ </div>
+</aside>
+<script>
+;(function(){
+ $('ul.subs').hide()
+  $('div.main').click(function(){
+    $('ul.subs').slideUp()
+    $('div.main').removeClass('open')
+    if($('+ul',this).css('display')=='none'){
+      $('+ul',this).slideDown()
+      $(this).addClass('open')
+    }
+  })
+  .mouseover(function(){
+    $(this).addClass('rollover')
+  })
+  .mouseout(function(){
+    $(this).removeClass('rollover')
+  })
+})()
+</script>
+</body>
+</html>

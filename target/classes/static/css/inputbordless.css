@@ -1,0 +1,8 @@
+.borderless .input-group-text {
+    background-color: transparent;
+}
+
+.borderless input,
+.borderless select {
+    border-left: 0;
+}

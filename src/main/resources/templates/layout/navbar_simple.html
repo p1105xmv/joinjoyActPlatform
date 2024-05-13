@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+  <meta charset="UTF-8" />
+  <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <link th:href="@{/css/main.css}" rel="stylesheet" />
+  <title></title>
+  <script src="https://cdn.jsdelivr.net/vue.resource/1.0.3/vue-resource.min.js"></script>
+</head>
+
+<!--  <div class="j_navbox-center"></div> -->
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+  aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+  <span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+  <form class="d-flex j_center">
+    <input class="nav-object j_input" id="findAc" type="search" placeholder="找活動" aria-label="Search" />
+  </form>
+</div>
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+  <ul class="navbar-nav ms-auto j_navbox-right">
+    <li class="nav-item"></li>
+
+
+    <!-- login dropdown li start  -->
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        <!-- 未登入預設 -->
+        <img sec:authorize="isAuthenticated()" th:src="@{${session.userinfo.uImgpath}}" style="
+                    border-radius: 50%;
+                    width: 58px;
+                    border: 5px white solid;
+                  " />
+        <!-- 登入頭貼顯示 -->
+        <img sec:authorize="!isAuthenticated()" class="nav-object j_btn-circle" th:src="@{/img/web/unloginUser.svg}" />
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+        <!-- 登入的互動視窗，取代原本的路徑 -->
+        <li>
+          <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#LoginModal">登入</a>
+        </li>
+        <li>
+          <a class="dropdown-item" th:href="@{/register}">註冊</a>
+        </li>
+        <!-- 登入才會出現 -->
+        <li sec:authorize="isAuthenticated()">
+          <a class="dropdown-item" th:href="@{/logout}">登出</a>
+        </li>
+        <li>
+          <hr class="dropdown-divider" />
+        </li>
+        <li>
+          <a class="dropdown-item" href="#">Something else here</a>
+        </li>
+      </ul>
+    </li>
+    <!-- login dropdown li start  -->
+
+  </ul>
+</div>
+
+
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light j_nav j-color fixed-top">
+    <div class="container-fluid">
+      <a th:href="@{/}"><img class="nav-object" th:src="@{/img/web/logo.svg}" /></a>
+      <div class="j_navbox-center collapse navbar-collapse">
+        <a class="nav-object" th:href="@{/}"><img class="nav-object" th:src="@{/img/web/jojoWord.svg}" /></a>
+      </div>
+
+      <!--  <div class="j_navbox-center"></div> -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto j_navbox-right">
+
+
+          <!-- login dropdown li start  -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <!-- 未登入預設 -->
+              <img sec:authorize="isAuthenticated()" th:src="@{${session.userinfo.uImgpath}}"
+                style="border-radius: 50%;width: 58px;border: 5px white solid;" />
+              <!-- 登入頭貼顯示 -->
+              <img sec:authorize="!isAuthenticated()" class="nav-object j_btn-circle"
+                th:src="@{/img/web/unloginUser.svg}" />
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <!-- 登入的互動視窗，取代原本的路徑 -->
+              <li>
+                <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#LoginModal">登入</a>
+              </li>
+              <li>
+                <a class="dropdown-item" th:href="@{/register}">註冊</a>
+              </li>
+              <!-- 登入才會出現 -->
+              <li sec:authorize="isAuthenticated()">
+                <a class="dropdown-item" th:href="@{/logout}">登出</a>
+              </li>
+              <li>
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </li>
+            </ul>
+          </li>
+          <!-- login dropdown li start  -->
+
+        </ul>
+      </div>
+    </div>
+
+  </nav>
+
+  <div style="height: 60px"></div>
+  <!-- 引入登入的互動視窗 -->
+  <div th:replace="~{authentication/authModal}"></div>
+
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+
+</html>

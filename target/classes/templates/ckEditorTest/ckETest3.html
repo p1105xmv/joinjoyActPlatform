@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ckEditorTest</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> <!-- 引入 jQuery -->
+
+</head>
+<style>
+   
+    .ck-editor__editable[role="textbox"] {
+        /* Editing area */
+        min-height: 200px;
+    }
+
+    .ck-content .image {
+        /* Block images */
+        max-width: 80%;
+        margin: 20px auto;
+    }
+</style>
+
+<body>
+    <div th:replace="~{layout/navbar}"></div>
+
+    <!-- 	<div id="container"> -->
+    <!-- 		<form th:action="@{/editor/handleEditorContent}" th:method="post" th:object="${activity}"> -->
+    <!--       	  <input type="hidden" th:field="*{acid}"> -->
+    <!--       	 <textarea id="editor" th:field="*{acIntro}"></textarea> -->
+    <!--       	  <button type="submit" class="btn btn-primary">下一頁</button> -->
+
+    <!-- 		</form> -->
+    <!-- 	</div> -->
+   
+    <textarea id="editor" ></textarea>
+    <button onclick="saveEditorContent()">Save Content</button>
+    <!--
+            The "superbuild" of CKEditor&nbsp;5 served via CDN contains a large set of plugins and multiple editor types.
+            See https://ckeditor.com/docs/ckeditor5/latest/installation/getting-started/quick-start.html#running-a-full-featured-editor-from-cdn
+        -->
+       
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/super-build/ckeditor.js"></script>
+    <!--
+            Uncomment to load the Spanish translation
+            <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/super-build/translations/es.js"></script>
+        -->
+    <script src="js/ckeditor-config.js"></script> <!-- 引入 CKEditor5 的配置和初始化 JavaScript 文件 -->
+    <script>
+       
+        
+        function saveEditorContent() {
+            var editorContent = window.editor.getData();
+
+            $.ajax({
+                url: '/save-editor-content',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ editorContent: editorContent}),
+                success: function (response) {
+                    alert(response); // Display success message
+                },
+                error: function (xhr, status, error) {
+                    alert('Error occurred: ' + error); // Display error message
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>
