@@ -6,10 +6,10 @@
 ## Joinjoy揪活動平台
 
 
-- [關於本專案](https://github.com/p1105xmv/joinjoyActPlatform/edit/main/README.md#%E9%97%9C%E6%96%BC%E6%9C%AC%E5%B0%88%E6%A1%88)
-- [畫面](https://github.com/p1105xmv/joinjoyActPlatform/edit/main/README.md#%E7%95%AB%E9%9D%A2)
-- [專案技術](https://github.com/p1105xmv/joinjoyActPlatform/edit/main/README.md#%E5%B0%88%E6%A1%88%E6%8A%80%E8%A1%93)
-- [如何開始](https://github.com/p1105xmv/joinjoyActPlatform/edit/main/README.md#%E5%A6%82%E4%BD%95%E9%96%8B%E5%A7%8B)
+- [關於本專案](https://github.com/p1105xmv/joinjoyActPlatform/tree/main?tab=readme-ov-file#%E9%97%9C%E6%96%BC%E6%9C%AC%E5%B0%88%E6%A1%88)
+- [畫面](https://github.com/p1105xmv/joinjoyActPlatform/tree/main?tab=readme-ov-file#%E7%95%AB%E9%9D%A2)
+- [專案技術](https://github.com/p1105xmv/joinjoyActPlatform/tree/main?tab=readme-ov-file#%E5%B0%88%E6%A1%88%E6%8A%80%E8%A1%93)
+- [如何開始](https://github.com/p1105xmv/joinjoyActPlatform/tree/main?tab=readme-ov-file#%E5%A6%82%E4%BD%95%E9%96%8B%E5%A7%8B)
   
   
 
